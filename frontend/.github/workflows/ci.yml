@@ -3,6 +3,8 @@ name: uptick-talent-lms-frontend-ci
 on:
   pull_request: # only run on PRs
     branches: [main]
+  push: # only run on pushes
+    branches: [main]
 
 jobs:
   checks:
