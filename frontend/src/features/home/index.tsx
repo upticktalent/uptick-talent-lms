@@ -4,7 +4,7 @@ import React from 'react';
 const Home = () => {
   return (
     <Box>
-      <Box as="h1"></Box>
+      <Box as="h2"></Box>
       Home
     </Box>
   );
