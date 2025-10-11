@@ -45,33 +45,11 @@ Git installed and configured
 
 (Optional) Docker for local database setup
 
-# Clone Repository
-git clone https://github.com/<your-org>/uptick-talent-lms.git
-cd uptick-talent-lms/backend
-
-# Install Dependencies
-yarn install
-# or
-npm install
-
+# git clone 
+# npm install
 
 # Setup Environment Variables
 .env
-
-# Start the Server
-yarn dev
-# or
-npm run dev
-
-# Scripts
-| Command       | Description                              |
-| ------------- | ---------------------------------------- |
-| `yarn dev`    | Start development server with hot reload |
-| `yarn build`  | Compile TypeScript                       |
-| `yarn start`  | Run built project                        |
-| `yarn lint`   | Check for linting issues                 |
-| `yarn format` | Format code with Prettier                |
-
 # Application
 PORT=5000
 NODE_ENV=development
@@ -106,6 +84,23 @@ npx prisma generate
 # Production
 npm run build
 npm start
+
+
+
+# Start the Server
+yarn dev
+# or
+npm run dev
+
+# Scripts
+| Command       | Description                              |
+| ------------- | ---------------------------------------- |
+| `yarn dev`    | Start development server with hot reload |
+| `yarn build`  | Compile TypeScript                       |
+| `yarn start`  | Run built project                        |
+| `yarn lint`   | Check for linting issues                 |
+| `yarn format` | Format code with Prettier                |
+
 
 # API Documentation
 
