@@ -1,245 +1,243 @@
-# uptick Talent — LMS Frontend
+# Uptick Talent LMS - Frontend
 
-This repository contains the Next.js frontend for the uptick Talent learning-management system (LMS). It is a modern, TypeScript-based Next.js app using the App Router, server/client components, and common frontend patterns (providers, hooks, redux, API client, and feature folders).
+A modern, scalable Learning Management System (LMS) frontend built with Next.js 15, React 19, and TypeScript. This application provides an intuitive interface for managing educational content, user progress, and learning experiences.
 
-Use this README as a template — it includes placeholders and recommended conventions for a robust Next.js project.
+## 🚀 Project Overview
 
-## Table of contents
+The Uptick Talent LMS Frontend is a comprehensive learning management platform that enables:
 
-- About
-- Quick start
-- Project structure
-- Environment variables
-- Scripts
-- Development conventions
-- Testing
-- CI / CD (example)
-- Deployment (example: Vercel)
-- Troubleshooting
-- Contributing
-- License
+- Interactive learning experiences
+- User authentication and authorization
+- Progress tracking and analytics
+- Content management and delivery
+- Real-time notifications and updates
 
-## About
+## 🛠️ Tech Stack
 
-Brief: this frontend is a Next.js application (App Router) that connects to the uptake Talent backend API. It uses TypeScript, a centralized `src/lib/api/client.ts` API client, Redux for global state, and React Query or suspense-ready data fetching through providers.
+- **Framework**: Next.js 15 (with Turbopack)
+- **Runtime**: React 19
+- **Language**: TypeScript 5
+- **Styling**: Tailwind CSS 4
+- **State Management**: Redux Toolkit + Redux Persist
+- **Data Fetching**: TanStack Query (React Query)
+- **Forms**: Formik + Yup validation
+- **Testing**: Vitest + Testing Library
+- **Code Quality**: ESLint + Prettier
+- **Package Manager**: Yarn
 
-Replace and adapt the sections below to match the project's real endpoints, secrets and workflows.
+## 📋 Prerequisites
 
-## Quick start
+Before you begin, ensure you have the following installed:
 
-Requirements
+- **Node.js**: Version 20 or higher
+- **Yarn**: Version 1.22.19 or higher
+- **Git**: For version control
 
-- Node.js 18+ (recommended LTS)
-- npm or yarn or pnpm
+## 🏗️ Installation & Setup
 
-Install dependencies
+1. **Clone the repository**
 
-```bash
-# using npm
-npm install
+   ```bash
+   git clone <repository-url>
+   cd uptick-talent-lms/frontend
+   ```
 
-# or using pnpm
-pnpm install
+2. **Install dependencies**
 
-# or using yarn
-yarn
+   ```bash
+   yarn install
+   ```
+
+3. **Set up environment variables**
+
+   ```bash
+   # Create environment file
+   cp .env.example .env.local
+
+   # Edit .env.local with your configuration
+   # Add your API endpoints, keys, and other environment-specific variables
+   ```
+
+4. **Start the development server**
+
+   ```bash
+   yarn dev
+   ```
+
+   The application will be available at [http://localhost:3000](http://localhost:3000)
+
+## 📜 Available Scripts
+
+| Script              | Description                                  |
+| ------------------- | -------------------------------------------- |
+| `yarn dev`          | Start development server with Turbopack      |
+| `yarn build`        | Build the application for production         |
+| `yarn start`        | Start the production server                  |
+| `yarn lint`         | Run ESLint for code quality checks           |
+| `yarn format`       | Format code using Prettier                   |
+| `yarn format:check` | Check code formatting without making changes |
+| `yarn test`         | Run tests once                               |
+| `yarn test:watch`   | Run tests in watch mode                      |
+
+## 📁 Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages and layouts
+│   ├── layout.tsx         # Root layout component
+│   ├── page.tsx           # Home page
+│   ├── globals.css        # Global styles
+│   └── favicon.ico        # Site favicon
+├── components/            # Reusable UI components
+│   ├── common/            # Common utility components
+│   ├── defaults/          # Default/fallback components
+│   ├── modals/            # Modal components
+│   ├── ui/                # Base UI components
+│   └── index.ts           # Component exports
+├── features/              # Feature-based modules
+│   ├── home/              # Home page feature
+│   └── index.ts           # Feature exports
+├── hooks/                 # Custom React hooks
+│   └── index.ts           # Hook exports
+├── layout/                # Layout components
+│   └── index.ts           # Layout exports
+├── lib/                   # Library configurations and utilities
+│   ├── api/               # API client configuration
+│   ├── config/            # App configuration files
+│   ├── providers/         # Context providers
+│   └── utils.ts           # Utility functions
+├── redux/                 # Redux state management
+│   ├── reducers/          # Redux reducers and slices
+│   ├── store.ts           # Store configuration
+│   ├── hooks.tsx          # Typed Redux hooks
+│   └── persistor.ts       # Redux persist configuration
+├── schema/                # Validation schemas
+│   ├── auth/              # Authentication schemas
+│   └── dashboard/         # Dashboard schemas
+├── types/                 # TypeScript type definitions
+│   └── auth.ts            # Authentication types
+└── utils/                 # Utility functions
+    ├── errors.ts          # Error handling utilities
+    ├── formatter.ts       # Data formatting utilities
+    └── index.ts           # Utility exports
 ```
 
-Run development server
+## 🎨 Code Conventions
+
+### TypeScript
+
+- Use strict TypeScript configuration
+- Prefer interfaces over types for object shapes
+- Use path aliases (`@/*`) for imports
+- Export types and interfaces from dedicated files
+
+### React
+
+- Use functional components with hooks
+- Implement proper error boundaries
+- Follow React best practices for performance optimization
+- Use TypeScript for all component props
+
+### Styling
+
+- Use Tailwind CSS for styling
+- We use the shadcn component library in this project. We do **not** use the original HTML elements exported by shadcn (e.g., `<Button />`, `<Input />`) directly; instead, always use the shadcn components as they are, without referencing or importing the HTML tags they wrap.
+- Follow mobile-first responsive design
+- Use CSS custom properties for theming
+- Implement consistent spacing and typography scales
+
+### Code Formatting
+
+- **Prettier Configuration**:
+  - Single quotes for strings
+  - Trailing commas
+  - 2-space indentation
+  - 100-character line width
+  - Semicolons required
+
+### File Naming
+
+- Use PascalCase for components (`UserProfile.tsx`)
+- Use camelCase for hooks (`useAuth.ts`)
+- Use kebab-case (`user-profile.css`) or lowercase (`userprofile.css`) for every other file.
+- Use descriptive, meaningful names
+
+## 🧪 Testing
+
+The project uses Vitest for testing with the following setup:
 
 ```bash
-npm run dev
-# or: pnpm dev, yarn dev
+# Run all tests
+yarn test
+
+# Run tests in watch mode
+yarn test:watch
 ```
 
-Open http://localhost:3000 in your browser.
+Test files should be located alongside the code they test and follow the naming pattern: `*.test.{ts,tsx}`
 
-Build and run production locally
+## 🔗 Integration
 
-```bash
-npm run build
-npm run start
-```
+### Backend Connection
 
-## Project structure
+This frontend connects to the Uptick Talent LMS backend API. Ensure the backend service is running and properly configured.
 
-Top-level folders you will see in this repo (trimmed):
+### Environment Variables
 
-- `src/app/` — Next.js App Router routes and layouts (server components and page entries)
-- `src/components/` — UI components and small presentational pieces
-- `src/features/` — Feature folders / domain code
-- `src/lib/` — API clients, helpers and shared libraries
-- `src/providers/` — React providers (Query client, Redux store, Theme, Auth)
-- `src/hooks/` — Reusable React hooks
-- `src/layout/` — Layout utilities used by the app root
-- `src/utils/` — Utility functions and formatters
-- `public/` — Static assets
-- `next.config.ts`, `tsconfig.json`, `postcss.config.mjs` — framework/config
-
-Example important files:
-
-- `src/lib/api/client.ts` — central REST/GraphQL client
-- `src/providers/query.provider.tsx` — react-query / tanstack provider
-- `src/redux/store.ts` — redux store config + persistor
-
-Adapt names to match your code conventions.
-
-## Environment variables
-
-Create a `.env.local` (never commit secrets). Add a `.env.example` to show required variables.
-
-Example `.env.example` (placeholders):
+Create a `.env.local` file with the following variables:
 
 ```env
-# Next.js
-NEXT_PUBLIC_APP_NAME="uptick-talent-lms"
-NEXT_PUBLIC_API_BASE_URL=https://api.example.com
-
-# Authentication (example for auth service)
-NEXT_PUBLIC_AUTH_CLIENT_ID=your-client-id
-AUTH_CLIENT_SECRET=your-client-secret
-
-# Analytics / Feature flags
-NEXT_PUBLIC_ANALYTICS_ID=
-FEATURE_FLAG_EXPERIMENTAL=false
+NEXT_PUBLIC_API_URL=your_api_url
+NEXT_PUBLIC_APP_NAME=Uptick Talent LMS
+# Add other environment-specific variables
 ```
 
-Notes:
+## 🚀 Deployment
 
-- Prefix variables that must be available in the browser with `NEXT_PUBLIC_`.
-- Keep server-only secrets out of version control.
-
-## Scripts
-
-Common npm scripts to include in `package.json` (adjust for your stack):
-
-```json
-{
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest",
-    "test:watch": "vitest --watch"
-  }
-}
-```
-
-Add or change commands to match your testing/linting setup (ESLint, Prettier, Vitest/Jest).
-
-## Development conventions
-
-- TypeScript strict mode should be enabled — prefer fixes that keep types strict.
-- Use the App Router for pages in `src/app` and colocate component styles and tests.
-- Prefer server components when no client-side interactivity is required; add "use client" at the top of client components.
-- Keep API calls centralized in `src/lib/api` and wrap requests with error handling and logging.
-- Add unit tests near the code (e.g., `MyComponent.test.tsx`) and keep snapshot sizes small.
-
-Accessibility and performance
-
-- Use semantic HTML and accessible roles/labels.
-- Use the `next/image` component for images where appropriate.
-- Prefer code-splitting and dynamic imports for large client-only components.
-
-State management
-
-- Use local component state where possible. Use Redux or Zustand for global UI state (not transient UI only).
-- For server-synced data, prefer React Query (TanStack Query) or Next.js fetch on the server + caching.
-
-## Testing
-
-Suggested tools:
-
-- Unit + component tests: Vitest + React Testing Library
-- E2E: Playwright or Cypress
-
-Example quick test commands:
+### Production Build
 
 ```bash
-npm run test
-npm run test:watch
+yarn build
+yarn start
 ```
 
-Add a `vitest.config.ts` and basic test setup file as needed.
+## 🤝 Contributing
 
-## CI / CD (example)
+1. Fork the repository
+2. Create a feature branch (`git checkout -b UPT-[issue-number]-[short-feature-description]`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin UPT-[issue-number]-[short-feature-description]`)
+5. Open a Pull Request
 
-Example GitHub Actions workflow (placeholder):
+### Development Workflow
 
-```yaml
-name: CI
+1. Follow the established code conventions
+2. Write tests for new features
+3. Ensure all tests pass
+4. Run linting and formatting before committing
+5. Update documentation as needed
 
-on: [push, pull_request]
+## 📚 Additional Resources
 
-jobs:
-	build:
-		runs-on: ubuntu-latest
-		steps:
-			- uses: actions/checkout@v4
-			- name: Use Node.js
-				uses: actions/setup-node@v4
-				with:
-					node-version: 18
-			- run: npm ci
-			- run: npm run lint
-			- run: npm run build
-			- run: npm run test --if-present
-```
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://react.dev)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Redux Toolkit Documentation](https://redux-toolkit.js.org)
+- [TanStack Query Documentation](https://tanstack.com/query)
 
-Store secrets (like API keys) in the GitHub repository secrets and reference them in workflow steps.
+## 📞 Support
 
-## Deployment (example: Vercel)
+For questions, issues, or contributions:
 
-Vercel is an excellent option for Next.js.
+- Create an issue in the repository
+- Contact the development team
+- Check the project documentation
 
-Steps:
+## 📄 License
 
-1. Connect your GitHub repository to Vercel.
-2. Set environment variables in the Vercel project settings (do not push them to Git).
-3. Configure build command: `npm run build` and the output directory is automatic for Next.js.
-
-Alternative: use Docker with a Node image and host on your cloud provider.
-
-## Troubleshooting
-
-- Build errors: run `npm run build` locally and inspect the stack traces. Use `--trace-deprecation` or `NODE_OPTIONS=--trace-warnings` if needed.
-- TypeScript errors: run `npm run typecheck` and fix in order from root-level imports.
-- Linting: `npm run lint` will show issues; autofix with `eslint --fix` when safe.
-
-## Contributing
-
-- Please open an issue for significant changes or feature requests.
-- Fork, create a feature branch, add tests, and open a pull request.
-- Follow commit message conventions (e.g., Conventional Commits) if used by the project.
-
-Suggested developer checklist for PRs:
-
-1. Pull latest `main` and rebase.
-2. Run `npm ci`, `npm run build`, `npm run test`.
-3. Add/adjust tests and update `CHANGELOG` if applicable.
-
-## Notes & placeholders
-
-- Replace all placeholder URLs, API routes, and env names with real values.
-- Consider adding these repo files if missing:
-  - `.env.example`
-  - `CONTRIBUTING.md`
-  - `CODE_OF_CONDUCT.md`
-  - `SECURITY.md`
-
-## License
-
-Specify your license here (e.g., MIT). If unknown, add a LICENSE file at the repo root.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 
-If you'd like, I can also:
-
-- create a `.env.example` file in the repo with the variables listed above
-- add a sample GitHub Actions workflow file to `.github/workflows/ci.yml`
-- add a `CONTRIBUTING.md` template
-
-Tell me which of those you'd like me to add next.
+**Happy Coding! 🎉**
