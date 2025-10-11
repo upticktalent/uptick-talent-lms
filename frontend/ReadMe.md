@@ -133,6 +133,7 @@ src/
 
 ### Styling
 - Use Tailwind CSS for styling
+- We use the shadcn component library in this project. We do **not** use the original HTML elements exported by shadcn (e.g., `<Button />`, `<Input />`) directly; instead, always use the shadcn components as they are, without referencing or importing the HTML tags they wrap.
 - Follow mobile-first responsive design
 - Use CSS custom properties for theming
 - Implement consistent spacing and typography scales
@@ -147,8 +148,8 @@ src/
 
 ### File Naming
 - Use PascalCase for components (`UserProfile.tsx`)
-- Use camelCase for utilities and hooks (`formatDate.ts`, `useAuth.ts`)
-- Use kebab-case for CSS files (`user-profile.css`)
+- Use camelCase for hooks (`useAuth.ts`)
+- Use kebab-case (`user-profile.css`) or lowercase (`userprofile.css`) for every other file.
 - Use descriptive, meaningful names
 
 ## 🧪 Testing
@@ -186,21 +187,12 @@ yarn build
 yarn start
 ```
 
-### Docker Deployment
-```bash
-# Build Docker image
-docker build -t uptick-talent-lms-frontend .
-
-# Run container
-docker run -p 3000:3000 uptick-talent-lms-frontend
-```
-
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+2. Create a feature branch (`git checkout -b UPT-[issue-number]-[short-feature-description]`)
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+4. Push to the branch (`git push origin UPT-[issue-number]-[short-feature-description]`)
 5. Open a Pull Request
 
 ### Development Workflow
