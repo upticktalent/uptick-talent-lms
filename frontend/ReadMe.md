@@ -5,6 +5,7 @@ A modern, scalable Learning Management System (LMS) frontend built with Next.js 
 ## 🚀 Project Overview
 
 The Uptick Talent LMS Frontend is a comprehensive learning management platform that enables:
+
 - Interactive learning experiences
 - User authentication and authorization
 - Progress tracking and analytics
@@ -35,26 +36,30 @@ Before you begin, ensure you have the following installed:
 ## 🏗️ Installation & Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd uptick-talent-lms/frontend
    ```
 
 2. **Install dependencies**
+
    ```bash
    yarn install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    # Create environment file
    cp .env.example .env.local
-   
+
    # Edit .env.local with your configuration
    # Add your API endpoints, keys, and other environment-specific variables
    ```
 
 4. **Start the development server**
+
    ```bash
    yarn dev
    ```
@@ -63,16 +68,16 @@ Before you begin, ensure you have the following installed:
 
 ## 📜 Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `yarn dev` | Start development server with Turbopack |
-| `yarn build` | Build the application for production |
-| `yarn start` | Start the production server |
-| `yarn lint` | Run ESLint for code quality checks |
-| `yarn format` | Format code using Prettier |
+| Script              | Description                                  |
+| ------------------- | -------------------------------------------- |
+| `yarn dev`          | Start development server with Turbopack      |
+| `yarn build`        | Build the application for production         |
+| `yarn start`        | Start the production server                  |
+| `yarn lint`         | Run ESLint for code quality checks           |
+| `yarn format`       | Format code using Prettier                   |
 | `yarn format:check` | Check code formatting without making changes |
-| `yarn test` | Run tests once |
-| `yarn test:watch` | Run tests in watch mode |
+| `yarn test`         | Run tests once                               |
+| `yarn test:watch`   | Run tests in watch mode                      |
 
 ## 📁 Project Structure
 
@@ -120,18 +125,21 @@ src/
 ## 🎨 Code Conventions
 
 ### TypeScript
+
 - Use strict TypeScript configuration
 - Prefer interfaces over types for object shapes
 - Use path aliases (`@/*`) for imports
 - Export types and interfaces from dedicated files
 
 ### React
+
 - Use functional components with hooks
 - Implement proper error boundaries
 - Follow React best practices for performance optimization
 - Use TypeScript for all component props
 
 ### Styling
+
 - Use Tailwind CSS for styling
 - We use the shadcn component library in this project. We do **not** use the original HTML elements exported by shadcn (e.g., `<Button />`, `<Input />`) directly; instead, always use the shadcn components as they are, without referencing or importing the HTML tags they wrap.
 - Follow mobile-first responsive design
@@ -139,6 +147,7 @@ src/
 - Implement consistent spacing and typography scales
 
 ### Code Formatting
+
 - **Prettier Configuration**:
   - Single quotes for strings
   - Trailing commas
@@ -147,6 +156,7 @@ src/
   - Semicolons required
 
 ### File Naming
+
 - Use PascalCase for components (`UserProfile.tsx`)
 - Use camelCase for hooks (`useAuth.ts`)
 - Use kebab-case (`user-profile.css`) or lowercase (`userprofile.css`) for every other file.
@@ -169,10 +179,13 @@ Test files should be located alongside the code they test and follow the naming 
 ## 🔗 Integration
 
 ### Backend Connection
+
 This frontend connects to the Uptick Talent LMS backend API. Ensure the backend service is running and properly configured.
 
 ### Environment Variables
+
 Create a `.env.local` file with the following variables:
+
 ```env
 NEXT_PUBLIC_API_URL=your_api_url
 NEXT_PUBLIC_APP_NAME=Uptick Talent LMS
@@ -182,6 +195,7 @@ NEXT_PUBLIC_APP_NAME=Uptick Talent LMS
 ## 🚀 Deployment
 
 ### Production Build
+
 ```bash
 yarn build
 yarn start
@@ -196,6 +210,7 @@ yarn start
 5. Open a Pull Request
 
 ### Development Workflow
+
 1. Follow the established code conventions
 2. Write tests for new features
 3. Ensure all tests pass
@@ -214,6 +229,7 @@ yarn start
 ## 📞 Support
 
 For questions, issues, or contributions:
+
 - Create an issue in the repository
 - Contact the development team
 - Check the project documentation
