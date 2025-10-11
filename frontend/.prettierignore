@@ -13,3 +13,4 @@ package.json
 postcss.config.mjs
 vitest.config.ts
 vitest.setup.ts
+CONTRIBUTING.md
