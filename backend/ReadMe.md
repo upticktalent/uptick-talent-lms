@@ -104,5 +104,5 @@ npm run dev
 | `yarn format` | Format code with Prettier                |
 
 
-# API Documentation
+
 
