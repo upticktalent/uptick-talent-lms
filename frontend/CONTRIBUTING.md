@@ -29,17 +29,17 @@ To get started with the frontend development:
     ```
 
 2. **Install dependencies**
-    Using your preferred package manager (npm, pnpm, yarn, or bun):
+    Upgrade node version to v20 and use yarn as your package manager:
 
     ```bash
-    npm install
+    yarn install
     ```
 
 3. **Run the development server:**
 
    - If your feature does **not** depend on the backend server:
      ```bash
-     npm run dev
+     yarn run dev
      ```
 
    - If your feature requires backend interaction, ensure both frontend and backend servers are running simultaneously.
@@ -130,6 +130,8 @@ let totalStudents = 0;
 **Examples:**
 ```js
 // Component function
+// Note: We're using JSX syntax — these are not raw HTML tags,
+// they are React elements that get rendered as HTML in the browser.
 const UserCard = () => {
   return <div>Profile</div>;
 }
@@ -167,7 +169,15 @@ Before creating a Pull Request (PR):
 
 ### When opening a PR:
 
-- Follow the commit message format for the PR title.
+- Create a PR title using the format below:
+- **Format:**
+  ```bash
+  [issue-number]: Pull request title
+  ```
+- **Example:**
+  ```bash
+  [UPT-7]: Add role-based login experience
+  ```
 - Add a clear and detailed description of your implementation.
 - Include screenshots (for UI-related changes) or a video demo where appropriate.
 - Apply the correct PR tags. Create a new one if none match your changes.

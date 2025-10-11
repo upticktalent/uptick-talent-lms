@@ -29,8 +29,9 @@ To get started with the backend development:
     ```
 
 2. **Install dependencies**
+  Upgrade node version to v20 and use yarn as your package manager:
     ```bash
-    npm install
+    yarn install
     ```
 
 3. **Set up environment variables**
@@ -47,12 +48,12 @@ To get started with the backend development:
 
 4. **Run database migrations (if applicable)**
     ```bash
-    npm run migrate
+    yarn run migrate
     ```
 
 5. **Start the development server**
     ```bash
-    npm run dev
+    yarn run dev
     ```
 
 6. **Verify API is running**
@@ -86,7 +87,7 @@ All commit messages must begin with a **prefix indicating the type of change** a
 
 - **Examples:**
   ```bash
-  feat: implement JWT authentication
+  feat: implement jwt authentication
   fix: resolve user validation error
   chore: update database seed scripts
   ```
@@ -105,8 +106,11 @@ All commit messages must begin with a **prefix indicating the type of change** a
 | **style**    | Code style changes (white-space, formatting, etc.)                                 |
 | **test**     | Adding or updating tests                                                           |
 
-**Tip:** Keep commit messages short, meaningful, and consistent.
-Husky will automatically enforce linting and commit standards before each commit.
+---
+**💡 Tip:**
+- Keep commit messages short, meaningful, and consistent.
+- Commits should be lowercase so it passes the ci commitlint
+- Husky will automatically enforce linting and commit standards before each commit.
 
 ---
 
@@ -176,7 +180,15 @@ Before creating a Pull Request (PR):
 
 ### When opening a PR:
 
-- Follow the commit message format for the PR title.
+- Create a PR title using the format below:
+- **Format:**
+  ```bash
+  [issue-number]: Pull request title
+  ```
+- **Example:**
+  ```bash
+  [UPT-12]: Add user authentication endpoints
+  ```
 - Add a clear and detailed description of your implementation.
 - Reference the issue number (e.g., “Closes UPT-12”).
 - Attach API response examples or screenshots if relevant.
