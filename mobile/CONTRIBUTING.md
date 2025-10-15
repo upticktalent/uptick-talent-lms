@@ -46,46 +46,46 @@ Make sure you have the following installed:
 
 ## Branch Naming Convention
 
-Use descriptive branch names following this structure:
+Branches should clearly reflect the issue they relate to.
+Use the **issue number and title** from the **Linear Board** to name your feature branch:
 
-| Type       | Description                 | Example                               |
-| ---------- | --------------------------- | ------------------------------------- |
-| `feature/` | New feature implementation  | `UPT 15 feature/add-login-screen `    |
-| `fix/`     | Bug fix or patch            | `UPT 16 fix/auth-token-refresh `      |
-| `chore/`   | Maintenance or minor update | `UPT 17 chore/update-dependencies `   |
-| `docs/`    | Documentation update        | `UPT 18 docs/add-contributing-guide ` |
-| `test/`    | Testing                     | `UPT 19 test/widget test for auth `   |
+- **Format:**
 
-## **Note:** Always attach the **ticket number** to both your **branch name** and **PR title** to make tracking easier.
+```bash
+ UPT-[issue-number]-[short-feature-description]
+```
+
+- **Example:**
+  ```bash
+  UPT-7-implement-shared-auth-component
+  ```
+  If the issue title is long, shorten it to a meaningful phrase.
+  Keep the name in **imperative mode** where possible (e.g., `implement`, `add`, `update`).
 
 ## 📝 Commit Message Guidelines
 
-We follow the **Conventional Commits** format for clarity and consistency.
+All commit messages must begin with a **prefix indicating the type of change** and a concise title in **imperative mode**.
 
-**Format:**
+- **Examples:**
+  ```bash
+  feat: add social login option
+  fix: correct token refresh logic                        |
+  chore: update dependencies
+  ```
 
-```
-<ticket number><type>(scope): <short summary>
-UPT-7-implement-shared-auth-component
-```
+### ✅ Commit Type Prefixes
 
-**Examples:**
-
-```
-feat(auth):UPT-15 implement user login API
-fix(ui): UPT-16 correct button alignment in dashboard
-chore:  UPT-17 update Flutter dependencies
-docs:  UPT-17 add README setup instructions
-```
-
-**Allowed Types:**
-
-- `feat` — New feature
-- `fix` — Bug fix
-- `chore` — Maintenance or configuration changes
-- `docs` — Documentation changes
-- `refactor` — Code improvement without new features
-- `test` — Adding or updating tests
+| Prefix       | Description                                                                        |
+| ------------ | ---------------------------------------------------------------------------------- |
+| **build**    | Changes that affect the build system or external dependencies (e.g., npm, webpack) |
+| **ci**       | Changes to CI configuration (e.g.,                                                 |
+| **docs**     | Documentation-only changes                                                         |
+| **feat**     | A new feature                                                                      |
+| **fix**      | A bug fix                                                                          |
+| **perf**     | A code change that improves performance                                            |
+| **refactor** | Code changes that neither fix a bug nor add a feature                              |
+| **style**    | Code style changes (white-space, formatting, missing semicolons, etc.)             |
+| **test**     | Adding or updating tests                                                           |
 
 ---
 
@@ -114,37 +114,49 @@ Ensure **all tests pass** before opening a pull request.
 
 1.  Ensure your branch is **up to date** with `main`:
 
-    ```bash
-    git pull origin main
-    ```
+```bash
+git fetch origin
+git merge origin/main
+```
 
-2.  Commit and push your changes:
+2. Verify that your implementation meets all acceptance criteria from the issue description.
 
-    ```bash
-    git add .
-    git commit -m "feat(auth): add login UI"
-    git push origin feature/add-login-ui
-    ```
+3. Commit and push your changes:
 
-3.  Open a Pull Request (PR) on GitHub:
+   ```bash
+   git add .
+   git commit -m "[UPT-7]: Added authentication logic"
+   git push origin feature/add-login-ui
+   ```
 
-    - Base branch: `main`
-    - Compare branch: your feature branch
-    - Fill in PR title and description clearly.
-      | Field | Example |
-      | --------------- | ---------------------------------------------- |
-      | **Branch Name** | `feature/readme-setup-UPT-14` |
-      | **PR Title** | `[UPT-14] docs: added README to project setup` |
-      Always include the ticket number (e.g., UPT-14) in both your branch name and PR title.
-      This helps maintain traceability between code changes and project tasks.
+4. Open a Pull Request (PR) on GitHub:
 
-4.  Before requesting review:
+### When opening a PR:
 
-    - Code is formatted and lint-free
-    - Tests pass successfully
-    - PR description explains the change clearly
+- Create a PR title using the format below:
+- **Format:**
+  ```bash
+  [issue-number]: Pull request title
+  ```
+- **Example:**
+  ```bash
+  [UPT-7]: Add role-based login experience
+  ```
+- Add a clear and detailed description of your implementation.
+- Include screenshots (for UI-related changes) or a video demo where appropriate.
+- Apply the correct PR tags. Create a new one if none match your changes.
+- Assign the PR to yourself.
+- Request a review by tagging the technical mentor or dev team lead.
+- At least one review approval is required before merging.
+- Only the team lead or technical mentor should perform merges unless instructed otherwise.
 
-5.  Wait for at least **one code review approval** before merging.
+5. Before requesting review:
+
+   - Code is formatted and lint-free
+   - Tests pass successfully
+   - PR description explains the change clearly
+
+6. Wait for at least **one code review approval** before merging.
 
 ---
 
