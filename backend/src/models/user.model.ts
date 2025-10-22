@@ -1,12 +1,13 @@
 import { Schema, model, Document } from 'mongoose';
+import { UserRole, UserStatus } from '../types/enums';
 
 export interface IUser extends Document {
   email: string;
   firstName: string;
   lastName: string;
   phoneNumber?: string;
-  role: 'applicant' | 'student' | 'admin' | 'mentor';
-  status: 'pending' | 'active' | 'inactive' | 'rejected' | 'invited';
+  role: UserRole;
+  status: UserStatus;
   passwordHash?: string;
   magicLinkTokenHash?: string;
   magicLinkExpiry?: Date;
@@ -21,8 +22,8 @@ const UserSchema = new Schema<IUser>({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   phoneNumber: { type: String },
-  role: { type: String, enum: ['applicant', 'student', 'admin', 'mentor'], default: 'applicant', required: true },
-  status: { type: String, enum: ['pending', 'active', 'inactive', 'rejected', 'invited'], default: 'pending', required: true },
+  role: { type: String, enum: Object.values(UserRole), default: UserRole.APPLICANT, required: true },
+  status: { type: String, enum: Object.values(UserStatus), default: UserStatus.PENDING, required: true },
   passwordHash: { type: String },
   magicLinkTokenHash: { type: String },
   magicLinkExpiry: { type: Date },

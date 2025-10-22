@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { ApplicationStatus } from '../types/enums';
 
 export interface IApplication extends Document {
   userId: Schema.Types.ObjectId;
@@ -13,7 +14,7 @@ export interface IApplication extends Document {
   mobileToolsOther?: string;
   referralSource?: string;
   referralSourceOther?: string;
-  status: 'pending' | 'shortlisted' | 'qualified' | 'rejected';
+  status: ApplicationStatus;
   takeHomeLink?: string;
   assessmentSubmittedAt?: Date;
   interviewScheduledAt?: Date;
@@ -35,7 +36,7 @@ const ApplicationSchema = new Schema<IApplication>({
   mobileToolsOther: { type: String },
   referralSource: { type: String },
   referralSourceOther: { type: String },
-  status: { type: String, enum: ['pending', 'shortlisted', 'qualified', 'rejected'], default: 'pending', required: true },
+  status: { type: String, enum: Object.values(ApplicationStatus), default: ApplicationStatus.PENDING, required: true },
   takeHomeLink: { type: String },
   assessmentSubmittedAt: { type: Date },
   interviewScheduledAt: { type: Date },

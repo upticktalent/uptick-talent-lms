@@ -1,9 +1,10 @@
 import { Schema, model, Document } from 'mongoose';
+import { TrackType } from '../types/enums';
 
 export interface ITrack extends Document {
   name: string;
   description?: string;
-  type: 'fellowship' | 'expert-led';
+  type: TrackType;
   startDate?: Date;
   endDate?: Date;
   mentorId?: Schema.Types.ObjectId;
@@ -16,7 +17,7 @@ export interface ITrack extends Document {
 const TrackSchema = new Schema<ITrack>({
   name: { type: String, required: true, unique: true },
   description: { type: String },
-  type: { type: String, enum: ['fellowship', 'expert-led'], required: true },
+  type: { type: String, enum: Object.values(TrackType), required: true },
   startDate: { type: Date },
   endDate: { type: Date },
   mentorId: { type: Schema.Types.ObjectId, ref: 'User' },
