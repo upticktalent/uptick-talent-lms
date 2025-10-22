@@ -1,25 +1,16 @@
-import { getters } from "@config";
 import mongoose from "mongoose";
 
-export const connectDatabase = async () => {
+const connectDB = async () => {
   try {
-    const mongoUri = getters.getDatabaseUri();
-
-    await mongoose.connect(mongoUri);
-
-    mongoose.connection.on("error", (error) => {
-      console.error("MongoDB connection error:", error);
-    });
-
-    mongoose.connection.on("disconnected", () => {
-      console.warn("MongoDB disconnected");
-    });
-  } catch (error) {
-    console.error("Failed to connect to MongoDB:", error);
-    throw error;
+    const mongoURI =
+      process.env.MONGO_URI || "mongodb://localhost:27017/uptick-lms";
+    await mongoose.connect(mongoURI);
+    console.log("MongoDB Connected...");
+  } catch (err: any) {
+    console.error(err.message);
+    // Exit process with failure
+    process.exit(1);
   }
 };
 
-export const disconnectDatabase = async () => {
-  await mongoose.connection.close();
-};
+export { connectDB };

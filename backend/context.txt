@@ -1,0 +1,131 @@
+You don't signup as an applicant:bangbang:
+No Dashboard for Applicant
+You only get a dashboard after you have been accepted
+Applicants Flow -
+Applicant visits the landing page
+Applicants apply for a program
+Applicant gets a notification of application status
+If selected - applicants receives a mail for take home assessment with instructions
+After the assessment - applicant submits the assessment via a web form
+If applicant is selected - Applicant receives a mail to schedule an interview
+After the interview and applicant scales through
+Applicant gets a mail with an account credentials to login to the LMS dashboard (they can reset their passwords)
+Admin Flow - Applications
+Admin is able to see all applications from the admin dashboard
+Admin is able to change application status
+Admin is able to see submissions
+Admin is able to track interviews scheduled
+Admin is also able to send out reminders for scheduled interviews
+Admin is also able to see admitted students
+Admin can also filter by category
+
+
+
+
+Core Collections (MongoDB)
+
+users (stores applicants, students, admins — with roles)
+
+programs (different programs they can apply to)
+
+applications (status tracking, timestamps)
+
+assessments (submission links, scores, feedback)
+
+interviews (schedule, status, outcome)
+
+notifications (email logs, reminders)
+
+courses (for LMS content)
+
+enrollments (student-course relationships, progress)
+
+
+
+Models - Mongoose Schemas
+
+| Concept      | Should Be Separate?      | Why                                      |
+| ------------ | ------------------------ | ---------------------------------------- |
+| User         | ✅ Base identity and auth | Shared across all roles                  |
+| Application  | ✅ Separate collection    | Role-specific to applicants              |
+| Admin Info   | ✅ Optional profile       | Different fields, access                 |
+| Mentor Info  | ✅ Optional profile       | Different from student                   |
+| LMS Tracking | ✅ StudentProfile         | Isolated from auth and application logic |
+
+User Schema
+{
+  _id: ObjectId,
+  email: String,
+  firstName: String,
+  lastName: String,
+  phoneNumber: String,
+  role: { type: String, enum: ['applicant', 'student', 'admin', 'mentor'], default: 'applicant' },
+  status: { type: String, enum: ['pending', 'active', 'inactive', 'rejected', 'invited'], default: 'pending' },
+  passwordHash: String,           // For admins or invited mentors only
+  magicLinkTokenHash: String,     // For students/magic link login
+  magicLinkExpiry: Date,
+  invitedBy: ObjectId,            // For staff/mentors invited by admins
+  lastLoginAt: Date,
+  createdAt: Date,
+  updatedAt: Date
+}
+
+
+Application Schema
+
+
+{
+  _id: ObjectId,
+  userId: { type: ObjectId, ref: 'User' },
+  programId: { type: ObjectId, ref: 'Program' }, // optional if you run multiple programs
+  city: String,
+  stack: String,
+  frontendTools: [String],
+  frontendToolsOther: String,
+  backendTools: [String],
+  backendToolsOther: String,
+  mobileTools: [String],
+  mobileToolsOther: String,
+  referralSource: String,
+  referralSourceOther: String,
+  status: { type: String, enum: ['pending', 'shortlisted', 'qualified', 'rejected'], default: 'pending' },
+  takeHomeLink: String,       // link to assessment
+  assessmentSubmittedAt: Date,
+  interviewScheduledAt: Date,
+  reviewedBy: { type: ObjectId, ref: 'User' },
+  createdAt: Date,
+  updatedAt: Date
+}
+
+
+Accepted Students Profile Schema
+{
+  userId: { type: ObjectId, ref: 'User' },
+  cohortId: { type: ObjectId, ref: 'Cohort' },
+  enrolledCourses: [{ type: ObjectId, ref: 'Course' }],
+  progress: [{
+    courseId: ObjectId,
+    percentage: Number,
+    lastUpdated: Date
+  }],
+  feedback: [{ courseId: ObjectId, rating: Number, comments: String }]
+}
+
+
+Mentor Profile Schema
+{
+  userId: { type: ObjectId, ref: 'User' },
+  expertiseAreas: [String],
+  availabilitySlots: [Date],
+  bio: String,
+  assignedStudents: [{ type: ObjectId, ref: 'User' }]
+}
+
+
+
+Admin Profile Schema
+{
+  userId: { type: ObjectId, ref: 'User' },
+  permissions: ['manageApplications', 'sendInvites', 'manageLMS'],
+  lastActionAt: Date
+}
