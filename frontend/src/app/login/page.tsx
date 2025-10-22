@@ -1,7 +1,7 @@
-import { AuthLayout } from '@/features/auth/layout/auth-layout';
+import { LoginLayout } from '@/features/login/layout/login-layout';
 
-const AuthPage = () => {
-  return <AuthLayout />;
+const LoginPage = () => {
+  return <LoginLayout />;
 };
 
-export default AuthPage;
+export default LoginPage;

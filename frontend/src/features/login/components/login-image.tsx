@@ -2,7 +2,7 @@ import Box from '@/components/ui/box';
 import { Users } from '@/types/auth';
 import { useSearchParams } from 'next/navigation';
 
-const AuthImage = () => {
+const LoginImage = () => {
   const searchParams = useSearchParams();
   const role = searchParams.get('role' as Users) || 'student';
 
@@ -21,4 +21,4 @@ const AuthImage = () => {
   );
 };
 
-export { AuthImage };
+export { LoginImage };
