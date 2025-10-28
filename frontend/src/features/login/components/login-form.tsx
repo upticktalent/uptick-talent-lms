@@ -1,13 +1,14 @@
 import React from 'react';
 import Box from '@/components/ui/box';
-import { getters } from '@/lib/config/i18n';
+import { getters, LangKey } from '@/lib/config/i18n';
 import Link from 'next/link';
 import Input from '@/components/ui/input';
 import Button from '@/components/ui/button';
 import Checkbox from '@/components/ui/checkbox';
+import { useAppSelector } from '@/redux';
 
 const LoginForm: React.FC = () => {
-  const lang = 'en';
+  const lang = useAppSelector(state => state.settings.lang) as LangKey;
   const text = getters.geti18ns()[lang].login.form;
 
   return (

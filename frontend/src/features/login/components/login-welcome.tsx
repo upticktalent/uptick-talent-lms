@@ -1,13 +1,14 @@
 import Box from '@/components/ui/box';
 import { Users } from '@/types/auth';
 import { useSearchParams } from 'next/navigation';
-import { getters } from '@/lib/config/i18n';
+import { getters, LangKey } from '@/lib/config/i18n';
+import { useAppSelector } from '@/redux';
 
 const Welcome = () => {
   const searchParams = useSearchParams();
   const role = (searchParams.get('role') as Users) || 'student';
-  const lang = 'en';
-
+  const lang = useAppSelector(state => state.settings.lang) as LangKey;
+  
   const text = getters.geti18ns()[lang].login;
 
   return (
