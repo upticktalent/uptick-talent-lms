@@ -1,0 +1,189 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STUDENT
+  MENTOR
+}
+
+enum  ReferralSource {
+  TWITTER
+  LINKEDIN
+  INSTAGRAM
+  FACEBOOK
+  FRIEND
+  OTHER
+}
+
+enum Track {
+  FRONTEND
+  BACKEND
+  FULLSTACK_DEVELOPMENT
+  MOBILE_DEVELOPMENT
+  DATA_SCIENCE
+  MACHINE_LEARNING
+  DATA_ANALYSIS
+  DATA_ENGINEERING
+  UI_DESIGN
+  UX_DESIGN
+  GRAPHICS_DESIGN
+  UX_RESEARCH
+  PRODUCT_MARKETING_MANAGEMENT
+  OPERATIONS
+  SALES
+  BUSINESS_DEVELOPMENT
+  PROJECT_PRODUCT_MANAGEMENT
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  SHORTLISTED
+  ASSESSMENT_SENT
+  ASSESSMENT_SUBMITTED
+  INTERVIEW_SCHEDULED
+  INTERVIEW_PASSED
+  REJECTED
+  ACCEPTED
+}
+
+enum FrontendTool {
+  REACT
+  VUE
+  ANGULAR
+  SVELTE
+  OTHER
+}
+
+enum BackendTool {
+  NODE
+  EXPRESS
+  DJANGO
+  FASTAPI
+  LARAVEL
+  OTHER
+}
+
+enum MobileTool {
+  FLUTTER
+  REACT_NATIVE
+  KOTLIN
+  SWIFT
+  OTHER
+}
+
+model Applicant {
+  id                  String     @id @default(uuid())
+  firstname           String
+  lastname            String
+  email               String     @unique
+  phoneNumber         String     @unique
+  city                String
+  track               Track
+
+  frontendTools       FrontendTool?
+  frontendToolsOther  String[]  @default([])
+  backendTools        BackendTool?
+  backendToolsOther   String[] @default([])
+  fullstackTools      String[] @default([])
+  mobileTools         MobileTool?
+  mobileToolsOther    String[]  @default([])
+
+  referralSource      ReferralSource
+  referralSourceOther String?
+
+  applicationStatus   ApplicationStatus   @default(PENDING)
+  assessment          Assessment?
+  interview           Interview?
+
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+}
+
+model Assessment {
+  id  String  @id @default(uuid())
+  applicantId  String  @unique
+  applicant Applicant  @relation(fields: [applicantId], references: [id] )
+
+  assessmentLink String?
+  submissionLink String?
+
+  sentAt  DateTime?
+  submittedAt DateTime?
+  reviewedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+} 
+
+model Interview {
+  id            String            @id @default(uuid())
+  applicantId String            @unique
+  applicant   Applicant         @relation(fields: [applicantId], references: [id])
+ 
+  status        ApplicationStatus @default(SHORTLISTED)
+  interviewDate DateTime
+  notes         String?
+
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model AdminProfile {
+  id        String   @id @default(uuid())
+  adminId   String   @unique
+  email     String   @unique
+  firstName String
+  lastName  String
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [adminId], references: [id])
+}
+
+model User {
+  id        String          @id @default(uuid())
+  email     String          @unique
+  password  String
+  firstName String
+  lastName  String
+  role      Role            @default(STUDENT)
+   emailVerified DateTime? 
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now())
+  admin     AdminProfile?
+  mentor    MentorProfile?
+  student   StudentProfile?
+}
+
+model StudentProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  email     String   @unique
+  firstName String
+  lastName  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model MentorProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  @@map("password_reset_tokens")
+}

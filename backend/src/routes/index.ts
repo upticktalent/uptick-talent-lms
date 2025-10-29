@@ -1,5 +1,10 @@
-import health from "./health.routes";
+import express from 'express';
+import authRoutes from './auth';
+import userRoutes from './users';
 
-export { health };
+const router = express.Router();
 
-export default { health };
+router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
+
+export default router;
