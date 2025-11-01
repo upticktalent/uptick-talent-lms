@@ -4,3 +4,8 @@ export interface AuthErrorResponse {
 }
 
 export type Users = 'student' | 'mentor';
+
+export interface LoginFormValues {
+  email: string;
+  password: string;
+}
