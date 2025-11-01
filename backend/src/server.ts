@@ -1,5 +1,5 @@
 import app from "./app";
-import { connectDatabase } from "./models/db";
+// import { connectDatabase } from "./models/db";
 import { getters } from "@config";
 
 const port = getters.getAppPort();
@@ -7,14 +7,14 @@ const port = getters.getAppPort();
 const startServer = async () => {
   try {
     // Connect to database first
-    await connectDatabase();
-    console.log("✅ Database connected");
+    // await connectDatabase();
+    // console.log("✅ Database connected");
 
     app.listen(port, () => {
       console.log(`${getters.geti18ns().LOGS.RUNNING_APP} ${port}`);
       console.log(`🚀 Server: http://localhost:${port}`);
     });
-  } catch (error) {
+  } catch (error) { 
     console.error("❌ Failed to start server:", error);
     process.exit(1);
   }

@@ -1,10 +1,12 @@
-import express, { ErrorRequestHandler } from "express";
-
+import express from "express";
 import cors from "cors";
 import { getters } from "@config";
 import { loadServices } from "./loader";
+// Routes
+import router from "./routes/applicants.routes";
+// Middleware
+import errorHandlerMiddleWare from "./Middlware/ErrorHandlerMiddleware";
 
-// Add more route imports as needed
 
 const app = express();
 
@@ -19,6 +21,9 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// routes
+app.use('/api/v1/applicants', router)    
+
 // Register routes via loader
 loadServices(app);
 
@@ -30,22 +35,8 @@ app.use((_req, res) => {
   });
 });
 
-// Global error handler - must be last
-const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
-  console.error("🔥 Error:", err.stack || err.message || err);
 
-  const message =
-    process.env.NODE_ENV === "production"
-      ? "Internal Server Error"
-      : err.message;
-
-  res.status(err.status || 500).json({
-    success: false,
-    message,
-    ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
-  });
-};
-
-app.use(errorHandler);
+// global error handler
+app.use(errorHandlerMiddleWare);
 
 export default app;
