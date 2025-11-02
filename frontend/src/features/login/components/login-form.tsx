@@ -11,6 +11,7 @@ import { useFormHandler } from '@/hooks/use-form-handler';
 import { loginSchema } from '@/lib/utils';
 import { client } from '@/lib/api/client';
 import { useRouter } from 'next/navigation';
+import { urls } from '@/lib/config/constants';
 
 const LoginForm: React.FC = () => {
   const lang = useAppSelector(state => state.settings.lang) as LangKey;
@@ -26,9 +27,7 @@ const LoginForm: React.FC = () => {
     validationSchema: loginSchema,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
-        console.log('Login form submitted with values:', values);
-        // Example API call using the client
-        const response = await client.post('/login', values);
+        const response = await client.post(urls.LOGIN, values);
         console.log('Login successful:', response.data);
         resetForm();
         setTimeout(() => router.push('/dashboard'), 1000);
