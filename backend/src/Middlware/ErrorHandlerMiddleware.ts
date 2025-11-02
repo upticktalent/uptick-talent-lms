@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { CustomApiError } from "../Errors/index";
-import { HttpStatusCode } from "@/config";
+import { HttpStatusCode } from "../config";
 const errorHandlerMiddleWare = (err: Error, req: Request, res: Response, next: NextFunction) => {
 
 

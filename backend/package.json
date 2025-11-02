@@ -5,8 +5,12 @@
   "main": "src/server.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node --exec babel-node --extensions '.ts' src/server.ts",
     "dev:watch": "nodemon --exec babel-node --extensions '.ts' src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "node start.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy",
     "lint": "eslint .",
     "fix-lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
     "precommit": "lint-staged",

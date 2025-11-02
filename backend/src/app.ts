@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { getters } from "@config";
+import { getters } from "./config";
 import { loadServices } from "./loader";
 // Routes
 import router from "./routes/applicants.routes";

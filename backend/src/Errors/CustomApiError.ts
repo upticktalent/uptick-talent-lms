@@ -1,4 +1,4 @@
-import { HttpStatusCode } from "@/config"
+import { HttpStatusCode } from "../config"
 export class CustomApiError extends Error {
     statusCode: number
     constructor(message: string) {
