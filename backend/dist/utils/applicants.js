@@ -46,8 +46,8 @@ exports.MobileToolEnum = zod_1.z.enum(["FLUTTER", "REACT_NATIVE", "KOTLIN", "SWI
 // Helper: convert empty string to null
 const emptyToNull = (val) => (val === "" ? null : val);
 exports.createApplicationSchema = zod_1.z.object({
-    firstname: zod_1.z.string().min(3).trim(),
-    lastname: zod_1.z.string().min(3).trim(),
+    firstName: zod_1.z.string().min(3).trim(),
+    lastName: zod_1.z.string().min(3).trim(),
     email: zod_1.z.string().email(),
     phoneNumber: zod_1.z
         .string()
@@ -64,7 +64,7 @@ exports.createApplicationSchema = zod_1.z.object({
     backendToolsOther: zod_1.z.array(zod_1.z.string()).default([]),
     mobileToolsOther: zod_1.z.array(zod_1.z.string()).default([]),
     referralSource: exports.ReferralSourceEnum,
-    referralSourceOther: zod_1.z.array(zod_1.z.string()).default([]),
+    referralSourceOther: zod_1.z.string().nullable().optional(),
     // Status is set by backend
     status: exports.ApplicationStatusEnum.default("PENDING"),
 });

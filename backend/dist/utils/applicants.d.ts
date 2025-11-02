@@ -60,8 +60,8 @@ export declare const MobileToolEnum: z.ZodEnum<{
     SWIFT: "SWIFT";
 }>;
 export declare const createApplicationSchema: z.ZodObject<{
-    firstname: z.ZodString;
-    lastname: z.ZodString;
+    firstName: z.ZodString;
+    lastName: z.ZodString;
     email: z.ZodString;
     phoneNumber: z.ZodString;
     city: z.ZodString;
@@ -117,7 +117,7 @@ export declare const createApplicationSchema: z.ZodObject<{
         FRIEND: "FRIEND";
         OTHER: "OTHER";
     }>;
-    referralSourceOther: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    referralSourceOther: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     status: z.ZodDefault<z.ZodEnum<{
         PENDING: "PENDING";
         REVIEWED: "REVIEWED";

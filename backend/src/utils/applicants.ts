@@ -49,8 +49,8 @@ export const MobileToolEnum = z.enum(["FLUTTER", "REACT_NATIVE", "KOTLIN", "SWIF
 const emptyToNull = (val: any) => (val === "" ? null : val);
 
 export const createApplicationSchema = z.object({
-  firstname: z.string().min(3).trim(),
-  lastname: z.string().min(3).trim(),
+  firstName: z.string().min(3).trim(),
+  lastName: z.string().min(3).trim(),
   email: z.string().email(),
   phoneNumber: z
     .string()
@@ -72,7 +72,7 @@ export const createApplicationSchema = z.object({
   mobileToolsOther: z.array(z.string()).default([]),
 
   referralSource: ReferralSourceEnum,
-  referralSourceOther: z.array(z.string()).default([]),
+  referralSourceOther: z.string().nullable().optional(),
   
 
   // Status is set by backend
