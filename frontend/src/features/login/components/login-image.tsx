@@ -1,10 +1,10 @@
 import Box from '@/components/ui/box';
-import { Users } from '@/types/auth';
+import { Roles, Users } from '@/types/auth';
 import { useSearchParams } from 'next/navigation';
 
 const LoginImage = () => {
   const searchParams = useSearchParams();
-  const role = searchParams.get('role' as Users) || 'student';
+  const role = searchParams.get('role' as Users) || Roles.STUDENT;
 
   const image: Record<typeof role, string> = {
     student: '/images/auth-img-1.jpg',

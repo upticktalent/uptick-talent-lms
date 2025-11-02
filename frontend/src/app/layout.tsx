@@ -3,6 +3,7 @@ import { Geist_Mono, Raleway } from 'next/font/google';
 import './globals.css';
 import { AppProvider } from '@/lib/providers';
 import { Toaster } from 'sonner';
+import Box from '@/components/ui/box';
 
 const raleway = Raleway({
   variable: '--font-raleway',
@@ -25,15 +26,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${raleway.variable} ${geistMono.variable} antialiased`}
-      >
+    <Box as="html" lang="en">
+      <Box as="body" className={`${raleway.variable} ${geistMono.variable} antialiased`}>
         <AppProvider>
           {children}
           <Toaster />
         </AppProvider>
-      </body>
-    </html>
+      </Box>
+    </Box>
   );
 }

@@ -3,4 +3,15 @@ export interface AuthErrorResponse {
   message: string;
 }
 
-export type Users = 'student' | 'mentor';
+export const Roles = {
+  ADMIN: 'admin',
+  MENTOR: 'mentor',
+  STUDENT: 'student',
+} as const;
+
+export type Users = keyof typeof Roles;
+
+export interface LoginFormValues {
+  email: string;
+  password: string;
+}
