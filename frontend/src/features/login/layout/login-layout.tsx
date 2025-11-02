@@ -2,6 +2,7 @@
 
 import Box from '@/components/ui/box';
 import { LoginImage, Welcome, LoginForm } from '@/features/login';
+import { Logo } from '@/components/common/logo';
 
 const LoginLayout = () => {
   return (
@@ -11,6 +12,7 @@ const LoginLayout = () => {
         <LoginImage />
         {/* Right - dark panel, form section */}
         <Box className="w-full max-w-md p-8 md:p-12 flex flex-col items-center justify-center mx-auto">
+          <Logo className="mb-4 md:mb-0 md:invisible rounded-sm" clickable={false} />
           <Welcome />
           <LoginForm />
         </Box>
