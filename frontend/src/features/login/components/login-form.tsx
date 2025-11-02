@@ -7,7 +7,7 @@ import Button from '@/components/ui/button';
 import Checkbox from '@/components/ui/checkbox';
 import { useAppSelector } from '@/redux';
 import type { LoginFormValues } from '@/types/auth';
-import { useFormHandler } from '@/hooks/use-form-handler';
+import { useFormHandler } from '@/hooks/useFormHandler';
 import { loginSchema } from '@/lib/utils';
 import { client } from '@/lib/api/client';
 import { useRouter } from 'next/navigation';
