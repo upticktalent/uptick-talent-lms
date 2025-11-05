@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist_Mono, Raleway } from 'next/font/google';
 import './globals.css';
 import { AppProvider } from '@/lib/providers';
 import { Toaster } from 'sonner';
+import Box from '@/components/ui/box';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const raleway = Raleway({
+  variable: '--font-raleway',
   subsets: ['latin'],
 });
 
@@ -25,15 +26,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <Box as="html" lang="en">
+      <Box as="body" className={`${raleway.variable} ${geistMono.variable} antialiased`}>
         <AppProvider>
           {children}
           <Toaster />
         </AppProvider>
-      </body>
-    </html>
+      </Box>
+    </Box>
   );
 }
