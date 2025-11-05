@@ -9,14 +9,15 @@ export const sendApplicationEmail = async (to: string, name: string) => {
     console.error("Missing RESEND_API_KEY");
     return false;
   }
-  try {
+
+ const sendEmail = async () => {
     const { data, error } = await resend.emails.send({
       from: "Uptick Talent <no-reply@upticktalent.africa>",
       to: [to],
       subject: "We Received Your Application!",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
-          <h2 style="color: #1a73e8;">Hi ${name},</h2>
+          <h2 style="color: #1a73e8;">Hello ${name},</h2>
           <p>Thank you for applying to <strong>Uptick Talent</strong>!</p>
           <p>We've received your application and our team is reviewing it.</p>
           <p>You'll hear back from us within <strong>3–5 business days</strong>.</p>
@@ -27,14 +28,24 @@ export const sendApplicationEmail = async (to: string, name: string) => {
     });
 
     if (error) {
-      console.error("Email failed:", error);
-      return false;
+      console.error("Resend Error:", error);
+      throw error;
     }
 
     console.log("Email sent:", data?.id);
     return true;
-  } catch (error:any) {
-    console.error("Email failed:", error.message || error);
-    return false;
+  };
+
+  // Retry once on failure
+  try {
+    return await sendEmail();
+  } catch (error) {
+    console.log("First attempt failed, retrying...");
+    try {
+      return await sendEmail();
+    } catch (retryError) {
+      console.error("Retry failed:", retryError);
+      return false;
+    }
   }
 };

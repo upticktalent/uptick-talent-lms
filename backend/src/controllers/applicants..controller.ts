@@ -66,10 +66,9 @@ export const createApplicant = async (
       include: { assessments: true },
     });
 
-    const data = parsed.data;
     const emailSent = await sendApplicationEmail(
-      data?.email,
-      `${data?.firstName} ${data?.lastName}`,
+      email,
+      `${firstName} ${lastName}`,
     );
     console.log(emailSent ? "Email Sent!" : "Email failed");
 
