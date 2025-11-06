@@ -81,7 +81,7 @@ export const FormSelect: React.FC<
 };
 
 // Basic reusable Checkbox Group
-export const FormCheckboxGroup: React.FC<{ name: string; options: string[] }> = ({
+export const FormCheckboxGroup: React.FC<{ name: string; options: { value: string; label: string }[]; }> = ({
   name,
   options,
 }) => {
@@ -91,22 +91,21 @@ export const FormCheckboxGroup: React.FC<{ name: string; options: string[] }> = 
         {({ field }: FieldProps) => (
           <Box className="grid grid-cols-2 gap-2">
             {options.map(option => (
-              <Label key={option} className="flex items-center space-x-2">
+              <Label key={option.value} className="flex items-center space-x-2">
                 <Checkbox
                   {...field}
-                  checked={field.value.includes(option)}
+                  checked={field.value.includes(option.value)}
                   onCheckedChange={checked => {
                     const { value } = field;
                     const newValue = checked
-                      ? [...value, option]
-                      : value.filter((v: string) => v !== option);
+                      ? [...value, option.value]
+                      : value.filter((v: string) => v !== option.value);
                     field.onChange({ target: { name, value: newValue } });
                   }}
-                  value={option}
                   className="rounded"
                 />
                 
-                <span>{option}</span>
+                <Box as="span">{option.label}</Box>
                 
               </Label>
             ))}
