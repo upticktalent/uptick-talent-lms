@@ -10,8 +10,9 @@ import { validationSchemas } from '@/schema/apply';
 import { useAutoSave, getSavedDraft, clearSavedDraft } from '@/hooks/apply/useAutoSave';
 import { useMultiStepForm } from '@/hooks/apply/useMultiStepForm';
 
-import { client } from '@/lib/api'; //
-import { getErrorMessage } from '@/utils/errors'; //
+import { client } from '@/lib/api'; 
+import { getErrorMessage } from '@/utils/errors'; 
+import { urls } from '@/lib';
 import Box from '@/components/ui/box';
 
 import { StepIndicator } from './components/StepIndicator';
@@ -118,7 +119,7 @@ export const ApplicationForm = () => {
           : [],
       };
 
-      return client.post('/api/v1/applicants/createApplicant', payload);
+      return client.post(urls.APPLY, payload);
     },
     onSuccess: () => {
       toast.success('Application submitted successfully!');
