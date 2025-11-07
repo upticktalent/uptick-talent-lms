@@ -1,6 +1,7 @@
 node_modules
 .env
 package-lock.json
+dist/
 # i18n
 uploads
 user_emails.csv
