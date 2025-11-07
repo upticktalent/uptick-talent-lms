@@ -2,6 +2,7 @@ import React from 'react';
 import { useFormikContext, Field, ErrorMessage } from 'formik';
 import { ApplicationFormData, Tracks } from '../types';
 import Box from '@/components/ui/box';
+import { cn } from '@/lib/utils';
 
 const toolOptions = {
   frontend: [
@@ -46,15 +47,19 @@ const allToolOptions = [
 const toolDisplayMap = new Map(allToolOptions.map(opt => [opt.value, opt.label]));
 
 // Helper component to display a summary item
-const SummaryItem: React.FC<{ label: string; value: React.ReactNode }> = ({
+const SummaryItem: React.FC<{ label: string; value: React.ReactNode; capitalize?: boolean; }> = ({
   label,
   value,
+  capitalize = true,
 }) => (
   <Box className="mb-3 py-3">
     <Box as="dt" className="text-sm font-medium text-gray-500">
       {label}
     </Box>
-    <Box as="dd" className="mt-1 text-base font-semibold capitalize">
+    <Box as="dd" className={cn(
+        'mt-1 text-base font-semibold',
+        capitalize && 'capitalize'
+      )}>
       {value || 'N/A'}
     </Box>
   </Box>
@@ -118,7 +123,7 @@ export const Review = () => {
           label="Full Name"
           value={`${values.firstName} ${values.lastName}`}
         />
-        <SummaryItem label="Email" value={values.email} />
+        <SummaryItem label="Email" value={values.email} capitalize={false} />
         <SummaryItem label="Phone Number" value={values.phoneNumber} />
         <SummaryItem label="City" value={values.city} />
       </Box>
