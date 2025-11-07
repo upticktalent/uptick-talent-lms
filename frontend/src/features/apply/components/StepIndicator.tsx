@@ -5,9 +5,10 @@ import { cn } from '@/lib/utils';
 interface StepIndicatorProps {
   currentStep: number;
   steps: { title: string; description: string }[];
+  goToStep: (stepNumber: number) => void;
 }
 
-export const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, steps }) => {
+export const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, steps, goToStep, }) => {
   return (
     <Box className="mb-8">
       {/* Step Titles */}
@@ -31,11 +32,17 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, steps
                   className={cn(
                     'w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm shrink-0',
                     isCompleted
-                      ? 'bg-green-500 text-white'
+                      ? 'bg-green-500 text-white cursor-pointer hover:bg-green-600' // Add cursor/hover
                       : isActive
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-200 text-gray-700',
+                    !isCompleted && 'pointer-events-none' // Disable clicks on future/active steps
                   )}
+                  onClick={() => {
+                    if (isCompleted) {
+                      goToStep(stepNumber);
+                    }
+                  }}
                 >
                   {isCompleted ? '✓' : stepNumber}
                 </Box>

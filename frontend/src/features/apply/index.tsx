@@ -94,6 +94,7 @@ export const ApplicationForm = () => {
     currentStep,
     nextStep,
     prevStep,
+    goToStep,
     isFirstStep,
     isLastStep,
   } = useMultiStepForm(steps.length);
@@ -161,7 +162,11 @@ export const ApplicationForm = () => {
         <Form>
           <AutoSaveHandler /> {/* Attach auto-save hook */}
           
-          <StepIndicator currentStep={currentStep} steps={steps} />
+          <StepIndicator
+            currentStep={currentStep}
+            steps={steps}
+            goToStep={goToStep}
+          />
 
           <Box className="p-6 md:p-8 border rounded-lg shadow-sm bg-white">
             {steps[currentStep - 1].component}
