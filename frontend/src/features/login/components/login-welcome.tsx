@@ -1,0 +1,30 @@
+import Box from '@/components/ui/box';
+import { Roles, Users } from '@/types/auth';
+import { useSearchParams } from 'next/navigation';
+import { getters, LangKey } from '@/lib/config/i18n';
+import { useAppSelector } from '@/redux';
+
+const Welcome = () => {
+  const searchParams = useSearchParams();
+  const role = (searchParams.get('role') as Users) || Roles.STUDENT;
+  const lang = useAppSelector(state => state.settings.lang) as LangKey;
+
+  const text = getters.geti18ns()[lang].login;
+
+  return (
+    <Box className="w-full max-w-md max-auto mb-8">
+      <Box as="h1" className="text-4xl md:5xl font-semibold leading-tight text-white text-center">
+        {text.title}
+      </Box>
+
+      <Box
+        as="p"
+        className="mt-4 text-sm md:text-base text-gray-300 text-center max-w-[36rem] mx-auto"
+      >
+        {text.subtitles[role]}
+      </Box>
+    </Box>
+  );
+};
+
+export { Welcome };
