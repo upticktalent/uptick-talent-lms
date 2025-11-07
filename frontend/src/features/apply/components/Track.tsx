@@ -37,8 +37,8 @@ export const Track = () => {
                 className={cn(
                   'flex items-center justify-between p-4 border rounded-lg cursor-pointer',
                   field.value === option.value
-                    ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-500'
-                    : 'border-gray-300',
+                    ? 'border-primary bg-accent ring-2 ring-ring'
+                    : 'border-border'
                 )}
               >
                 <Box as="span" className="font-medium">

@@ -168,7 +168,7 @@ export const ApplicationForm = () => {
             goToStep={goToStep}
           />
 
-          <Box className="p-6 md:p-8 border rounded-lg shadow-sm bg-white">
+          <Box className="p-6 md:p-8 border rounded-lg shadow-sm bg-card">
             {steps[currentStep - 1].component}
           </Box>
 

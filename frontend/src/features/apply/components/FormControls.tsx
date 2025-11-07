@@ -26,12 +26,9 @@ export const FormControls: React.FC<FormControlsProps> = ({
     <Box className="flex justify-between items-center mt-8 pt-6 border-t">
       <Button
         type="button"
+        variant="outline"
         onClick={onBack}
         disabled={isFirstStep || isSubmitting}
-        className={cn(
-          'py-2 px-4 rounded-md font-medium text-gray-700 bg-gray-100 hover:bg-gray-200',
-          (isFirstStep || isSubmitting) && 'opacity-50 cursor-not-allowed'
-        )}
       >
         Previous
       </Button>
@@ -40,8 +37,7 @@ export const FormControls: React.FC<FormControlsProps> = ({
         type="submit"
         disabled={!isStepValid || isSubmitting}
         className={cn(
-          'py-2 px-6 rounded-md font-medium text-white',
-          isLastStep ? 'bg-green-600 hover:bg-green-700' : 'bg-primary hover:bg-primary/90',
+          isLastStep ? 'bg-[#477BFF] hover:bg-[#477BFF]/90 text-white' : 'bg-primary hover:bg-primary/90',
           (!isStepValid || isSubmitting) && 'opacity-50 cursor-not-allowed'
         )}
       >

@@ -15,7 +15,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, steps
       <Box as="h2" className="text-2xl font-semibold">
         {steps[currentStep - 1].title}
       </Box>
-      <Box as="p" className="text-gray-600 mt-1">
+      <Box as="p" className="text-muted-foreground mt-1">
         {steps[currentStep - 1].description}
       </Box>
 
@@ -34,8 +34,8 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, steps
                     isCompleted
                       ? 'bg-green-500 text-white cursor-pointer hover:bg-green-600' // Add cursor/hover
                       : isActive
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-700',
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground',
                     !isCompleted && 'pointer-events-none' // Disable clicks on future/active steps
                   )}
                   onClick={() => {
@@ -48,7 +48,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, steps
                 </Box>
 
                 {stepNumber < steps.length && (
-                  <Box className={cn('flex-1 h-1', isCompleted ? 'bg-green-500' : 'bg-gray-200')} />
+                  <Box className={cn('flex-1 h-1', isCompleted ? 'bg-green-500' : 'bg-muted')} />
                 )}
               </React.Fragment>
             );
@@ -59,6 +59,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, steps
           {steps.map((step, index) => {
             const stepNumber = index + 1;
             const isActive = stepNumber === currentStep;
+            const isCompleted = stepNumber < currentStep;
 
             return (
               <React.Fragment key={step.title}>
@@ -66,8 +67,14 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, steps
                   as="span"
                   className={cn(
                     'w-8 text-center text-xs',
-                    isActive ? 'font-bold' : 'text-gray-500',
+                    isActive ? 'font-bold' : 'text-muted-foreground',
+                    isCompleted && 'cursor-pointer hover:text-foreground'
                   )}
+                  onClick={() => {
+                    if (isCompleted) {
+                      goToStep(stepNumber);
+                    }
+                  }}
                 >
                   {step.title.split(' ')[0]}
                 </Box>

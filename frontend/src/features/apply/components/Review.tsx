@@ -53,7 +53,7 @@ const SummaryItem: React.FC<{ label: string; value: React.ReactNode; capitalize?
   capitalize = true,
 }) => (
   <Box className="mb-3 py-3">
-    <Box as="dt" className="text-sm font-medium text-gray-500">
+    <Box as="dt" className="text-sm font-medium text-muted-foreground">
       {label}
     </Box>
     <Box as="dd" className={cn(
@@ -118,7 +118,7 @@ export const Review = () => {
       </Box>
 
       {/* Personal Info */}
-      <Box as="dl" className="divide-y divide-gray-200 mb-6">
+      <Box as="dl" className="divide-y divide-border mb-6">
         <SummaryItem
           label="Full Name"
           value={`${values.firstName} ${values.lastName}`}
@@ -129,7 +129,7 @@ export const Review = () => {
       </Box>
 
       {/* Track & Tools */}
-      <Box as="dl" className="divide-y divide-gray-200 mb-6">
+      <Box as="dl" className="divide-y divide-border mb-6">
         <SummaryItem
           label="Selected Track"
           value={trackDisplayNames[values.track] || values.track}
@@ -138,7 +138,7 @@ export const Review = () => {
       </Box>
 
       {/* Referral */}
-      <Box as="dl" className="divide-y divide-gray-200 mb-6">
+      <Box as="dl" className="divide-y divide-border mb-6">
         <SummaryItem
           label="Referral Source"
           value={
