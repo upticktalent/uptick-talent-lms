@@ -21,6 +21,27 @@ const i18nData = {
         back: 'Back to homepage',
       },
     },
+    apply: {
+      toast: {
+        success: 'Application submitted successfully!',
+        error: 'Submission failed. Please try again.',
+      },
+      validation: {
+        firstNameRequired: 'First name is required',
+        lastNameRequired: 'Last name is required',
+        emailInvalid: 'Invalid email address',
+        emailRequired: 'Email is required',
+        phoneRequired: 'Phone number is required',
+        phoneInvalid: 'Invalid phone number format',
+        phoneMinDigits: 'Phone number must be at least 7 digits',
+        cityRequired: 'City is required',
+        trackRequired: 'Please select a track',
+        toolsRequired: 'Please select at least one tool',
+        referralRequired: 'Please select a referral source',
+        referralOtherRequired: 'Please specify the source',
+        confirmRequired: 'You must confirm your information is correct',
+      },
+    },
   },
   es: {
     welcome: 'Bienvenido',

@@ -13,6 +13,7 @@ import { useMultiStepForm } from '@/hooks/apply/useMultiStepForm';
 import { client } from '@/lib/api'; 
 import { getErrorMessage } from '@/utils/errors'; 
 import { urls } from '@/lib';
+import { getters } from '@/lib/config/i18n';
 import Box from '@/components/ui/box';
 
 import { StepIndicator } from './components/StepIndicator';
@@ -22,6 +23,8 @@ import { Track } from './components/Track';
 import { Tools } from './components/Tools';
 import { Referral } from './components/Referral';
 import { Review } from './components/Review';
+
+const i18n = getters.geti18ns().en.apply;
 
 // --- Form and Step Definitions ---
 
@@ -122,12 +125,12 @@ export const ApplicationForm = () => {
       return client.post(urls.APPLY, payload);
     },
     onSuccess: () => {
-      toast.success('Application submitted successfully!');
+      toast.success(i18n.toast.success);
       clearSavedDraft();
       // TODO: Redirect to a thank you page
     },
     onError: error => {
-      toast.error(getErrorMessage(error, 'Submission failed. Please try again.'));
+      toast.error(getErrorMessage(error, i18n.toast.error));
     },
   });
 
