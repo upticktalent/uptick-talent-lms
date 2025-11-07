@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
 import { createApplicationSchema } from "../utils/applicants";
 import { sendApplicationEmail } from "../utils/email";
-import { success } from "zod";
 
 const prisma = new PrismaClient();
 
@@ -32,6 +31,9 @@ export const createApplicant = async (
       email,
       phoneNumber,
       city,
+      state,
+      country,
+      dateOfBirth,
       track,
       frontendTools,
       backendTools,
@@ -52,6 +54,9 @@ export const createApplicant = async (
         phoneNumber,
         city,
         track,
+        state,
+        country,
+        dateOfBirth,
         frontendTools,
         backendTools,
         mobileTools,

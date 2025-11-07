@@ -58,7 +58,9 @@ export const createApplicationSchema = z.object({
     .regex(/^[0-9+\-()\s]+$/, "Invalid phone number format"),
 
   city: z.string().min(2, "City name must be at least 2 characters long").trim(),
-
+  state: z.string().min(2, "City name must be at least 2 characters long").trim(),
+  country: z.string().min(3, 'Country name must be at least 2 characters long ').trim(),
+  dateOfBirth: z.coerce.date(),
   track: TrackEnum,
 
   // Tool arrays — default to empty
