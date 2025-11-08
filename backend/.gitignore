@@ -1,12 +1,65 @@
-node_modules
-.env
+# Node / Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 package-lock.json
-# i18n
-uploads
+yarn.lock
+pnpm-lock.yaml
+
+# Build & Generated
+dist/
+backend/dist/
+**/dist/
+src/generated/
+src/generated/prisma/
+prisma/generated/
+.prisma/client/
+
+# Environment
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env_STAGING
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
+*.sublime-*
+
+# Logs
+logs/
+*.log
+
+# Uploads / Data
+uploads/
 user_emails.csv
-.env_STAGING
-# src/playground
-.env_STAGING
 docker-compose.yml
 
-/src/generated/prisma
+# Prisma
+prisma/dev.db
+prisma/*.db
+prisma/migrations/*.lock
+*.sqlite
+*.sqlite3
+
+# Misc
+coverage/
+.tmp/
+temp/
+.cache/
+.eslintcache
+.prettierrc
+.stylelintcache
+
+# Render / Deploy
+.render/
+render.yaml
+render.yml
