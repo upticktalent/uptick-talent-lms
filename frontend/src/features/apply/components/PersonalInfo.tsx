@@ -1,11 +1,11 @@
 import React from 'react';
-import { FormInput, FormSelect } from './FormInput';
+import { FormInput, FormCombobox } from './FormInput';
 import Box from '@/components/ui/box';
 import { useCountryStateCity } from '@/hooks/apply/useCountryStateCity';
 import { useFormikContext } from 'formik';
 import { ApplicationFormData } from '@/types/apply';
 import { SelectItem } from '@/components/ui/select';
-import { DatePicker } from '@/components/common';
+import { DatePicker, PhoneNumberInput } from '@/components/common';
 
 export const PersonalInfo = () => {
   const { values, setFieldValue } = useFormikContext<ApplicationFormData>();
@@ -29,55 +29,42 @@ export const PersonalInfo = () => {
         type="email"
         placeholder="jane.doe@example.com"
       />
-      <FormInput
-        name="phoneNumber"
-        label="Phone Number"
-        type="tel"
-        placeholder="+1 234 567 890"
-      />
+      <PhoneNumberInput name="phoneNumber" label="Phone Number" />
       <DatePicker name="dateOfBirth" label="Date of Birth" />
 
       {/* Country */}
-      <FormSelect
+      <FormCombobox
         name="country"
         label="Country"
         placeholder={loadingCountries ? 'Loading countries...' : 'Select Country'}
         disabled={loadingCountries}
-      >
-        {countryOptions.map(option => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </FormSelect>
+        options={countryOptions}
+        onValueChange={() => {
+          setFieldValue('state', '');
+          setFieldValue('city', '');
+        }}
+      />
 
       {/* State */}
-      <FormSelect
+      <FormCombobox
         name="state"
         label="State"
         placeholder={loadingStates ? 'Loading states...' : 'Select State'}
         disabled={!values.country || loadingStates}
-      >
-        {stateOptions.map(option => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </FormSelect>
+        options={stateOptions}
+        onValueChange={() => {
+          setFieldValue('city', '');
+        }}
+      />
 
       {/* City (Updated from FormInput) */}
-      <FormSelect
+      <FormCombobox
         name="city"
         label="City"
         placeholder={loadingCities ? 'Loading cities...' : 'Select City'}
         disabled={!values.state || loadingCities}
-      >
-        {cityOptions.map(option => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </FormSelect>
+        options={cityOptions}
+      />
     </Box>
   );
 };

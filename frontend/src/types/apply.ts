@@ -10,7 +10,7 @@ export type ApplicationFormData = {
   firstName: string;
   lastName: string;
   email: string;
-  phoneNumber: string;
+  phoneNumber: string | undefined;
   dateOfBirth: Date | null;
   country: string;
   state: string;

@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
 import { Tracks } from '@/types/apply';
 import { getters } from '@/lib/config/i18n';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 
 const i18n = getters.geti18ns().en.apply.validation;
 
@@ -13,14 +14,9 @@ export const PersonalInfoSchema = Yup.object({
     .required(i18n.emailRequired),
   phoneNumber: Yup.string()
     .required(i18n.phoneRequired)
-    .matches(/^[+]?[-0-9()\s]*$/, i18n.phoneInvalid)
-    .test(
-      'min-digits',
-      i18n.phoneMinDigits,
-      value => {
-        if (!value) return false; // Fails if empty
-        const digits = value.replace(/\D/g, '');
-        return digits.length >= 7;
+    .test('is-valid-phone', i18n.phoneInvalid, value => {
+      // Use the library's validator
+      return isValidPhoneNumber(value || '');
       }
     ),
     dateOfBirth: Yup.date().nullable().required(i18n.dateOfBirthRequired).max(new Date(Date.now() - 10 * 365.25 * 24 * 60 * 60 * 1000), 'You must be at least 10 years old'),
