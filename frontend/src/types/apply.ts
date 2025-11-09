@@ -11,6 +11,9 @@ export type ApplicationFormData = {
   lastName: string;
   email: string;
   phoneNumber: string;
+  dateOfBirth: Date | null;
+  country: string;
+  state: string;
   city: string;
 
   // Step 2
