@@ -53,8 +53,8 @@ export const FormInput: React.FC<FormInputProps> = ({
 
 // Basic reusable Select Field
 export const FormSelect: React.FC<
-  FormInputProps & { children: React.ReactNode; placeholder?: string }
-> = ({ name, label, children, placeholder, type, ...rest }) => {
+  FormInputProps & { children: React.ReactNode; placeholder?: string; disabled?: boolean; }
+> = ({ name, label, children, placeholder, type, disabled, ...rest }) => {
   return (
     <Box className="mb-4">
       <Label htmlFor={name} className="block text-sm font-medium mb-1">
@@ -68,6 +68,7 @@ export const FormSelect: React.FC<
             onValueChange={value => {
               form.setFieldValue(field.name, value);
             }}
+            disabled={disabled}
           >
             <SelectTrigger id={name} className="w-full" {...rest}>
               <SelectValue placeholder={placeholder || 'Select an option'} />
