@@ -1,3 +1,5 @@
+import { date } from "yup";
+
 const i18nData = {
   en: {
     welcome: 'Welcome',
@@ -34,6 +36,9 @@ const i18nData = {
         phoneRequired: 'Phone number is required',
         phoneInvalid: 'Invalid phone number format',
         phoneMinDigits: 'Phone number must be at least 7 digits',
+        dateOfBirthRequired: 'Date of birth is required',
+        countryRequired: 'Country is required',
+        stateRequired: 'State/Province is required',
         cityRequired: 'City is required',
         trackRequired: 'Please select a track',
         toolsRequired: 'Please select at least one tool',

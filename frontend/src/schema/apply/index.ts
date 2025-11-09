@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { Tracks } from '@/features/apply/types';
+import { Tracks } from '@/types/apply';
 import { getters } from '@/lib/config/i18n';
 
 const i18n = getters.geti18ns().en.apply.validation;
@@ -23,6 +23,9 @@ export const PersonalInfoSchema = Yup.object({
         return digits.length >= 7;
       }
     ),
+    dateOfBirth: Yup.date().nullable().required(i18n.dateOfBirthRequired).max(new Date(Date.now() - 10 * 365.25 * 24 * 60 * 60 * 1000), 'You must be at least 10 years old'),
+    country: Yup.string().required(i18n.countryRequired),
+    state: Yup.string().required(i18n.stateRequired),
   city: Yup.string().required(i18n.cityRequired),
 });
 

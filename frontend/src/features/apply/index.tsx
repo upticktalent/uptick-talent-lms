@@ -5,7 +5,7 @@ import { Formik, Form } from 'formik';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { ApplicationFormData } from './types';
+import { ApplicationFormData } from '@/types/apply';
 import { validationSchemas } from '@/schema/apply';
 import { useAutoSave, getSavedDraft, clearSavedDraft } from '@/hooks/apply/useAutoSave';
 import { useMultiStepForm } from '@/hooks/apply/useMultiStepForm';
@@ -33,6 +33,9 @@ const defaultInitialValues: ApplicationFormData = {
   lastName: '',
   email: '',
   phoneNumber: '',
+  dateOfBirth: null,
+  country: '',
+  state: '',
   city: '',
   track: '',
   frontendTools: [],
