@@ -9,6 +9,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
 interface FormInputProps {
@@ -76,6 +91,93 @@ export const FormSelect: React.FC<
             <SelectContent>{children}</SelectContent>
           </Select>
         )}
+      </Field>
+      <ErrorMessage
+        name={name}
+        component="div"
+        className="text-red-600 text-sm mt-1"
+      />
+    </Box>
+  );
+};
+
+export const FormCombobox: React.FC<{
+  name: string;
+  label: string;
+  placeholder?: string;
+  disabled?: boolean;
+  options: { value: string; label: string }[];
+  onValueChange?: (value: string) => void; // For cascading resets
+}> = ({ name, label, options, placeholder, disabled, onValueChange }) => {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <Box className="mb-4">
+      <Label htmlFor={name} className="block text-sm font-medium mb-1">
+        {label}
+      </Label>
+      <Field name={name}>
+        {({ field, form }: FieldProps) => {
+          const selectedLabel = options.find(
+            opt => opt.value === field.value
+          )?.label;
+
+          return (
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  id={name}
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-full justify-between"
+                  disabled={disabled}
+                >
+                  {field.value ? selectedLabel : placeholder || 'Select...'}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                <Command>
+                  <CommandInput
+                    placeholder={placeholder || 'Search...'}
+                    className="h-9"
+                  />
+                  <CommandList>
+                    <CommandEmpty>No results found.</CommandEmpty>
+                    <CommandGroup>
+                      {options.map(option => (
+                        <CommandItem
+                          key={option.value}
+                          value={option.label} // Search by label
+                          onSelect={() => {
+                            const newValue =
+                              option.value === field.value ? '' : option.value;
+                            form.setFieldValue(name, newValue);
+                            if (onValueChange) {
+                              onValueChange(newValue);
+                            }
+                            setOpen(false);
+                          }}
+                        >
+                          {option.label}
+                          <Check
+                            className={cn(
+                              'ml-auto h-4 w-4',
+                              field.value === option.value
+                                ? 'opacity-100'
+                                : 'opacity-0'
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          );
+        }}
       </Field>
       <ErrorMessage
         name={name}
