@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFormikContext } from 'formik';
-import { ApplicationFormData, Tracks } from '../types';
+import { ApplicationFormData, Tracks } from '@/types/apply';
 import { FormCheckboxGroup, FormInput } from './FormInput';
 import Box from '@/components/ui/box';
 

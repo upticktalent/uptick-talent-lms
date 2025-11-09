@@ -1,8 +1,10 @@
 import React from 'react';
 import { useFormikContext, Field, ErrorMessage } from 'formik';
-import { ApplicationFormData, Tracks } from '../types';
+import { ApplicationFormData, Tracks } from '@/types/apply';
 import Box from '@/components/ui/box';
 import { cn } from '@/lib/utils';
+import { useCountryStateCity } from '@/hooks/apply/useCountryStateCity';
+import { formatDate } from '@/components/common';
 
 const toolOptions = {
   frontend: [
@@ -47,7 +49,7 @@ const allToolOptions = [
 const toolDisplayMap = new Map(allToolOptions.map(opt => [opt.value, opt.label]));
 
 // Helper component to display a summary item
-const SummaryItem: React.FC<{ label: string; value: React.ReactNode; capitalize?: boolean; }> = ({
+const SummaryItem: React.FC<{ label: string; value: React.ReactNode; capitalize?: boolean }> = ({
   label,
   value,
   capitalize = true,
@@ -56,10 +58,7 @@ const SummaryItem: React.FC<{ label: string; value: React.ReactNode; capitalize?
     <Box as="dt" className="text-sm font-medium text-muted-foreground">
       {label}
     </Box>
-    <Box as="dd" className={cn(
-        'mt-1 text-base font-semibold',
-        capitalize && 'capitalize'
-      )}>
+    <Box as="dd" className={cn('mt-1 text-base font-semibold', capitalize && 'capitalize')}>
       {value || 'N/A'}
     </Box>
   </Box>
@@ -85,7 +84,9 @@ const referralSourceDisplayNames: Record<string, string> = {
 
 export const Review = () => {
   const { values } = useFormikContext<ApplicationFormData>();
-  const { track } = values;
+  const { track, country, state } = values;
+
+  const { countryOptions, stateOptions } = useCountryStateCity(values.country);
 
   let tools: string[] = [];
   let otherTools: string = '';
@@ -106,10 +107,13 @@ export const Review = () => {
 
   const displayedToolLabels = tools
     .filter(toolValue => toolValue !== 'OTHER')
-    .map(toolValue => toolDisplayMap.get(toolValue) || toolValue); 
-  const displayTools = [...displayedToolLabels, otherTools]
-    .filter(Boolean) 
-    .join(', ');
+    .map(toolValue => toolDisplayMap.get(toolValue) || toolValue);
+  const displayTools = [...displayedToolLabels, otherTools].filter(Boolean).join(', ');
+
+  const dob = values.dateOfBirth ? formatDate(new Date(values.dateOfBirth)) : 'N/A';
+
+  const countryLabel = countryOptions.find(opt => opt.value === country)?.label || country;
+  const stateLabel = stateOptions.find(opt => opt.value === state)?.label || state;
 
   return (
     <Box>
@@ -119,12 +123,12 @@ export const Review = () => {
 
       {/* Personal Info */}
       <Box as="dl" className="divide-y divide-border mb-6">
-        <SummaryItem
-          label="Full Name"
-          value={`${values.firstName} ${values.lastName}`}
-        />
+        <SummaryItem label="Full Name" value={`${values.firstName} ${values.lastName}`} />
         <SummaryItem label="Email" value={values.email} capitalize={false} />
         <SummaryItem label="Phone Number" value={values.phoneNumber} />
+        <SummaryItem label="Date of Birth" value={dob} capitalize={false} />
+        <SummaryItem label="Country" value={countryLabel} />
+        <SummaryItem label="State" value={stateLabel} />
         <SummaryItem label="City" value={values.city} />
       </Box>
 
@@ -141,10 +145,7 @@ export const Review = () => {
       <Box as="dl" className="divide-y divide-border mb-6">
         <SummaryItem
           label="Referral Source"
-          value={
-            referralSourceDisplayNames[values.referralSource] ||
-            values.referralSource
-          }
+          value={referralSourceDisplayNames[values.referralSource] || values.referralSource}
         />
         {values.referralSource === 'OTHER' && (
           <SummaryItem label="Other Source" value={values.referralSourceOther} />
@@ -157,11 +158,7 @@ export const Review = () => {
           <Field type="checkbox" name="confirm" className="rounded" />
           <span>I confirm that all information provided is correct.</span>
         </label>
-        <ErrorMessage
-          name="confirm"
-          component="div"
-          className="text-red-600 text-sm mt-1"
-        />
+        <ErrorMessage name="confirm" component="div" className="text-red-600 text-sm mt-1" />
       </Box>
     </Box>
   );

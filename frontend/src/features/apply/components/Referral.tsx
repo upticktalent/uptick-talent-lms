@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFormikContext } from 'formik';
-import { ApplicationFormData } from '../types';
+import { ApplicationFormData } from '@/types/apply';
 import { FormInput, FormSelect } from './FormInput';
 import Box from '@/components/ui/box';
 import { SelectItem } from '@/components/ui/select';

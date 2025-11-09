@@ -4,7 +4,7 @@ import Box from '@/components/ui/box';
 import { cn } from '@/lib/utils';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Tracks } from '../types';
+import { Tracks } from '@/types/apply';
 
 const stackOptions = [
   { value: Tracks.FRONTEND, label: 'Frontend Engineering' },
