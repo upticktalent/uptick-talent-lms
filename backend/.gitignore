@@ -1,0 +1,13 @@
+node_modules
+.env
+package-lock.json
+dist/
+# i18n
+uploads
+user_emails.csv
+.env_STAGING
+# src/playground
+.env_STAGING
+docker-compose.yml
+
+/src/generated/prisma
