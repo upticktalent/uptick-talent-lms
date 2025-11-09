@@ -148,7 +148,7 @@ input:-webkit-autofill {
 
 tbody tr:nth-child(even) {
   /* background: #fcf9f5; */
-  background: #f8f5f3;
+  /* background: #f8f5f3; */
 }
 
 @keyframes horizontalwave {

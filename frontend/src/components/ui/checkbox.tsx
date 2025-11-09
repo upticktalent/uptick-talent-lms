@@ -1,34 +1,32 @@
-import React from 'react';
-import clsx from 'clsx';
-import Box from '@/components/ui/box';
-import { CheckboxProps } from '@/types/ui';
+"use client"
 
-const Checkbox: React.FC<CheckboxProps> = ({
-  id,
-  label,
-  description,
+import * as React from "react"
+import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
+import { CheckIcon } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+
+function Checkbox({
   className,
-  wrapperClassName,
   ...props
-}) => {
+}: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
   return (
-    <Box className={clsx('flex items-start gap-2', wrapperClassName)}>
-      <Box
-        as="input"
-        id={id}
-        type="checkbox"
-        className={clsx(
-          'h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500',
-          className,
-        )}
-        {...props}
-      />
-      <Box as="label" htmlFor={id} className="text-sm text-[#605D64] leading-tight">
-        {label}
-        {description && <Box as="p" className="text-xs text-gray-500 mt-0.5">{description}</Box>}
-      </Box>
-    </Box>
-  );
-};
+    <CheckboxPrimitive.Root
+      data-slot="checkbox"
+      className={cn(
+        "peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+        className
+      )}
+      {...props}
+    >
+      <CheckboxPrimitive.Indicator
+        data-slot="checkbox-indicator"
+        className="grid place-content-center text-current transition-none"
+      >
+        <CheckIcon className="size-3.5" />
+      </CheckboxPrimitive.Indicator>
+    </CheckboxPrimitive.Root>
+  )
+}
 
-export default Checkbox;
+export { Checkbox }

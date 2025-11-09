@@ -4,9 +4,13 @@ export const env = {
   API_V1: '/api/v1/',
 };
 
+export const createRoute = (endpoint: string) => {
+  return `${env.API_V1}${endpoint}`;
+};
+
 export const urls = {
-  LOGIN: `${env.API_V1}auth/login`,
+  LOGIN: createRoute('auth/login'),
+  APPLY: createRoute('applicants/createApplicant'),
 };
 
 export const queryKeys = {};
-
