@@ -3,6 +3,7 @@
 import * as React from 'react';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { XIcon } from 'lucide-react';
+import Box from './box';
 
 import { cn } from '@/lib/utils';
 import { cva, VariantProps } from 'class-variance-authority';
@@ -73,7 +74,9 @@ function SheetContent({ className, children, side = 'right', ...props }: SheetCo
         {children}
         <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
           <XIcon className="size-4" />
-          <span className="sr-only">Close</span>
+          <Box as="span" className="sr-only">
+            Close
+          </Box>
         </SheetPrimitive.Close>
       </SheetPrimitive.Content>
     </SheetPortal>
@@ -82,7 +85,7 @@ function SheetContent({ className, children, side = 'right', ...props }: SheetCo
 
 function SheetHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div
+    <Box
       data-slot="sheet-header"
       className={cn('flex flex-col gap-1.5 p-4', className)}
       {...props}
@@ -92,7 +95,7 @@ function SheetHeader({ className, ...props }: React.ComponentProps<'div'>) {
 
 function SheetFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div
+    <Box
       data-slot="sheet-footer"
       className={cn('mt-auto flex flex-col gap-2 p-4', className)}
       {...props}

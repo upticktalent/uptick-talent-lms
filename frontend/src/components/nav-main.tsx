@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronRight, LayoutDashboardIcon } from 'lucide-react';
+import Box from '@/components/ui/box';
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
@@ -31,7 +32,7 @@ export function NavMain({ items }: NavMainProps) {
         <SidebarMenuItem>
           <SidebarMenuButton tooltip="Dashboard">
             <LayoutDashboardIcon />
-            <span>{data.dashboard}</span>
+            <Box as="span">{data.dashboard}</Box>
           </SidebarMenuButton>
         </SidebarMenuItem>
         {items.map(item => (
@@ -45,7 +46,7 @@ export function NavMain({ items }: NavMainProps) {
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton tooltip={item.title}>
                   {item.icon && <item.icon />}
-                  <span>{item.title}</span>
+                  <Box as="span">{item.title}</Box>
                   <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
@@ -54,9 +55,9 @@ export function NavMain({ items }: NavMainProps) {
                   {item.items?.map(subItem => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
-                        <a href={subItem.url}>
-                          <span>{subItem.title}</span>
-                        </a>
+                        <Box as="a" href={subItem.url}>
+                          <Box as="span">{subItem.title}</Box>
+                        </Box>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   ))}
