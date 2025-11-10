@@ -137,8 +137,8 @@ model User {
 // APPLICANTS MODEL
 model Application {
   id                     String         @id @default(uuid())
-  firstname               String
-  lastname                String
+  firstName               String
+  lastName                String
   email                   String         @unique
 
   phoneNumber            String         @unique
