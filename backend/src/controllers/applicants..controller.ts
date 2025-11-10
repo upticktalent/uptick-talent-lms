@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
 import { createApplicationSchema } from "../utils/applicants";
 import { sendApplicationEmail } from "../utils/email";
+import { responseObject } from "../utils";
+import { HttpStatusCode } from "../config";
 
 const prisma = new PrismaClient();
 
@@ -64,8 +66,7 @@ export const createApplicant = async (
         backendToolsOther,
         mobileToolsOther,
         referralSource,
-        referralSourceOther:
-          referralSource === "OTHER" ? referralSourceOther : null,
+        referralSourceOther,
         status,
       },
       include: { assessments: true },
@@ -77,17 +78,31 @@ export const createApplicant = async (
     );
     console.log(emailSent ? "Email Sent!" : "Email failed");
 
-    return res.status(201).json({
-      success: true,
+    return responseObject({
+      res,
+      status: true,
+      statusCode: HttpStatusCode.CREATED,
       message: "Applicant created!",
-      data: newApplicant,
+      payload: newApplicant,
     });
+
+    // return res.status(201).json({
+    //   success: true,
+    //   message: "Applicant created!",
+    //   data: newApplicant,
+    // });
   } catch (error: any) {
     if (error.code === "P2002") {
-      return res.status(409).json({
-        success: false,
+      return responseObject({
+        res,
+        status: false,
+        statusCode: HttpStatusCode.CONFLICT,
         message: "Email or phone already exists",
       });
+      // return res.status(409).json({
+      //   success: false,
+      //   message: "Email or phone already exists",
+      // });
     }
     next(error);
   }
@@ -108,20 +123,30 @@ export const getAllApplicants = async (
         id: true,
         firstName: true,
         lastName: true,
-        email:true,
-        track:true,
-        phoneNumber:true,
+        email: true,
+        track: true,
+        phoneNumber: true,
         createdAt: true,
-      }
+      },
     });
-    
-    return res.status(201) .json({
-      success: true,
-      allApplicants: applicants,
-      count:  applicants.length
-    })
-    
-  } catch (error:any) {
-    next(error)
+
+    return responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      status: true,
+      payload: {
+        data: applicants,
+        count: applicants.length,
+      },
+      message: "All Applicants",
+    });
+
+    // return res.status(201) .json({
+    //   success: true,
+    //   allApplicants: applicants,
+    //   count:  applicants.length
+    // })
+  } catch (error: any) {
+    next(error);
   }
 };

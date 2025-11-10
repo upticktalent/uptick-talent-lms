@@ -5,7 +5,7 @@ export const responseObject: ResponseObjectFn = (props) => {
     res,
     statusCode,
     message,
-    payload = undefined,
+    payload = null,
     status = false,
   } = props;
 

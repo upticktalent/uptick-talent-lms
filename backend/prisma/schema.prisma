@@ -6,10 +6,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-/* -------------------------------------------------------------------------- */
-/*  ENUMS – Fixed options for applicant forms                                */
-/* -------------------------------------------------------------------------- */
+// ENUMS NEEDED FOR APPLICANTS FORM
 enum Track {
   FRONTEND
   BACKEND
@@ -76,82 +73,115 @@ enum ApplicationStatus {
   ACCEPTED
 }
 
-/* -------------------------------------------------------------------------- */
-/*  LOOKUP TABLES                                                            */
-/* -------------------------------------------------------------------------- */
+// LOOKUP TABLES FOR ADMIN TO MAKE CHANGES IN THE FUTURE
+model TrackOption {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ReferralSourceOption {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FrontendToolOption {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BackendToolOption {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MobileToolOption {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Role {
-  id        String    @id @default(uuid())
-  name      String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   users     UserRole[]
 }
 
-/* -------------------------------------------------------------------------- */
-/*  CORE MODELS                                                              */
-/* -------------------------------------------------------------------------- */
+// CORE MODELS
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  password  String
-  firstName String
-  lastName  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          String        @id @default(uuid())
+  email       String        @unique
+  password    String
+  firstName   String
+  lastName    String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   roles       UserRole[]
-  student     StudentProfile?
-  mentor      MentorProfile?
   admin       AdminProfile?
+  mentor      MentorProfile?
+  student     StudentProfile?
 }
 
+// APPLICANTS MODEL
 model Application {
-  id                  String         @id @default(uuid())
+  id                     String         @id @default(uuid())
+  firstName               String
+  lastName                String
+  email                   String         @unique
 
-  firstName String
-  lastName String
-  email  String  @unique
+  phoneNumber            String         @unique
+  city                   String
+  state       String? 
+  country     String?   @default("Nigeria")
+  dateOfBirth DateTime?
 
-  phoneNumber         String         @unique
-  city                String
-  track               Track
+  track                  Track
+  referralSource         ReferralSource
+  frontendTools          FrontendTool[]  @default([])
+  backendTools           BackendTool[]  @default([])
+  mobileTools            MobileTool[]   @default([])
 
-  frontendTools       FrontendTool[] @default([])
-  frontendToolsOther  String[]       @default([])
-  backendTools        BackendTool[]  @default([])
-  backendToolsOther   String[]       @default([])
-  mobileTools         MobileTool[]   @default([])
-  mobileToolsOther    String[]       @default([])
+  frontendToolsOther  String[]  @default([])
+  backendToolsOther String[]  @default([])
+  mobileToolsOther String[]  @default([])
+  referralSourceOther    String[]  @default([])
 
-  referralSource      ReferralSource
-  referralSourceOther String?
 
-  status              ApplicationStatus @default(PENDING)
+  status                 ApplicationStatus @default(PENDING)
 
-  assessments         Assessment[]
-  interviews          Interview[]
+  assessments            Assessment[]
+  interviews             Interview[]
 
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
 }
 
-/* -------------------------------------------------------------------------- */
-/*  MANY-TO-MANY                                                             */
-/* -------------------------------------------------------------------------- */
-model UserRole {
-  userId String
-  roleId String
 
-  user   User @relation(fields: [userId], references: [id])
-  role   Role @relation(fields: [roleId], references: [id])
+
+// MANY-TO-MANY: ROLES
+model UserRole {
+  userId   String
+  roleId   String
+
+  user     User   @relation(fields: [userId], references: [id])
+  role     Role   @relation(fields: [roleId], references: [id])
 
   @@id([userId, roleId])
 }
 
-/* -------------------------------------------------------------------------- */
-/*  ONE-TO-MANY                                                              */
-/* -------------------------------------------------------------------------- */
+// ASSESSMENT & INTERVIEW – One-to-Many
 model Assessment {
   id              String      @id @default(uuid())
   applicationId   String
@@ -180,9 +210,7 @@ model Interview {
   updatedAt      DateTime          @updatedAt
 }
 
-/* -------------------------------------------------------------------------- */
-/*  PROFILES                                                                 */
-/* -------------------------------------------------------------------------- */
+// PROFILES
 model AdminProfile {
   id        String   @id @default(uuid())
   userId    String   @unique

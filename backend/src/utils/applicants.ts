@@ -74,7 +74,7 @@ export const createApplicationSchema = z.object({
   mobileToolsOther: z.array(z.string()).default([]),
 
   referralSource: ReferralSourceEnum,
-  referralSourceOther: z.string().nullable().optional(),
+  referralSourceOther: z.array(z.string()).default([]).optional(),
   
 
   // Status is set by backend
