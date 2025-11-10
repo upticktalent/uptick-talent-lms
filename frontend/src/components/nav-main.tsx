@@ -17,7 +17,7 @@ import {
 
 import { useAppSelector } from '@/redux';
 import { getters, LangKey } from '@/lib/config/i18n';
-import { NavMainProps } from '@/types/ui';
+import { NavMainProps } from '@/types/nav';
 
 export function NavMain({ items }: NavMainProps) {
   const lang = useAppSelector(state => state.settings.lag) as LangKey;

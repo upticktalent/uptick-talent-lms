@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useAppSelector } from '@/redux';
 import { getters, LangKey } from '@/lib/config/i18n';
-import { NavUserProps } from '@/types/ui';
+import { NavUserProps } from '@/types/nav';
 
 export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar();
