@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import routes from './routes';
-
+import { setupSwagger } from './config/swagger';
 // Load env vars
 dotenv.config();
 
@@ -17,6 +17,9 @@ app.use(helmet());
 // CORS middleware
 app.use(cors());
 
+// Setup Swagger documentation
+setupSwagger(app);
+
 // Logging middleware
 app.use(morgan('combined'));
 
@@ -28,13 +31,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/v1', routes);
 
 // Health check route
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Server is running healthy',
-    timestamp: new Date().toISOString()
-  });
-});
+// app.get('/health', (req, res) => {
+//   res.status(200).json({
+//     success: true,
+//     message: 'Server is running healthy',
+//     timestamp: new Date().toISOString()
+//   });
+// });
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -46,7 +49,7 @@ app.use('*', (req, res) => {
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error:', err);
+ 
   res.status(500).json({
     success: false,
     message: 'Internal server error',
@@ -55,6 +58,5 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV}`);
+
 });

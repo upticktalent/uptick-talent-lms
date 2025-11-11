@@ -3,70 +3,78 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest, generateToken } from '../middleware/auth';
-
 import { sendPasswordResetEmail, sendPasswordChangedEmail } from '../utils/EmailService';
+import { Logger } from '../constants/logger';
+import { responseObject } from '@utils';
+import { HttpStatusCode } from '@config';
+import { getMessage } from '../constants/i18n';
+import { EnvironmentConfig } from '../constants/environment';
+
 const prisma = new PrismaClient();
 
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
-   
+    console.log('🔐 Login Attempt:', req.body);
+    
     if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email and password are required'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('AUTH.ERRORS.EMAIL_PASSWORD_REQUIRED')
       });
     }
 
-    
     const user = await prisma.user.findUnique({
       where: { email }
     });
 
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.UNAUTHORIZED,
+        message: getMessage('AUTH.ERRORS.INVALID_CREDENTIALS')
       });
     }
 
-    
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.UNAUTHORIZED,
+        message: getMessage('AUTH.ERRORS.INVALID_CREDENTIALS')
       });
     }
 
-    
     const token = generateToken(user.id);
 
-    
     const userWithoutPassword = {
       id: user.id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
-      // emailVerified: user.emailVerified,
       createdAt: user.createdAt
     };
 
-    res.json({
-      success: true,
-      message: 'Login successful',
-      data: {
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      message: getMessage('AUTH.SUCCESS.LOGIN'),
+      payload: {
         user: userWithoutPassword,
         token
-      }
+      },
+      status: true
     });
+   
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error during login'
+    Logger.error('Login error:', error);
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('AUTH.ERRORS.INTERNAL_LOGIN')
     });
   }
 };
@@ -83,30 +91,34 @@ export const getMe = async (req: AuthRequest, res: Response) => {
         role: true,
         emailVerified: true,
         createdAt: true,
-        admin: true,
-        mentor: true,
-        student: true
+        updatedAt: true
       }
     });
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: getMessage('USERS.ERRORS.NOT_FOUND')
       });
     }
-
-    res.json({
-      success: true,
-      data: {
+      
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      message: getMessage('AUTH.SUCCESS.PROFILE_RETRIEVED'),
+      payload: {
         user
-      }
+      },
+      status: true
     });
+   
   } catch (error) {
-    console.error('Get me error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
+    Logger.error('Get me error:', error);
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('AUTH.ERRORS.INTERNAL_SERVER')
     });
   }
 };
@@ -115,31 +127,22 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
   try {
     const { firstName, lastName } = req.body;
     const userId = req.user.id;
- console.log('🔄 Update Profile Request:');
-    console.log('User ID:', userId);
-    console.log('Request Body:', req.body);
-    console.log('First Name:', firstName, 'Type:', typeof firstName);
-    console.log('Last Name:', lastName, 'Type:', typeof lastName);
 
     if (!firstName || !lastName) {
-            console.log('❌ Validation failed - missing fields');
-
-      return res.status(400).json({
-        success: false,
-        message: 'First name and last name are required'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('AUTH.ERRORS.FIRST_LAST_NAME_REQUIRED')
       });
     }
 
-
-     if (firstName.trim() === '' || lastName.trim() === '') {
-      console.log('❌ Validation failed - empty strings');
-      return res.status(400).json({
-        success: false,
-        message: 'First name and last name cannot be empty'
+    if (firstName.trim() === '' || lastName.trim() === '') {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('AUTH.ERRORS.NAME_CANNOT_BE_EMPTY')
       });
     }
-
-    console.log('✅ Validation passed, updating user...');
 
     const user = await prisma.user.update({
       where: { id: userId },
@@ -154,24 +157,27 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
         firstName: true,
         lastName: true,
         role: true,
-        // emailVerified: true,
         createdAt: true,
         updatedAt: true
       }
     });
-
-    res.json({
-      success: true,
-      message: 'Profile updated successfully',
-      data: {
-        user
-      }
+    
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      message: getMessage('AUTH.SUCCESS.PROFILE_UPDATED'),
+      payload: {
+        user  
+      },
+      status: true
     });
+   
   } catch (error) {
-    console.error('Update profile error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
+    Logger.error('Update profile error:', error);
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('AUTH.ERRORS.INTERNAL_SERVER')
     });
   }
 };
@@ -181,46 +187,45 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
     const { currentPassword, newPassword } = req.body;
     const userId = req.user.id;
 
-    
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Current password and new password are required'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('AUTH.ERRORS.CURRENT_NEW_PASSWORD_REQUIRED')
       });
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'New password must be at least 6 characters long'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('AUTH.ERRORS.PASSWORD_MIN_LENGTH')
       });
     }
 
-    
     const user = await prisma.user.findUnique({
       where: { id: userId }
     });
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: getMessage('USERS.ERRORS.NOT_FOUND')
       });
     }
 
-    
     const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
     if (!isCurrentPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Current password is incorrect'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.UNAUTHORIZED,
+        message: getMessage('AUTH.ERRORS.INCORRECT_CURRENT_PASSWORD')
       });
     }
 
-    
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
 
-    
     await prisma.user.update({
       where: { id: userId },
       data: {
@@ -228,43 +233,46 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
         updatedAt: new Date()
       }
     });
-
-    res.json({
-      success: true,
-      message: 'Password changed successfully'
+ 
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      message: getMessage('AUTH.SUCCESS.PASSWORD_CHANGED'),
+      status: true
     });
+   
   } catch (error) {
-    console.error('Change password error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
+    Logger.error('Change password error:', error);
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('AUTH.ERRORS.INTERNAL_PASSWORD_CHANGE')
     });
   }
 };
-
 
 export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
 
-    // Validate input
     if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email is required'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('AUTH.ERRORS.EMAIL_REQUIRED')
       });
     }
 
-    // Check if user exists
     const user = await prisma.user.findUnique({
       where: { email }
     });
 
     // Always return success even if user doesn't exist (for security)
     if (!user) {
-      return res.json({
-        success: true,
-        message: 'If an account with that email exists, a password reset link has been sent'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.OK,
+        message: getMessage('AUTH.SUCCESS.RESET_EMAIL_SENT')
       });
     }
 
@@ -287,60 +295,57 @@ export const forgotPassword = async (req: Request, res: Response) => {
     });
 
     // Send reset email
-    if (process.env.NODE_ENV !== 'test') {
+    if (!EnvironmentConfig.IS_TEST) {
       await sendPasswordResetEmail(email, resetToken);
     }
 
-    res.json({
-      success: true,
-      message: 'If an account with that email exists, a password reset link has been sent'
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      message: getMessage('AUTH.SUCCESS.RESET_EMAIL_SENT')
     });
+   
   } catch (error) {
-    console.error('Forgot password error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error during password reset request'
+    Logger.error('Forgot password error:', error);
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('AUTH.ERRORS.INTERNAL_RESET_REQUEST')
     });
   }
 };
 
-
-
-// Reset Password - Validate token and set new password
 export const resetPassword = async (req: Request, res: Response) => {
   try {
     const { token, newPassword } = req.body;
 
-    // Validate input
     if (!token || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Token and new password are required'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('AUTH.ERRORS.TOKEN_NEW_PASSWORD_REQUIRED')
       });
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'New password must be at least 6 characters long'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('AUTH.ERRORS.PASSWORD_MIN_LENGTH')
       });
     }
 
     // Find valid reset token
     const resetToken = await prisma.passwordResetToken.findUnique({
       where: { token },
-      // include: { 
-
-
-      //   // We'll get the user through email
-      // }
     });
 
     // Check if token exists and is not expired
     if (!resetToken || resetToken.expiresAt < new Date()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid or expired reset token'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('AUTH.ERRORS.INVALID_EXPIRED_TOKEN')
       });
     }
 
@@ -350,9 +355,10 @@ export const resetPassword = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: 'User not found'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: getMessage('USERS.ERRORS.NOT_FOUND')
       });
     }
 
@@ -374,32 +380,35 @@ export const resetPassword = async (req: Request, res: Response) => {
     });
 
     // Send password changed notification
-    if (process.env.NODE_ENV !== 'test') {
+    if (!EnvironmentConfig.IS_TEST) {
       await sendPasswordChangedEmail(user.email);
     }
 
-    res.json({
-      success: true,
-      message: 'Password reset successfully'
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      message: getMessage('AUTH.SUCCESS.PASSWORD_RESET')
     });
+    
   } catch (error) {
-    console.error('Reset password error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error during password reset'
+    Logger.error('Reset password error:', error);
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('AUTH.ERRORS.INTERNAL_RESET')
     });
   }
 };
 
-// Validate Reset Token - Check if token is valid
 export const validateResetToken = async (req: Request, res: Response) => {
   try {
     const { token } = req.body;
 
     if (!token) {
-      return res.status(400).json({
-        success: false,
-        message: 'Token is required'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('AUTH.ERRORS.TOKEN_REQUIRED')
       });
     }
 
@@ -410,25 +419,30 @@ export const validateResetToken = async (req: Request, res: Response) => {
     const isValid = resetToken && resetToken.expiresAt > new Date();
 
     if (!isValid) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid or expired reset token'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('AUTH.ERRORS.INVALID_EXPIRED_TOKEN')
       });
     }
 
-    res.json({
-      success: true,
-      message: 'Token is valid',
-      data: {
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      message: getMessage('AUTH.SUCCESS.TOKEN_VALID'),
+      payload: {
         email: resetToken.email,
         isValid: true
-      }
+      },
+      status: true
     });
+   
   } catch (error) {
-    console.error('Validate reset token error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
+    Logger.error('Validate reset token error:', error);
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('AUTH.ERRORS.INTERNAL_TOKEN_VALIDATION')
     });
   }
 };

@@ -1,6 +1,3 @@
-
-
-
 import express, { ErrorRequestHandler, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -8,7 +5,11 @@ import compression from "compression";
 import rateLimit from "express-rate-limit";
 import { getters } from "@config";
 import { loadServices } from "./loader";
-
+import { Logger } from "./constants/logger";
+import { EnvironmentConfig } from "./constants/environment";
+import { responseObject } from '@utils';
+import { HttpStatusCode } from '@config';
+import { getMessage } from './constants/i18n';
 const app = express();
 
 // Security middleware
@@ -19,11 +20,13 @@ app.use(helmet({
 // Compression middleware
 app.use(compression());
 
-// Rate limiting
+// Rate limiting - Fixed message format
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 100 : 1000, // limit each IP
+  max: EnvironmentConfig.IS_PRODUCTION ? 100 : 1000, // limit each IP
+
   message: {
+    status: 429, 
     success: false,
     message: "Too many requests from this IP, please try again later"
   },
@@ -39,7 +42,7 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (process.env.NODE_ENV === "production") {
+    if (EnvironmentConfig.IS_PRODUCTION) {
       const allowedOrigins = getters.getAllowedOrigins();
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
@@ -70,18 +73,8 @@ app.use(express.urlencoded({
 
 // Request logging middleware (simple version)
 app.use((req: Request, _res: Response, next: NextFunction) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - IP: ${req.ip}`);
+  Logger.log(`${new Date().toISOString()} - ${req.method} ${req.path} - IP: ${req.ip}`);
   next();
-});
-
-// Health check endpoint
-app.get('/health', (_req: Request, res: Response) => {
-  res.status(200).json({
-    success: true,
-    message: 'Server is healthy',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
 });
 
 // Register routes via loader
@@ -96,14 +89,37 @@ app.use((_req: Request, res: Response) => {
   });
 });
 
+// Define proper TypeScript interfaces for error response
+interface BaseErrorResponse {
+  success: false;
+  message: string;
+  timestamp: string;
+  path: string;
+}
+
+interface DevelopmentErrorResponse extends BaseErrorResponse {
+  details?: string;
+  stack?: string;
+  validationErrors?: unknown;
+}
+
+interface PrismaError extends Error {
+  code?: string;
+  meta?: {
+    target?: string[];
+  };
+  status?: number;
+  errors?: unknown;
+}
+
 // Global error handler - must be last
-const errorHandler: ErrorRequestHandler = (err, req: Request, res: Response, _next: NextFunction) => {
+const errorHandler: ErrorRequestHandler = (err: PrismaError, req: Request, res: Response, _next: NextFunction) => {
   const timestamp = new Date().toISOString();
   
-  // Log error with context
-  console.error(`[${timestamp}] 🔥 Error:`, {
-    message: err.message,
-    stack: err.stack,
+  // Log error with context using optional chaining
+  Logger.error(`[${timestamp}] 🔥 Error:`, {
+    message: err?.message,
+    stack: err?.stack,
     url: req.url,
     method: req.method,
     ip: req.ip,
@@ -111,17 +127,17 @@ const errorHandler: ErrorRequestHandler = (err, req: Request, res: Response, _ne
   });
 
   // Prisma specific error handling
-  let statusCode = err.status || 500;
+  let statusCode = err?.status || 500;
   let message = 'Internal Server Error';
-  let details = undefined;
+  let details: string | undefined = undefined;
 
-  // Handle Prisma errors
-  if (err.code) {
+  // Handle Prisma errors with optional chaining
+  if (err?.code) {
     switch (err.code) {
       case 'P2002':
         statusCode = 409;
         message = 'Resource already exists with provided unique constraint';
-        details = err.meta?.target;
+        details = err.meta?.target?.join(', ');
         break;
       case 'P2025':
         statusCode = 404;
@@ -139,30 +155,36 @@ const errorHandler: ErrorRequestHandler = (err, req: Request, res: Response, _ne
   }
 
   // In production, don't leak error details
-  if (process.env.NODE_ENV === "production" && statusCode === 500) {
+  if (EnvironmentConfig.IS_PRODUCTION && statusCode === 500) {
     message = "Internal Server Error";
   }
 
-  const errorResponse: any = {
+  // Base error response
+  const errorResponse: BaseErrorResponse = {
     success: false,
     message,
     timestamp,
     path: req.path
   };
 
-  // Add error details in development
-  if (process.env.NODE_ENV !== "production") {
-    errorResponse.details = details || err.message;
-    errorResponse.stack = err.stack;
+  // Add development-specific details
+  let developmentResponse: BaseErrorResponse | DevelopmentErrorResponse = errorResponse;
+  
+  if (!EnvironmentConfig.IS_PRODUCTION) {
+    developmentResponse = {
+      ...errorResponse,
+      details: details || err?.message,
+      stack: err?.stack,
+    };
+
+    // Add validation errors if they exist with optional chaining
+    if (err?.errors) {
+      (developmentResponse as DevelopmentErrorResponse).validationErrors = err.errors;
+      statusCode = 422; // Unprocessable Entity
+    }
   }
 
-  // Add validation errors if they exist
-  if (err.errors) {
-    errorResponse.validationErrors = err.errors;
-    statusCode = 422; // Unprocessable Entity
-  }
-
-  res.status(statusCode).json(errorResponse);
+  res.status(statusCode).json(developmentResponse);
 };
 
 app.use(errorHandler);

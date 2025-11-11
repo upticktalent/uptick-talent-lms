@@ -1,16 +1,20 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
+import { EnvironmentConfig } from '../constants/environment';
 
 const globalForPrisma = global as unknown as { 
   prisma: PrismaClient | undefined 
 };
 
+// Database log configuration based on environment
+const databaseLogConfig: (Prisma.LogLevel | Prisma.LogDefinition)[] = EnvironmentConfig.IS_DEVELOPMENT 
+  ? ['query', 'error', 'warn'] 
+  : ['error'];
+
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' 
-    ? ['query', 'error', 'warn'] 
-    : ['error'],
+  log: databaseLogConfig,
 });
 
-if (process.env.NODE_ENV !== 'production') {
+if (!EnvironmentConfig.IS_PRODUCTION) {
   globalForPrisma.prisma = prisma;
 }
 

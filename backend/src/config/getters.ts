@@ -36,6 +36,8 @@ const getAllowedOrigins = () => {
   return env.ALLOWED_ORIGINS;
 };
 
+
+
 export const getters = {
   geti18ns,
   getCurrentLanguage,

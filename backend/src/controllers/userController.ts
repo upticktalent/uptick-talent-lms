@@ -1,78 +1,115 @@
 import { Response } from 'express';
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient, Role, Prisma } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { AuthRequest } from '../middleware/auth';
+import { PASSWORD_CONSTANTS } from '../constants/password';
+import { Logger } from '../constants/logger';
+import { EnvironmentConfig } from '../constants/environment';
+import { responseObject } from '@utils';
+import { HttpStatusCode } from '@config';
+import { getMessage } from '../constants/i18n';
 
 const prisma = new PrismaClient();
 
-
-const generateRandomPassword = (length: number = 12): string => {
-  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+const generateRandomPassword = (length: number = PASSWORD_CONSTANTS.DEFAULT_LENGTH): string => {
   let password = '';
   for (let i = 0; i < length; i++) {
-    password += charset.charAt(Math.floor(Math.random() * charset.length));
+    password += PASSWORD_CONSTANTS.CHARSET.charAt(
+      Math.floor(Math.random() * PASSWORD_CONSTANTS.CHARSET.length)
+    );
   }
   return password;
 };
 
-
 export const createUser = async (req: AuthRequest, res: Response) => {
   try {
-    const { email, firstName, lastName, role = Role.STUDENT } = req.body;
+    const { email, firstName, lastName, role = Role.STUDENT, track } = req.body;
 
-    
-    if (!email || !firstName || !lastName) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email, first name, and last name are required'
+    // Split guards with clear individual messages using i18n
+    if (!email) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('USERS.ERRORS.EMAIL_REQUIRED')
+      });
+    }
+
+    if (!firstName) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('USERS.ERRORS.FIRST_NAME_REQUIRED')
+      });
+    }
+
+    if (!lastName) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('USERS.ERRORS.LAST_NAME_REQUIRED')
       });
     }
 
     if (![Role.STUDENT, Role.MENTOR].includes(role)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Role must be either STUDENT or MENTOR'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('USERS.ERRORS.ROLE_INVALID')
       });
     }
 
-   
     const existingUser = await prisma.user.findUnique({
       where: { email }
     });
 
     if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'User already exists with this email'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('USERS.ERRORS.EMAIL_EXISTS')
       });
     }
 
-   
     const randomPassword = generateRandomPassword();
-    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+    const hashedPassword = await bcrypt.hash(randomPassword, PASSWORD_CONSTANTS.SALT_ROUNDS);
 
-   
-    const userData: any = {
+    const baseUserData: Prisma.UserCreateInput = {
       email,
       password: hashedPassword,
       firstName,
       lastName,
-      role
+      role,
     };
 
-    
+    // Create the complete user data with conditional profile
+    let userData: Prisma.UserCreateInput;
+
     if (role === Role.STUDENT) {
-      userData.student = {
-        create: {
-          email,
-          firstName,
-          lastName
+      userData = {
+        ...baseUserData,
+        studentProfile: {
+          create: {
+            email,
+            firstName,
+            track: track || 'default-track',
+            lastName
+          }
         }
       };
     } else if (role === Role.MENTOR) {
-      userData.mentor = {
-        create: {}
+      userData = {
+        ...baseUserData,
+        mentorProfile: {
+          create: {
+            email,
+            firstName,
+            track: track || 'default-track',
+            lastName
+          }
+        }
       };
+    } else {
+      userData = baseUserData;
     }
 
     const user = await prisma.user.create({
@@ -83,29 +120,28 @@ export const createUser = async (req: AuthRequest, res: Response) => {
         firstName: true,
         lastName: true,
         role: true,
-        // emailVerified: true,
         createdAt: true,
-        student: role === Role.STUDENT,
-        mentor: role === Role.MENTOR
+        studentProfile: role === Role.STUDENT,
+        mentorProfile: role === Role.MENTOR
       }
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'User created successfully',
-      data: {
+    responseObject({
+      statusCode: HttpStatusCode.CREATED,
+      res,
+      message: getMessage('USERS.SUCCESS.CREATED'),
+      payload: {
         user,
-        temporaryPassword: process.env.NODE_ENV === 'development' ? randomPassword : undefined
-      },
-      note: process.env.NODE_ENV === 'production' 
-        ? 'Temporary password has been generated and should be sent to the user via secure channel'
-        : 'Save this temporary password as it will not be shown again'
+        temporaryPassword: EnvironmentConfig.IS_DEVELOPMENT ? randomPassword : undefined
+      }
     });
+    
   } catch (error) {
-    console.error('Create user error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error during user creation'
+    Logger.error('Create user error:', error);
+    responseObject({
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      res,
+      message: getMessage('USERS.ERRORS.INTERNAL_CREATION')
     });
   }
 };
@@ -117,9 +153,9 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
-    let where: any = {};
+    const where: Prisma.UserWhereInput = {};
     if (role && [Role.ADMIN, Role.STUDENT, Role.MENTOR].includes(role as Role)) {
-      where.role = role;
+      where.role = role as Role;
     }
 
     const [users, total] = await Promise.all([
@@ -131,12 +167,11 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
           firstName: true,
           lastName: true,
           role: true,
-          // emailVerified: true,
           createdAt: true,
           updatedAt: true,
-          admin: true,
-          mentor: true,
-          student: true
+          adminProfile: true,
+          mentorProfile: true,
+          studentProfile: true
         },
         orderBy: {
           createdAt: 'desc'
@@ -147,9 +182,11 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
       prisma.user.count({ where })
     ]);
 
-    res.json({
-      success: true,
-      data: {
+    responseObject({
+      statusCode: HttpStatusCode.OK,
+      res,
+      message: getMessage('USERS.SUCCESS.LIST_RETRIEVED'),
+      payload: {
         users,
         pagination: {
           page: Number(page),
@@ -160,10 +197,11 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Get all users error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
+    Logger.error('Get all users error:', error);
+    responseObject({
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      res,
+      message: getMessage('USERS.ERRORS.INTERNAL_SERVER')
     });
   }
 };
@@ -180,33 +218,36 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
         firstName: true,
         lastName: true,
         role: true,
-        // emailVerified: true,
         createdAt: true,
         updatedAt: true,
-        admin: true,
-        mentor: true,
-        student: true
+        adminProfile: true,
+        mentorProfile: true,
+        studentProfile: true
       }
     });
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: getMessage('USERS.ERRORS.NOT_FOUND')
       });
     }
 
-    res.json({
-      success: true,
-      data: {
+    responseObject({
+      statusCode: HttpStatusCode.OK,
+      res,
+      message: getMessage('USERS.SUCCESS.RETRIEVED'),
+      payload: {
         user
       }
     });
   } catch (error) {
-    console.error('Get user by id error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
+    Logger.error('Get user by id error:', error);
+    responseObject({
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      res,
+      message: getMessage('USERS.ERRORS.INTERNAL_SERVER')
     });
   }
 };
@@ -221,13 +262,14 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
     });
 
     if (!existingUser) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: getMessage('USERS.ERRORS.NOT_FOUND')
       });
     }
 
-    const updateData: any = {
+    const updateData: Prisma.UserUpdateInput = {
       updatedAt: new Date()
     };
 
@@ -246,24 +288,26 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
         firstName: true,
         lastName: true,
         role: true,
-        // emailVerified: true,
         createdAt: true,
         updatedAt: true
       }
     });
 
-    res.json({
-      success: true,
-      message: 'User updated successfully',
-      data: {
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      message: getMessage('USERS.SUCCESS.UPDATED'),
+      payload: {
         user
       }
     });
+    
   } catch (error) {
-    console.error('Update user error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
+    Logger.error('Update user error:', error);
+    responseObject({
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      res,
+      message: getMessage('USERS.ERRORS.INTERNAL_SERVER')
     });
   }
 };
@@ -277,14 +321,15 @@ export const resetUserPassword = async (req: AuthRequest, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: getMessage('USERS.ERRORS.NOT_FOUND')
       });
     }
 
     const newPassword = generateRandomPassword();
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(newPassword, PASSWORD_CONSTANTS.SALT_ROUNDS);
 
     await prisma.user.update({
       where: { id },
@@ -294,21 +339,21 @@ export const resetUserPassword = async (req: AuthRequest, res: Response) => {
       }
     });
 
-    res.json({
-      success: true,
-      message: 'Password reset successfully',
-      data: {
-        newPassword: process.env.NODE_ENV === 'development' ? newPassword : undefined
-      },
-      note: process.env.NODE_ENV === 'production'
-        ? 'New password has been generated and should be sent to the user via secure channel'
-        : 'Save this new password as it will not be shown again'
+    responseObject({
+      statusCode: HttpStatusCode.OK,
+      res,
+      message: getMessage('USERS.SUCCESS.PASSWORD_RESET'),
+      payload: {
+        newPassword: EnvironmentConfig.IS_DEVELOPMENT ? newPassword : undefined
+      }
     });
+   
   } catch (error) {
-    console.error('Reset user password error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
+    Logger.error('Reset user password error:', error);
+    responseObject({
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      res,
+      message: getMessage('USERS.ERRORS.INTERNAL_SERVER')
     });
   }
 };
@@ -322,16 +367,18 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: getMessage('USERS.ERRORS.NOT_FOUND')
       });
     }
 
     if (user.id === req.user.id) {
-      return res.status(400).json({
-        success: false,
-        message: 'You cannot delete your own account'
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('USERS.ERRORS.SELF_DELETE')
       });
     }
 
@@ -339,15 +386,17 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
       where: { id }
     });
 
-    res.json({
-      success: true,
-      message: 'User deleted successfully'
+    responseObject({
+      statusCode: HttpStatusCode.OK,
+      res,
+      message: getMessage('USERS.SUCCESS.DELETED')
     });
   } catch (error) {
-    console.error('Delete user error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
+    Logger.error('Delete user error:', error);
+    responseObject({
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      res,
+      message: getMessage('USERS.ERRORS.INTERNAL_SERVER')
     });
   }
 };

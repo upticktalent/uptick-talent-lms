@@ -1,0 +1,7 @@
+export const PASSWORD_CONSTANTS = {
+  CHARSET: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*',
+  DEFAULT_LENGTH: 12,
+  MIN_LENGTH: 8,
+  MAX_LENGTH: 32,
+  SALT_ROUNDS: 10, 
+} as const;

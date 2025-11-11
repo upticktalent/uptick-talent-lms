@@ -1,11 +1,13 @@
 import { PrismaClient, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import * as process from 'process';
+
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminEmail = 'amoosamson@gmail.com';
-  const adminPassword = 'Name@uptick1234';
+  const adminEmail = process.env.ADMIN_EMAIL || ''
+  const adminPassword = process.env.ADMIN_PASSWORD || '';
 
   try {
     
@@ -13,7 +15,6 @@ async function main() {
       where: { email: adminEmail },
     });
 
-    console.log('Existing admin:', existingAdmin);
     
     if (existingAdmin) {
       console.log('Admin user already exists.');
@@ -29,7 +30,7 @@ async function main() {
         firstName: 'Admin',
         lastName: 'User',
         role: Role.ADMIN,
-        admin: {
+        adminProfile: {
           create: {
             email: adminEmail,
             firstName: 'Admin',
@@ -38,10 +39,9 @@ async function main() {
         }
       },
       include: {
-        admin: true,
+        adminProfile: true,
       },
     });
-
     console.log('Default admin user created successfully:', adminUser);
   } catch (error) {
     console.error('Error creating admin user:', error);

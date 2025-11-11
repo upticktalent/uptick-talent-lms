@@ -1,4 +1,4 @@
-import { Env } from "@types";
+import { Env } from "../types";
 import dotenv from "dotenv";
 
 dotenv.config();
