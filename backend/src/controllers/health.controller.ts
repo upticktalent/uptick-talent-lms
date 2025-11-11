@@ -1,12 +1,15 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
+import { PrismaClient } from "@prisma/client";
 
-import mongoose from "mongoose";
+const prisma = new PrismaClient();
 
-// Basic health check
+/**
+ * Basic health check
+ */
 export const getHealth = async (
   _req: Request,
   res: Response,
-  _next: NextFunction,
+  _next: NextFunction
 ) => {
   res.status(200).json({
     success: true,
@@ -15,23 +18,29 @@ export const getHealth = async (
   });
 };
 
-// Detailed health check with DB and system info
+/**
+ * Detailed health check — includes DB status, uptime, and memory usage
+ */
 export const getDetailedHealth = async (
   _req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
-    const dbState = mongoose.connection.readyState;
-    const dbStatusMap: Record<number, string> = {
-      0: "disconnected",
-      1: "connected",
-      2: "connecting",
-      3: "disconnecting",
-    };
-    const dbStatus = dbStatusMap[dbState] ?? "unknown";
+    let dbStatus = "disconnected";
+    let isHealthy = false;
 
-    const isHealthy = dbState === 1;
+    // Check Prisma DB connection
+    try {
+      await prisma.$queryRaw`SELECT 1;`; // Quick lightweight DB ping
+      dbStatus = "connected";
+      isHealthy = true;
+    } catch (dbError) {
+      dbStatus = "disconnected";
+      isHealthy = false;
+    }
+
+    const memoryUsage = process.memoryUsage();
 
     res.status(isHealthy ? 200 : 503).json({
       success: isHealthy,
@@ -39,16 +48,10 @@ export const getDetailedHealth = async (
       uptime: process.uptime(),
       database: {
         status: dbStatus,
-        connected: dbState === 1,
       },
       memory: {
-        usage: process.memoryUsage(),
-        free: Math.round(
-          (process.memoryUsage().heapTotal - process.memoryUsage().heapUsed) /
-            1024 /
-            1024,
-        ),
-        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+        used: Math.round(memoryUsage.heapUsed / 1024 / 1024),
+        total: Math.round(memoryUsage.heapTotal / 1024 / 1024),
         unit: "MB",
       },
       environment: process.env.NODE_ENV || "development",
@@ -58,11 +61,13 @@ export const getDetailedHealth = async (
   }
 };
 
-// Liveness probe - checks if app is running
+/**
+ * Liveness probe — checks if app is alive
+ */
 export const getLiveness = async (
   _req: Request,
   res: Response,
-  _next: NextFunction,
+  _next: NextFunction
 ) => {
   res.status(200).json({
     status: "alive",
@@ -70,19 +75,27 @@ export const getLiveness = async (
   });
 };
 
-// Readiness probe - checks if app is ready to receive traffic
+/**
+ * Readiness probe — checks if the app is ready to receive traffic
+ */
 export const getReadiness = async (
   _req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
-    const dbState = mongoose.connection.readyState;
-    const isReady = dbState === 1;
+    let isReady = false;
+
+    try {
+      await prisma.$queryRaw`SELECT 1;`;
+      isReady = true;
+    } catch {
+      isReady = false;
+    }
 
     res.status(isReady ? 200 : 503).json({
       status: isReady ? "ready" : "not ready",
-      database: dbState === 1 ? "connected" : "not connected",
+      database: isReady ? "connected" : "not connected",
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

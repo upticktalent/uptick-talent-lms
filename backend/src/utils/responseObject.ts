@@ -1,11 +1,11 @@
-import type { ResponseObjectFn } from "@types";
+import type { ResponseObjectFn } from "../types";
 
 export const responseObject: ResponseObjectFn = (props) => {
   const {
     res,
     statusCode,
     message,
-    payload = undefined,
+    payload = null,
     status = false,
   } = props;
 

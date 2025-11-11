@@ -1,4 +1,4 @@
-import { Env } from "@types";
+import { Env } from "../types";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -9,4 +9,5 @@ export const env: Env = {
   APP_PORT: process.env.APP_PORT!,
   DATABASE_URI: process.env.DATABASE_URI!,
   ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
+  RESEND_API_KEY:process.env.RESEND_API_KEY!
 };

@@ -1,23 +1,57 @@
-import express, { ErrorRequestHandler } from "express";
-
+import express from "express";
 import cors from "cors";
-import { getters } from "@config";
+import { getters } from "./config";
 import { loadServices } from "./loader";
+// Routes
+import router from "./routes/applicants.routes";
+// Middleware
+import errorHandlerMiddleWare from "./Middlware/ErrorHandlerMiddleware";
 
-// Add more route imports as needed
 
 const app = express();
 
-const corsOptions = {
-  origin:
-    process.env.NODE_ENV === "production" ? getters.getAllowedOrigins() : "*",
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  credentials: true,
+const getProductionOrigins = (): string => {
+  return getters.getAllowedOrigins();
 };
 
-app.use(cors(corsOptions));
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+].filter(Boolean)
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, 
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  })
+);
+
+
+
+
+
+// const corsOptions = {
+//   origin:
+//     process.env.NODE_ENV === "production" ? getters.getAllowedOrigins() : "*",
+//   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+//   credentials: true,
+// };
+
+// app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// routes
+app.use('/api/v1/applicants', router)    
 
 // Register routes via loader
 loadServices(app);
@@ -30,22 +64,8 @@ app.use((_req, res) => {
   });
 });
 
-// Global error handler - must be last
-const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
-  console.error("🔥 Error:", err.stack || err.message || err);
 
-  const message =
-    process.env.NODE_ENV === "production"
-      ? "Internal Server Error"
-      : err.message;
-
-  res.status(err.status || 500).json({
-    success: false,
-    message,
-    ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
-  });
-};
-
-app.use(errorHandler);
+// global error handler
+app.use(errorHandlerMiddleWare);
 
 export default app;

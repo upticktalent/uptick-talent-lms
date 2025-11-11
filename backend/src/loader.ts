@@ -1,8 +1,8 @@
-import { HttpStatusCode, getters } from "@config";
-import { joinUrls, responseObject } from "@utils";
+import { HttpStatusCode, getters } from "./config";
+import { joinUrls, responseObject } from "./utils";
 
 import type { Express } from "express";
-import { constants } from "@constants";
+import { constants } from "./constants";
 import routers from "./routes";
 
 const servicesLoader = [

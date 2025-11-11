@@ -4,4 +4,5 @@ export type Env = {
   APP_PORT: string;
   DATABASE_URI: string;
   ALLOWED_ORIGINS: string;
+  RESEND_API_KEY:string;
 };
