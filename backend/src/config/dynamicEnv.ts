@@ -8,6 +8,6 @@ export const env: Env = {
   CURRENT_LANGUAGE: process.env.CURRENT_LANGUAGE! as Env["CURRENT_LANGUAGE"],
   APP_PORT: process.env.APP_PORT!,
   DATABASE_URI: process.env.DATABASE_URI!,
-  ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
+  ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS?.split(",") || [],
   RESEND_API_KEY:process.env.RESEND_API_KEY!
 };

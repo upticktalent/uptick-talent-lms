@@ -6,7 +6,6 @@ import { env } from "../config/dynamicEnv";
 const resend = new Resend(env.RESEND_API_KEY);
 export const sendApplicationEmail = async (to: string, name: string) => {
   if (!env.RESEND_API_KEY) {
-    Logger.error("Missing RESEND_API_KEY");
      throw new Error("RESEND_API_KEY is required");
   }
 
@@ -32,7 +31,6 @@ export const sendApplicationEmail = async (to: string, name: string) => {
       throw error;
     }
 
-    Logger.log("Email sent:", data?.id);
     return true;
   };
 

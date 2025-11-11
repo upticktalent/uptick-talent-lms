@@ -1,28 +1,26 @@
 import express from "express";
 import cors from "cors";
-import { getters } from "./config";
+// import { getters } from "./config";
 import { loadServices } from "./loader";
 // Routes
 import router from "./routes/applicants.routes";
 // Middleware
 import errorHandlerMiddleWare from "./Middlware/ErrorHandlerMiddleware";
+import { ENDPOINTS } from "./constants/endpoints";
+import { env } from "./config/dynamicEnv";
 
 
 const app = express();
 
-const getProductionOrigins = (): string => {
-  return getters.getAllowedOrigins();
-};
+// const getProductionOrigins = (): string => {
+//   return getters.getAllowedOrigins()
+// };
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:3001",
-].filter(Boolean)
+const allowedOrigins = env.ALLOWED_ORIGINS
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl)
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
@@ -51,7 +49,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // routes
-app.use('/api/v1/applicants', router)    
+app.use(ENDPOINTS.APPLICANTS, router)    
 
 // Register routes via loader
 loadServices(app);

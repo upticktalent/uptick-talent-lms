@@ -1,20 +1,31 @@
 import { Request, Response, NextFunction } from "express";
 import { CustomApiError } from "../Errors/index";
 import { HttpStatusCode } from "../config";
-const errorHandlerMiddleWare = (err: Error, req: Request, res: Response, next: NextFunction) => {
+import { responseObject } from "../utils/responseObject";
 
-
+const errorHandlerMiddleWare = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   if (err instanceof CustomApiError) {
-    return res.status(err.statusCode).json({ 
-      msg: err.message 
+    return responseObject({
+      res,
+      statusCode: err.statusCode,
+      message: err.message,
+      payload: null,
+      status: false,
     });
   }
 
-  // fallback for other errors
-  console.error(err);
-  return res
-    .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-    .send("something went wrong, try again later");
+  return responseObject({
+    res,
+    statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+    message: "Something went wrong, try again later",
+    payload: null,
+    status: false,
+  });
 };
 
 export default errorHandlerMiddleWare;

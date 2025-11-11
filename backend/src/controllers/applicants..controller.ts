@@ -122,7 +122,7 @@ export const getAllApplicants = async (
         createdAt: true,
       },
     });
-    Logger.log('all applicants:', applicants)
+    
 
     return responseObject({
       res,
