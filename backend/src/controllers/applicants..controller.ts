@@ -77,7 +77,7 @@ export const createApplicant = async (
       email,
       `${firstName} ${lastName}`,
     );
-    console.log(emailSent ? "Email Sent!" : "Email failed");
+    Logger.log(emailSent ? "Email Sent!" : "Email failed");
 
     return responseObject({
       res,
