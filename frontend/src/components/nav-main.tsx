@@ -20,14 +20,12 @@ import { getters, LangKey } from '@/lib/config/i18n';
 import { NavMainProps } from '@/types/nav';
 
 export function NavMain({ items }: NavMainProps) {
-  const lang = useAppSelector(state => state.settings.lag) as LangKey;
+  const lang = useAppSelector(state => state.settings.lang) as LangKey;
   const data = getters.geti18ns()[lang].sidebarContent;
-
-  console.log(data);
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>{data.SidebarGroup.title}</SidebarGroupLabel>
+      <SidebarGroupLabel>{data.sidebarGroup.title}</SidebarGroupLabel>
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton tooltip="Dashboard">
