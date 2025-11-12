@@ -1,4 +1,4 @@
-import { routeCreator } from "@utils";
+import { routeCreator } from "../utils";
 
 export const urls = {
   // Health routes

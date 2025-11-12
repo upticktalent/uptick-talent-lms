@@ -1,14 +1,13 @@
-import { HttpStatusCode, getters } from "@config";
-import { joinUrls, responseObject } from "@utils";
-
+import { HttpStatusCode, getters } from "./config";
+import { joinUrls, responseObject } from "./utils";
 import type { Express } from "express";
-import { constants } from "@constants";
-import routers from "./routes";
+import { constants } from "./constants";
+import healthRoutes from "./routes/health.routes";
 
 const servicesLoader = [
   {
     path: joinUrls(constants.urls.health.entry().path),
-    handler: [routers.health],
+    handler: [healthRoutes],
   },
 ];
 

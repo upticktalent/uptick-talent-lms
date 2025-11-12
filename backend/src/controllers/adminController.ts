@@ -1,7 +1,6 @@
-import { Response } from 'express';
+import { RequestHandler } from 'express';
 import { PrismaClient, Role, Track, ApplicationStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import { AuthRequest } from '../middleware/auth';
 import { emailService } from '../services/email.service';
 import { Logger } from '../constants/logger';
 import { responseObject } from '@utils';
@@ -23,7 +22,7 @@ const generateRandomPassword = (length: number = PASSWORD_CONSTANTS.DEFAULT_LENG
 };
 
 // Cohort Management
-export const createCohort = async (req: AuthRequest, res: Response) => {
+export const createCohort: RequestHandler = async (req, res) => {
   try {
     const { name, track, startDate, endDate, description } = req.body;
 
@@ -71,7 +70,7 @@ export const createCohort = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getCohorts = async (req: AuthRequest, res: Response) => {
+export const getCohorts: RequestHandler = async (req, res) => {
   try {
     const { track, active } = req.query;
 
@@ -123,7 +122,7 @@ export const getCohorts = async (req: AuthRequest, res: Response) => {
 };
 
 // User Creation with Email
-export const createStudentAccount = async (req: AuthRequest, res: Response) => {
+export const createStudentAccount: RequestHandler = async (req, res) => {
   try {
     const { email, firstName, lastName, track, cohortId } = req.body;
 
@@ -220,7 +219,7 @@ export const createStudentAccount = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const createMentorAccount = async (req: AuthRequest, res: Response) => {
+export const createMentorAccount: RequestHandler = async (req, res) => {
   try {
     const { email, firstName, lastName, expertise, track, bio } = req.body;
 
@@ -319,7 +318,7 @@ export const createMentorAccount = async (req: AuthRequest, res: Response) => {
 };
 
 // Course Management
-export const createCourse = async (req: AuthRequest, res: Response) => {
+export const createCourse: RequestHandler = async (req, res) => {
   try {
     const { title, description, track, cohortId, mentorId } = req.body;
 
@@ -368,7 +367,7 @@ export const createCourse = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getCourses = async (req: AuthRequest, res: Response) => {
+export const getCourses: RequestHandler = async (req, res) => {
   try {
     const { track, cohortId } = req.query;
 
@@ -410,7 +409,7 @@ export const getCourses = async (req: AuthRequest, res: Response) => {
 };
 
 // Get Users by Track
-export const getUsersByTrack = async (req: AuthRequest, res: Response) => {
+export const getUsersByTrack: RequestHandler = async (req, res) => {
   try {
     const { track, role } = req.query;
 
@@ -481,7 +480,7 @@ export const getUsersByTrack = async (req: AuthRequest, res: Response) => {
 };
 
 // Email Applicants
-export const emailApplicants = async (req: AuthRequest, res: Response) => {
+export const emailApplicants: RequestHandler = async (req, res) => {
   try {
     const { applicantIds, subject, message, status, notes } = req.body;
 
@@ -553,7 +552,7 @@ export const emailApplicants = async (req: AuthRequest, res: Response) => {
 };
 
 // Get all applicants with filtering
-export const getApplicants = async (req: AuthRequest, res: Response) => {
+export const getApplicants: RequestHandler = async (req, res) => {
   try {
     const {
       status,
@@ -639,7 +638,7 @@ export const getApplicants = async (req: AuthRequest, res: Response) => {
 };
 
 // Send assessment/task to selected applicants
-export const sendAssessment = async (req: AuthRequest, res: Response) => {
+export const sendAssessment: RequestHandler = async (req, res) => {
   try {
     const { applicantIds, assessmentLink, dueDate, instructions } = req.body;
 
@@ -743,7 +742,7 @@ export const sendAssessment = async (req: AuthRequest, res: Response) => {
 };
 
 // Track assessment progress
-export const getAssessmentProgress = async (req: AuthRequest, res: Response) => {
+export const getAssessmentProgress: RequestHandler = async (req, res) => {
   try {
     const { track, status, page = 1, limit = 10 } = req.query;
 
@@ -821,7 +820,7 @@ export const getAssessmentProgress = async (req: AuthRequest, res: Response) => 
 };
 
 // Evaluate assessment and move to next stage
-export const evaluateAssessment = async (req: AuthRequest, res: Response) => {
+export const evaluateAssessment: RequestHandler = async (req, res) => {
   try {
     const { applicantId, score, feedback, passed, nextStage } = req.body;
 
@@ -892,7 +891,7 @@ export const evaluateAssessment = async (req: AuthRequest, res: Response) => {
 };
 
 // Create student account from successful applicant
-export const createStudentFromApplicant = async (req: AuthRequest, res: Response) => {
+export const createStudentFromApplicant: RequestHandler = async (req, res) => {
   try {
     const { applicantId, cohortId } = req.body;
 
@@ -988,7 +987,7 @@ export const createStudentFromApplicant = async (req: AuthRequest, res: Response
 };
 
 // Bulk create student accounts from successful applicants
-export const bulkCreateStudents = async (req: AuthRequest, res: Response) => {
+export const bulkCreateStudents: RequestHandler = async (req, res) => {
   try {
     const { applicantIds, cohortId } = req.body;
 
@@ -1090,7 +1089,7 @@ export const bulkCreateStudents = async (req: AuthRequest, res: Response) => {
 };
 
 // Get admin dashboard statistics
-export const getAdminDashboard = async (req: AuthRequest, res: Response) => {
+export const getAdminDashboard: RequestHandler = async (req, res) => {
   try {
     const [
       totalApplicants,
@@ -1159,7 +1158,7 @@ export const getAdminDashboard = async (req: AuthRequest, res: Response) => {
 };
 
 // Update applicant status
-export const updateApplicantStatus = async (req: AuthRequest, res: Response) => {
+export const updateApplicantStatus: RequestHandler = async (req, res) => {
   try {
     const { applicantId, status, notes } = req.body;
 

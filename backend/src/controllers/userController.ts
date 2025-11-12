@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Response, RequestHandler } from 'express';
 import { PrismaClient, Role, Prisma } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { AuthRequest } from '../middleware/auth';
@@ -21,7 +21,7 @@ const generateRandomPassword = (length: number = PASSWORD_CONSTANTS.DEFAULT_LENG
   return password;
 };
 
-export const createUser = async (req: AuthRequest, res: Response) => {
+export const createUser: RequestHandler = async (req, res) => {
   try {
     const { email, firstName, lastName, role = Role.STUDENT, track } = req.body;
 
@@ -146,7 +146,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getAllUsers = async (req: AuthRequest, res: Response) => {
+export const getAllUsers: RequestHandler = async (req, res) => {
   try {
     const { role, page = 1, limit = 10 } = req.query;
     
@@ -206,7 +206,7 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getUserById = async (req: AuthRequest, res: Response) => {
+export const getUserById: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -252,7 +252,7 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updateUser = async (req: AuthRequest, res: Response) => {
+export const updateUser: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
     const { firstName, lastName, role } = req.body;
@@ -312,7 +312,7 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const resetUserPassword = async (req: AuthRequest, res: Response) => {
+export const resetUserPassword: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -358,7 +358,7 @@ export const resetUserPassword = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const deleteUser = async (req: AuthRequest, res: Response) => {
+export const deleteUser: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -374,7 +374,9 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    if (user.id === req.user.id) {
+    const authReq = req as AuthRequest;
+
+    if (user.id === authReq.user.id) {
       return responseObject({
         res,
         statusCode: HttpStatusCode.BAD_REQUEST,

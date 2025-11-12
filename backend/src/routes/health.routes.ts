@@ -3,7 +3,7 @@ import {
   getHealth,
   getLiveness,
   getReadiness,
-} from "@controllers/health.controller";
+} from "../controllers/health.controller";
 
 import { Router } from "express";
 import { urls } from "../constants/urls";

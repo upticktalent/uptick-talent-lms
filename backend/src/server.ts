@@ -1,34 +1,31 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
 import dotenv from 'dotenv';
-import routes from './routes';
+import express from 'express';
+import { MainRouter } from './routes';
 import { setupSwagger } from './config/swagger';
 // Load env vars
 dotenv.config();
+import app from "./app";
+import { getters } from "./config";
 
-const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Security middleware
-app.use(helmet());
-
-// CORS middleware
-app.use(cors());
+const startServer = async () => {
+  try {
+    app.listen(PORT, () => {
+      console.log(`${getters.geti18ns().LOGS.RUNNING_APP} ${PORT}`);
+      console.log(`🚀 Server: http://localhost:${PORT}`);
+    });
+  } catch (error) { 
+    console.error("❌ Failed to start server:", error);
+    process.exit(1);
+  }
+};
 
 // Setup Swagger documentation
 setupSwagger(app);
 
-// Logging middleware
-app.use(morgan('combined'));
-
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
-
 // Routes
-app.use('/api/v1', routes);
+app.use('/api/v1', MainRouter);
 
 // Health check route
 // app.get('/health', (req, res) => {
@@ -57,6 +54,5 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-app.listen(PORT, () => {
+startServer();
 
-});

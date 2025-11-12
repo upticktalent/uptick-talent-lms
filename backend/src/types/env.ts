@@ -3,5 +3,7 @@ export type Env = {
   CURRENT_LANGUAGE: "en";
   APP_PORT: string;
   DATABASE_URI: string;
-  ALLOWED_ORIGINS: string;
+  ALLOWED_ORIGINS: string[];
+  RESEND_API_KEY:string;
+  
 };

@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, RequestHandler } from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
@@ -79,10 +79,11 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const getMe = async (req: AuthRequest, res: Response) => {
+export const getMe: RequestHandler = async (req, res) => {
   try {
+    const authReq = req as AuthRequest;
     const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
+      where: { id: authReq.user.id },
       select: {
         id: true,
         email: true,
@@ -123,10 +124,10 @@ export const getMe = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updateProfile = async (req: AuthRequest, res: Response) => {
+export const updateProfile: RequestHandler = async (req, res) => {
   try {
     const { firstName, lastName } = req.body;
-    const userId = req.user.id;
+    const userId = (req as AuthRequest).user.id;
 
     if (!firstName || !lastName) {
       return responseObject({
@@ -182,10 +183,10 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const changePassword = async (req: AuthRequest, res: Response) => {
+export const changePassword: RequestHandler = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    const userId = req.user.id;
+    const userId = (req as AuthRequest).user.id;
 
     if (!currentPassword || !newPassword) {
       return responseObject({

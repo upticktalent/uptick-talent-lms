@@ -7,6 +7,10 @@ import { getters } from "@config";
 import { loadServices } from "./loader";
 import { Logger } from "./constants/logger";
 import { EnvironmentConfig } from "./constants/environment";
+import router from "./routes/applicants.routes";
+import errorHandlerMiddleWare from "./Middlware/ErrorHandlerMiddleware";
+import { ENDPOINTS } from "./constants/endpoints";
+import { env } from "./config/dynamicEnv";
 import { responseObject } from '@utils';
 import { HttpStatusCode } from '@config';
 import { getMessage } from './constants/i18n';
@@ -76,6 +80,50 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   Logger.log(`${new Date().toISOString()} - ${req.method} ${req.path} - IP: ${req.ip}`);
   next();
 });
+
+
+
+
+
+
+// const getProductionOrigins = (): string => {
+//   return getters.getAllowedOrigins()
+// };
+
+const allowedOrigins = env.ALLOWED_ORIGINS
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, 
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  })
+);
+
+
+
+
+
+// const corsOptions = {
+//   origin:
+//     process.env.NODE_ENV === "production" ? getters.getAllowedOrigins() : "*",
+//   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+//   credentials: true,
+// };
+
+// app.use(cors(corsOptions));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// routes
+app.use(ENDPOINTS.APPLICANTS, router)    
 
 // Register routes via loader
 loadServices(app);
@@ -188,5 +236,8 @@ const errorHandler: ErrorRequestHandler = (err: PrismaError, req: Request, res: 
 };
 
 app.use(errorHandler);
+
+// global error handler
+app.use(errorHandlerMiddleWare);
 
 export default app;

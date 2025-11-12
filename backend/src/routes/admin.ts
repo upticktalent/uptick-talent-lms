@@ -19,38 +19,54 @@ import {
   updateApplicantStatus
 } from '../controllers/adminController';
 import { urls } from '../constants/urls';
+import { Role } from '@prisma/client';
+import {
+  validateCreateCohort,
+  validateCreateStudent,
+  validateCreateMentor,
+  validateCreateCourse,
+  validateEmailApplicants,
+  validateSendAssessment,
+  validateEvaluateAssessment,
+  validateUpdateApplicantStatus,
+  validateCreateStudentFromApplicant,
+  validateBulkCreateStudents,
+  checkCohortExists,
+  checkMentorExists
+} from '../middleware/adminValidation';
+import { validatePagination } from '../middleware/validation';
 
 const router = express.Router();
 
 // All routes require admin authentication
-router.use(authenticate, authorize('ADMIN'));
+router.use(authenticate, authorize(Role.ADMIN));
 
-// Cohort routes
-router.post(urls.admin.createCohort().path, createCohort);
+// Cohort routes with validation
+router.post(urls.admin.createCohort().path, validateCreateCohort, createCohort);
 router.get(urls.admin.cohorts().path, getCohorts);
 
-// User creation routes
-router.post(urls.admin.createStudent().path, createStudentAccount);
-router.post(urls.admin.createMentor().path, createMentorAccount);
+// User creation routes with validation
+router.post(urls.admin.createStudent().path, validateCreateStudent, checkCohortExists, createStudentAccount);
+router.post(urls.admin.createMentor().path, validateCreateMentor, createMentorAccount);
 
-// Course routes
-router.post(urls.admin.createCourse().path, createCourse);
+// Course routes with validation
+router.post(urls.admin.createCourse().path, validateCreateCourse, checkCohortExists, checkMentorExists, createCourse);
 router.get(urls.admin.courses().path, getCourses);
 
 // User management routes
 router.get('/users/track', getUsersByTrack);
 
-// Applicant management routes
-router.get(urls.admin.applicants().path, getApplicants);
-router.post(urls.admin.emailApplicants().path, emailApplicants);
-router.post(urls.admin.sendAssessment().path, sendAssessment);
-router.get(urls.admin.assessmentProgress().path, getAssessmentProgress);
-router.post(urls.admin.evaluateAssessment().path, evaluateAssessment);
-router.put(urls.admin.updateApplicantStatus().path, updateApplicantStatus);
+// Applicant management routes with validation
+router.get(urls.admin.applicants().path, validatePagination, getApplicants);
+router.post(urls.admin.emailApplicants().path, validateEmailApplicants, emailApplicants);
+router.post(urls.admin.sendAssessment().path, validateSendAssessment, sendAssessment);
+router.get(urls.admin.assessmentProgress().path, validatePagination, getAssessmentProgress);
+router.post(urls.admin.evaluateAssessment().path, validateEvaluateAssessment, evaluateAssessment);
+router.put(urls.admin.updateApplicantStatus().path, validateUpdateApplicantStatus, updateApplicantStatus);
 
-// Student creation from applicants
-router.post(urls.admin.createStudentFromApplicant().path, createStudentFromApplicant);
-router.post(urls.admin.bulkCreateStudents().path, bulkCreateStudents);
+// Student creation from applicants with validation
+router.post(urls.admin.createStudentFromApplicant().path, validateCreateStudentFromApplicant, checkCohortExists, createStudentFromApplicant);
+router.post(urls.admin.bulkCreateStudents().path, validateBulkCreateStudents, checkCohortExists, bulkCreateStudents);
 
 // Dashboard
 router.get(urls.admin.dashboard().path, getAdminDashboard);
