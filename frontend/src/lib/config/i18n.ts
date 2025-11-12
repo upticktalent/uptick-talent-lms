@@ -1,3 +1,5 @@
+import { ClipboardList } from 'lucide-react';
+
 const i18nData = {
   en: {
     welcome: 'Welcome',
@@ -20,6 +22,41 @@ const i18nData = {
         login: 'Login',
         back: 'Back to homepage',
       },
+    },
+    sidebarContent: {
+      user: {
+        name: 'Admin',
+        email: 'admin@example.com',
+        avatar: '/avatars/shadcn.jpg',
+        notification: 'Notifications',
+        logout: 'Log out',
+      },
+      sidebarGroup: {
+        title: 'Platform',
+      },
+      dashboard: 'Dashboard',
+      applications: [
+        {
+          title: 'Applications',
+          url: '#',
+          icon: ClipboardList,
+          isActive: true,
+          items: [
+            {
+              title: 'Placeholder-1',
+              url: '#',
+            },
+            {
+              title: 'Placeholder-2',
+              url: '#',
+            },
+            {
+              title: 'Placeholder-3',
+              url: '#',
+            },
+          ],
+        },
+      ],
     },
   },
   es: {
