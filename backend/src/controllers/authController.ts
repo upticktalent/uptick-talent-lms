@@ -7,7 +7,7 @@ import { sendPasswordResetEmail, sendPasswordChangedEmail } from '../utils/Email
 import { Logger } from '../constants/logger';
 import { responseObject } from '@utils';
 import { HttpStatusCode } from '@config';
-import { getMessage } from '../constants/i18n';
+import { getMessage } from '../utils/i188n';
 import { EnvironmentConfig } from '../constants/environment';
 
 const prisma = new PrismaClient();

@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../lib/db';
 import { responseObject } from '@utils';
 import { HttpStatusCode } from '@config';
-import { getMessage } from '../constants/i18n';
+import { getMessage } from '../utils/i188n';
 import { Track } from '@prisma/client';
 
 const isValidUuid = (value?: string): boolean => {
@@ -34,8 +34,24 @@ export const validateCreateCohort = (req: Request, res: Response, next: NextFunc
 export const validateCreateStudent = (req: Request, res: Response, next: NextFunction) => {
   const { email, firstName, lastName, track } = req.body;
 
-  if (!email || !firstName || !lastName || !ensureTrack(track)) {
-    return sendBadRequest(res, getMessage('ADMIN.ERRORS.STUDENT_REQUIRED_FIELDS'));
+  if (!email) {
+    return sendBadRequest(res, getMessage('ADMINERRORS.EMAIL_REQUIRED'));
+  }
+
+  if (!firstName) {
+    return sendBadRequest(res, getMessage('ADMINERRORS.FIRST_NAME_REQUIRED'));
+  }
+
+  if (!lastName) {
+    return sendBadRequest(res, getMessage('ADMINERRORS.LAST_NAME_REQUIRED'));
+  }
+
+  if (!track) {
+    return sendBadRequest(res, getMessage('ADMINERRORS.TRACK_REQUIRED'));
+  }
+
+  if (!ensureTrack(track)) {
+    return sendBadRequest(res, getMessage('ADMINERRORS.INVALID_TRACK'));
   }
 
   next();
@@ -44,8 +60,16 @@ export const validateCreateStudent = (req: Request, res: Response, next: NextFun
 export const validateCreateMentor = (req: Request, res: Response, next: NextFunction) => {
   const { email, firstName, lastName } = req.body;
 
-  if (!email || !firstName || !lastName) {
-    return sendBadRequest(res, getMessage('ADMIN.ERRORS.MENTOR_REQUIRED_FIELDS'));
+  if (!email) {
+    return sendBadRequest(res, getMessage('ADMINERRORS.EMAIL_REQUIRED'));
+  }
+
+  if (!firstName) {
+    return sendBadRequest(res, getMessage('ADMINERRORS.FIRST_NAME_REQUIRED'));
+  }
+
+  if (!lastName) {
+    return sendBadRequest(res, getMessage('ADMINERRORS.LAST_NAME_REQUIRED'));
   }
 
   next();

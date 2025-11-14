@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { responseObject } from '@utils';
 import { HttpStatusCode } from '@config';
-import { getMessage } from '../constants/i18n';
+import { getMessage } from '../utils/i188n';
 import { Role } from '@prisma/client';
 
 export const validateCreateUser = (req: Request, res: Response, next: NextFunction) => {

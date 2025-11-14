@@ -13,7 +13,8 @@ import { ENDPOINTS } from "./constants/endpoints";
 import { env } from "./config/dynamicEnv";
 import { responseObject } from '@utils';
 import { HttpStatusCode } from '@config';
-import { getMessage } from './constants/i18n';
+import { getMessage } from './utils/i188n';
+
 const app = express();
 
 // Security middleware
@@ -24,13 +25,12 @@ app.use(helmet({
 // Compression middleware
 app.use(compression());
 
-// Rate limiting - Fixed message format
+// Rate limiting - Using global HttpStatusCode
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: EnvironmentConfig.IS_PRODUCTION ? 100 : 1000, // limit each IP
-
   message: {
-    status: 429, 
+    status: HttpStatusCode.TOO_MANY_REQUESTS,
     success: false,
     message: "Too many requests from this IP, please try again later"
   },
@@ -81,16 +81,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-
-
-
-
-
-// const getProductionOrigins = (): string => {
-//   return getters.getAllowedOrigins()
-// };
-
-const allowedOrigins = env.ALLOWED_ORIGINS
+const allowedOrigins = env.ALLOWED_ORIGINS;
 
 app.use(
   cors({
@@ -107,30 +98,15 @@ app.use(
   })
 );
 
-
-
-
-
-// const corsOptions = {
-//   origin:
-//     process.env.NODE_ENV === "production" ? getters.getAllowedOrigins() : "*",
-//   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-//   credentials: true,
-// };
-
-// app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// routes
-app.use(ENDPOINTS.APPLICANTS, router)    
+// Routes
+app.use(ENDPOINTS.APPLICANTS, router);
 
 // Register routes via loader
 loadServices(app);
 
-// 404 handler - must be after all routes
+// 404 handler - Using global HttpStatusCode
 app.use((_req: Request, res: Response) => {
-  res.status(404).json({
+  res.status(HttpStatusCode.NOT_FOUND).json({
     success: false,
     message: "Route not found",
     path: _req.path
@@ -174,36 +150,48 @@ const errorHandler: ErrorRequestHandler = (err: PrismaError, req: Request, res: 
     body: req.body
   });
 
-  // Prisma specific error handling
-  let statusCode = err?.status || 500;
-  let message = 'Internal Server Error';
+  // Prisma specific error handling with global status codes
+  let statusCode = err?.status || HttpStatusCode.INTERNAL_SERVER_ERROR;
+  let message = getMessage('errors.internalServer');
   let details: string | undefined = undefined;
 
   // Handle Prisma errors with optional chaining
   if (err?.code) {
     switch (err.code) {
       case 'P2002':
-        statusCode = 409;
+        statusCode = HttpStatusCode.CONFLICT;
         message = 'Resource already exists with provided unique constraint';
         details = err.meta?.target?.join(', ');
         break;
       case 'P2025':
-        statusCode = 404;
+        statusCode = HttpStatusCode.NOT_FOUND;
         message = 'Resource not found';
         break;
       case 'P2003':
-        statusCode = 400;
+        statusCode = HttpStatusCode.BAD_REQUEST;
         message = 'Invalid foreign key reference';
         break;
       default:
         // Other Prisma errors
-        statusCode = 400;
+        statusCode = HttpStatusCode.BAD_REQUEST;
         message = 'Database operation failed';
     }
   }
 
-  // In production, don't leak error details
-  if (EnvironmentConfig.IS_PRODUCTION && statusCode === 500) {
+  // Handle common HTTP errors
+  if (err.name === 'ValidationError') {
+    statusCode = HttpStatusCode.UNPROCESSABLE_ENTITY;
+    message = 'Validation failed';
+  } else if (err.name === 'UnauthorizedError') {
+    statusCode = HttpStatusCode.UNAUTHORIZED;
+    message = 'Unauthorized access';
+  } else if (err.name === 'ForbiddenError') {
+    statusCode = HttpStatusCode.FORBIDDEN;
+    message = 'Access forbidden';
+  }
+
+  // In production, don't leak error details for server errors
+  if (EnvironmentConfig.IS_PRODUCTION && statusCode >= HttpStatusCode.INTERNAL_SERVER_ERROR) {
     message = "Internal Server Error";
   }
 
@@ -225,19 +213,22 @@ const errorHandler: ErrorRequestHandler = (err: PrismaError, req: Request, res: 
       stack: err?.stack,
     };
 
-    // Add validation errors if they exist with optional chaining
     if (err?.errors) {
       (developmentResponse as DevelopmentErrorResponse).validationErrors = err.errors;
-      statusCode = 422; // Unprocessable Entity
+      statusCode = HttpStatusCode.UNPROCESSABLE_ENTITY;
     }
   }
+  responseObject({ 
+        res,
+        statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+        message: getMessage('Internal server error')
+      });
 
-  res.status(statusCode).json(developmentResponse);
 };
 
 app.use(errorHandler);
 
-// global error handler
+// Global error handler middleware
 app.use(errorHandlerMiddleWare);
 
 export default app;

@@ -9,6 +9,9 @@ export const urls = {
     liveness: () => "/liveness",
     readiness: () => "/readiness",
   },
+  user_management:{
+    getAll: ()=> routeCreator('all')
+  },
   
   // Feature routes
   features: {
@@ -57,7 +60,12 @@ export const urls = {
     createStudentFromApplicant: () => routeCreator("admin/students/create-from-applicant"),
     bulkCreateStudents: () => routeCreator("admin/students/bulk-create"),
     dashboard: () => routeCreator("admin/dashboard"),
+    
   },
+  applicant: {
+interview: () => routeCreator('/applicants/interview/evaluate'), 
+    schedule:  () => routeCreator('/applicants/interview/schedule')
+  }
 };
 
 // Direct string constants (alternative approach)
@@ -91,8 +99,15 @@ export const ROUTES = {
     CREATE_STUDENT_FROM_APPLICANT: '/admin/students/create-from-applicant',
     BULK_CREATE_STUDENTS: '/admin/students/bulk-create',
     DASHBOARD: '/admin/dashboard',
+   
+
+  },
+  APPLICANT: {
+ INTERVIEW: '/applicants/interview/evaluate',
+    SCHEDULE: '/applicants/interview/schedule'
   },
   HEALTH: '/health',
+  USER_MANAGEMENT: '/users/track'
 } as const;
 
 // Helper function to get full API URLs

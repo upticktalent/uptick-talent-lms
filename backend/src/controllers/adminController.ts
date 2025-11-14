@@ -5,7 +5,8 @@ import { emailService } from '../services/email.service';
 import { Logger } from '../constants/logger';
 import { responseObject } from '@utils';
 import { HttpStatusCode } from '@config';
-import { getMessage } from '../constants/i18n';
+import { getMessage } from '../utils/i188n';
+
 import { EnvironmentConfig } from '../constants/environment';
 import { PASSWORD_CONSTANTS } from '../constants/password';
 
@@ -820,9 +821,79 @@ export const getAssessmentProgress: RequestHandler = async (req, res) => {
 };
 
 // Evaluate assessment and move to next stage
+// export const evaluateAssessment: RequestHandler = async (req, res) => {
+//   try {
+//     const { applicantId, score, feedback, passed, nextStage } = req.body;
+
+//     if (!applicantId || passed === undefined) {
+//       return responseObject({
+//         res,
+//         statusCode: HttpStatusCode.BAD_REQUEST,
+//         message: getMessage('ADMIN.ERRORS.EVALUATION_REQUIRED_FIELDS')
+//       });
+//     }
+
+//     const applicant = await prisma.applicant.findUnique({
+//       where: { id: applicantId },
+//       include: { assessment: true }
+//     });
+
+//     if (!applicant || !applicant.assessment) {
+//       return responseObject({
+//         res,
+//         statusCode: HttpStatusCode.NOT_FOUND,
+//         message: getMessage('ADMIN.ERRORS.APPLICANT_ASSESSMENT_NOT_FOUND')
+//       });
+//     }
+
+//     // Update assessment with evaluation
+//     await prisma.assessment.update({
+//       where: { applicantId },
+//       data: {
+//         reviewedAt: new Date(),
+//       }
+//     });
+
+//     // Determine next status
+//     let nextStatus: ApplicationStatus;
+//     if (passed) {
+//       nextStatus = nextStage === 'INTERVIEW' ? 'INTERVIEW_SCHEDULED' : 'ACCEPTED';
+//     } else {
+//       nextStatus = 'REJECTED';
+//     }
+
+//     // Update applicant status
+//     await prisma.applicant.update({
+//       where: { id: applicantId },
+//       data: { applicationStatus: nextStatus }
+//     });
+
+//     responseObject({
+//       res,
+//       statusCode: HttpStatusCode.OK,
+//       message: passed 
+//         ? getMessage('ADMIN.SUCCESS.ASSESSMENT_PASSED') 
+//         : getMessage('ADMIN.SUCCESS.ASSESSMENT_FAILED'),
+//       payload: {
+//         applicantId,
+//         status: nextStatus,
+//         passed
+//       }
+//     });
+  
+//   } catch (error) {
+//     Logger.error('Evaluate assessment error:', error);
+//     responseObject({
+//       res,
+//       statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+//       message: getMessage('ADMIN.ERRORS.INTERNAL_SERVER')
+//     });
+//   }
+// };
+
 export const evaluateAssessment: RequestHandler = async (req, res) => {
   try {
-    const { applicantId, score, feedback, passed, nextStage } = req.body;
+    const { applicantId, score, feedback, passed } = req.body;
 
     if (!applicantId || passed === undefined) {
       return responseObject({
@@ -849,14 +920,15 @@ export const evaluateAssessment: RequestHandler = async (req, res) => {
     await prisma.assessment.update({
       where: { applicantId },
       data: {
+       
         reviewedAt: new Date(),
       }
     });
 
-    // Determine next status
+    // Determine next status based on result
     let nextStatus: ApplicationStatus;
     if (passed) {
-      nextStatus = nextStage === 'INTERVIEW' ? 'INTERVIEW_SCHEDULED' : 'ACCEPTED';
+      nextStatus = 'SHORTLISTED'; // Ready for interview scheduling
     } else {
       nextStatus = 'REJECTED';
     }
@@ -876,10 +948,10 @@ export const evaluateAssessment: RequestHandler = async (req, res) => {
       payload: {
         applicantId,
         status: nextStatus,
-        passed
+        passed,
+        nextStep: passed ? 'Schedule interview for this applicant' : 'Application rejected'
       }
     });
-  
   } catch (error) {
     Logger.error('Evaluate assessment error:', error);
     responseObject({
@@ -1211,6 +1283,244 @@ export const updateApplicantStatus: RequestHandler = async (req, res) => {
   }
 };
 
+
+// NEW: Evaluate Interview and Create Student Account
+export const evaluateInterview: RequestHandler = async (req, res) => {
+  try {
+    const { applicantId, passed, score, feedback, cohortId, interviewNotes } = req.body;
+
+    if (!applicantId || passed === undefined) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('ADMIN.ERRORS.INTERVIEW_EVALUATION_REQUIRED')
+      });
+    }
+
+    const applicant = await prisma.applicant.findUnique({
+      where: { id: applicantId },
+      include: { 
+        interview: true,
+        assessment: true 
+      }
+    });
+
+    if (!applicant) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: getMessage('ADMIN.ERRORS.APPLICANT_NOT_FOUND')
+      });
+    }
+
+    if (!applicant.interview) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: 'Applicant does not have a scheduled interview'
+      });
+    }
+
+    if (passed) {
+      // Check if user already exists (in case of duplicate)
+      const existingUser = await prisma.user.findUnique({
+        where: { email: applicant.email }
+      });
+
+      if (existingUser) {
+        return responseObject({
+          res,
+          statusCode: HttpStatusCode.BAD_REQUEST,
+          message: getMessage('USERS.ERRORS.EMAIL_EXISTS')
+        });
+      }
+
+      // Generate temporary password
+      const temporaryPassword = generateRandomPassword();
+      const hashedPassword = await bcrypt.hash(temporaryPassword, PASSWORD_CONSTANTS.SALT_ROUNDS);
+
+      // Create user
+      const user = await prisma.user.create({
+        data: {
+          email: applicant.email,
+          password: hashedPassword,
+          firstName: applicant.firstname,
+          lastName: applicant.lastname,
+          role: Role.STUDENT
+        }
+      });
+
+      // Create student profile
+      const student = await prisma.studentProfile.create({
+        data: {
+          userId: user.id,
+          email: applicant.email,
+          firstName: applicant.firstname,
+          lastName: applicant.lastname,
+          track: applicant.track,
+          cohortId: cohortId || null
+        }
+      });
+
+      // Update applicant status to ACCEPTED
+      await prisma.applicant.update({
+        where: { id: applicantId },
+        data: { applicationStatus: 'ACCEPTED' }
+      });
+
+      // Update interview record with results
+      await prisma.interview.update({
+        where: { applicantId },
+        data: {
+          status: 'ACCEPTED',
+          notes: interviewNotes || feedback || 'Interview passed - student account created'
+        }
+      });
+
+      // Send credentials email to the applicant
+      const emailSent = await emailService.sendCredentialsEmail(
+        applicant.email,
+        applicant.firstname,
+        temporaryPassword,
+        'STUDENT'
+      );
+
+      responseObject({
+        res,
+        statusCode: HttpStatusCode.OK,
+        message: getMessage('ADMIN.SUCCESS.INTERVIEW_PASSED'),
+        payload: {
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role
+          },
+          student,
+          temporaryPassword: EnvironmentConfig.IS_DEVELOPMENT ? temporaryPassword : undefined,
+          emailSent
+        }
+      });
+    } else {
+      // Interview failed - update status to rejected
+      await prisma.applicant.update({
+        where: { id: applicantId },
+        data: { applicationStatus: 'REJECTED' }
+      });
+
+      // Update interview record
+      await prisma.interview.update({
+        where: { applicantId },
+        data: {
+          status: 'REJECTED',
+          notes: interviewNotes || feedback || 'Interview failed'
+        }
+      });
+
+      responseObject({
+        res,
+        statusCode: HttpStatusCode.OK,
+        message: getMessage('ADMIN.SUCCESS.INTERVIEW_FAILED'),
+        payload: {
+          applicantId,
+          status: 'REJECTED'
+        }
+      });
+    }
+  } catch (error: any) {
+    Logger.error('Evaluate interview error:', error);
+    
+    if (error.code === 'P2002') {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('USERS.ERRORS.EMAIL_EXISTS')
+      });
+    }
+
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('ADMIN.ERRORS.INTERNAL_SERVER')
+    });
+  }
+};
+
+
+export const scheduleInterview: RequestHandler = async (req, res) => {
+  try {
+    const { applicantId, interviewDate, notes } = req.body;
+
+    if (!applicantId || !interviewDate) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: 'Applicant ID and interview date are required'
+      });
+    }
+
+    const applicant = await prisma.applicant.findUnique({
+      where: { id: applicantId }
+    });
+
+    if (!applicant) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: getMessage('ADMIN.ERRORS.APPLICANT_NOT_FOUND')
+      });
+    }
+
+    // Create or update interview
+    const interview = await prisma.interview.upsert({
+      where: { applicantId },
+      update: {
+        interviewDate: new Date(interviewDate),
+        notes,
+        status: 'INTERVIEW_SCHEDULED'
+      },
+      create: {
+        applicantId,
+        interviewDate: new Date(interviewDate),
+        notes,
+        status: 'INTERVIEW_SCHEDULED'
+      }
+    });
+
+    // Update applicant status
+    await prisma.applicant.update({
+      where: { id: applicantId },
+      data: { applicationStatus: 'INTERVIEW_SCHEDULED' }
+    });
+
+    // Send interview invitation email
+    const emailSent = await emailService.sendInterviewInvitation(
+      applicant.email,
+      applicant.firstname,
+      interviewDate,
+      notes
+    );
+
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      message: 'Interview scheduled successfully',
+      payload: {
+        interview,
+        emailSent
+      }
+    });
+  } catch (error: any) {
+    Logger.error('Schedule interview error:', error);
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('ADMIN.ERRORS.INTERNAL_SERVER')
+    });
+  }
+};
+
 // Helper functions
 const getTrackInstructions = (track: Track, generalInstructions?: string) => {
   const trackInstructions: { [key in Track]?: string } = {
@@ -1228,3 +1538,4 @@ const getTrackInstructions = (track: Track, generalInstructions?: string) => {
     ? `${generalInstructions}\n\n${specificInstructions}`
     : specificInstructions;
 };
+

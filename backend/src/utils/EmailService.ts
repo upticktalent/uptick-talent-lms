@@ -1,3 +1,4 @@
+import { Logger } from '../config/logger';
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
@@ -38,9 +39,9 @@ export const sendPasswordResetEmail = async (email: string, resetToken: string) 
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`Password reset email sent to ${email}`);
+    Logger.log(`Password reset email sent to ${email}`);
   } catch (error) {
-    console.error('Error sending email:', error);
+    Logger.error('Error sending email:', error);
     throw new Error('Failed to send password reset email');
   }
 };
@@ -65,8 +66,8 @@ export const sendPasswordChangedEmail = async (email: string) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`Password changed notification sent to ${email}`);
+    Logger.log(`Password changed notification sent to ${email}`);
   } catch (error) {
-    console.error('Error sending email:', error);
+    Logger.error('Error sending email:', error);
   }
 };

@@ -3,7 +3,7 @@ import { AuthRequest } from './auth';
 import { Role } from '@prisma/client';
 import { responseObject } from '@utils';
 import { HttpStatusCode } from '@config';
-import { getMessage } from '../constants/i18n';
+import { getMessage } from '../utils/i188n';
 
 // Middleware to check if user has required role
 export const requireRole = (allowedRoles: Role[]) => {

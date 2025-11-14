@@ -16,7 +16,9 @@ import {
   createStudentFromApplicant,
   bulkCreateStudents,
   getAdminDashboard,
-  updateApplicantStatus
+  updateApplicantStatus,
+  evaluateInterview,
+  scheduleInterview
 } from '../controllers/adminController';
 import { urls } from '../constants/urls';
 import { Role } from '@prisma/client';
@@ -54,7 +56,7 @@ router.post(urls.admin.createCourse().path, validateCreateCourse, checkCohortExi
 router.get(urls.admin.courses().path, getCourses);
 
 // User management routes
-router.get('/users/track', getUsersByTrack);
+router.get(urls.user_management.getAll().path, getUsersByTrack);
 
 // Applicant management routes with validation
 router.get(urls.admin.applicants().path, validatePagination, getApplicants);
@@ -70,5 +72,7 @@ router.post(urls.admin.bulkCreateStudents().path, validateBulkCreateStudents, ch
 
 // Dashboard
 router.get(urls.admin.dashboard().path, getAdminDashboard);
+router.post(urls.applicant.interview().path, authenticate, authorize(Role.ADMIN), evaluateInterview);
+router.post(urls.applicant.schedule().path, authenticate, authorize(Role.ADMIN), scheduleInterview);
 
 export default router;

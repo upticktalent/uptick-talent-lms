@@ -1,3 +1,4 @@
+8
 export const i18n = {
   en: {
     ENVIRONMENT: {
@@ -95,6 +96,10 @@ export const i18n = {
         BULK_STUDENT_CREATION_COMPLETED: "Bulk student creation process completed",
         DASHBOARD_DATA_RETRIEVED: "Admin dashboard data retrieved successfully",
         APPLICANT_STATUS_UPDATED: "Applicant status updated successfully",
+        // ... existing success messages
+    'INTERVIEW_SCHEDULED': 'Interview scheduled successfully',
+    'INTERVIEW_PASSED': 'Interview evaluated successfully. Student account created and credentials sent.',
+    'INTERVIEW_FAILED': 'Interview evaluated successfully. Applicant rejected.',
       },
       ERRORS: {
         COHORT_REQUIRED_FIELDS: "Name, track, start date, and end date are required",
@@ -114,6 +119,8 @@ export const i18n = {
         APPLICANT_IDS_REQUIRED: "Applicant IDs array is required",
         STATUS_UPDATE_REQUIRED_FIELDS: "Applicant ID and status are required",
         INTERNAL_SERVER: "Internal server error",
+       'INTERVIEW_EVALUATION_REQUIRED': 'Applicant ID and passed status are required for interview evaluation',
+    'INTERVIEW_SCHEDULING_REQUIRED': 'Applicant ID and interview date are required',
       },
     },
      
@@ -159,6 +166,29 @@ export const i18n = {
         CONTACT_SUPPORT_IF_NEEDED: "For security reasons, if you did not initiate this change, please contact our support team immediately.",
         SUBJECT: "Password Changed - Uptick Talent",
       },
+        ADMINERRORS: {
+    EMAIL_REQUIRED: 'Email is required',
+    FIRST_NAME_REQUIRED: 'First name is required',
+    LAST_NAME_REQUIRED: 'Last name is required',
+    // ... keep the generic one for backward compatibility if needed
+    MENTOR_REQUIRED_FIELDS: 'All mentor fields are required',
+  },
+   'INTERVIEW_INVITATION': {
+    'TITLE': 'Interview Invitation - Uptick Talent Program',
+    'GREETING': 'Congratulations {firstName}!',
+    'INVITATION_TEXT': 'After reviewing your application, we\'re excited to invite you to an interview for the Uptick Talent Program.',
+    'DETAILS_TITLE': 'Interview Details',
+    'DATE_TIME': 'Date & Time',
+    'INTERVIEWER': 'Interviewer',
+    'MEETING_LINK': 'Meeting Link',
+    'ADDITIONAL_NOTES': 'Additional Notes',
+    'PREPARATION_TITLE': 'Preparation Instructions',
+    'RESCHEDULE_TITLE': 'Need to Reschedule?',
+    'RESCHEDULE_TEXT': 'If you need to reschedule or have any questions, please reply to this email at least 24 hours before your scheduled interview.',
+    'LATE_CANCELLATION_WARNING': 'Late cancellations or no-shows may affect your application status.',
+    'LOOKING_FORWARD': 'We\'re looking forward to learning more about you and your potential fit for our program!',
+    'SUBJECT': 'Interview Invitation - Uptick Talent Program'
+  },
       
       BULK: {
         TITLE: "Uptick Talent Announcement",
@@ -176,20 +206,3 @@ export const i18n = {
   },
 };
 
-// Helper function to get messages (you can expand this for multi-language support)
-export const getMessage = (key: string, params?: Record<string, any>): string => {
-  const keys = key.split('.');
-  let value: any = i18n.en;
-  
-  for (const k of keys) {
-    value = value[k];
-    if (value === undefined) return key; // Fallback to key if not found
-  }
-  
-  // Replace parameters in the message
-  if (params && typeof value === 'string') {
-    return value.replace(/{(\w+)}/g, (match, param) => params[param] || match);
-  }
-  
-  return value || key;
-};
