@@ -7,7 +7,7 @@ import { Logger } from '../constants/logger';
 import { EnvironmentConfig } from '../constants/environment';
 import { responseObject } from '@utils';
 import { HttpStatusCode } from '@config';
-import { getMessage } from '../constants/i18n';
+import { getMessage } from '../utils/i188n';
 
 const prisma = new PrismaClient();
 

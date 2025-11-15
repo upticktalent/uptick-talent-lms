@@ -252,9 +252,13 @@ export const changePassword: RequestHandler = async (req, res) => {
   }
 };
 
+
+
 export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
+
+    console.log('🔐 Forgot Password Request:', { email });
 
     if (!email) {
       return responseObject({
@@ -268,8 +272,11 @@ export const forgotPassword = async (req: Request, res: Response) => {
       where: { email }
     });
 
+    console.log('👤 User found:', !!user);
+
     // Always return success even if user doesn't exist (for security)
     if (!user) {
+      console.log('📧 User not found, but returning success for security');
       return responseObject({
         res,
         statusCode: HttpStatusCode.OK,
@@ -281,10 +288,14 @@ export const forgotPassword = async (req: Request, res: Response) => {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
 
+    console.log('🔑 Generated reset token:', resetToken);
+
     // Delete any existing reset tokens for this email
     await prisma.passwordResetToken.deleteMany({
       where: { email }
     });
+
+    console.log('🗑️ Deleted existing reset tokens');
 
     // Create new reset token
     await prisma.passwordResetToken.create({
@@ -295,19 +306,45 @@ export const forgotPassword = async (req: Request, res: Response) => {
       }
     });
 
+    console.log('💾 Saved new reset token to database');
+
     // Send reset email
     if (!EnvironmentConfig.IS_TEST) {
+      console.log('📤 Attempting to send reset email via Resend');
       await sendPasswordResetEmail(email, resetToken);
+      console.log('✅ Email process completed');
+    } else {
+      console.log('🧪 Test environment - skipping email send');
     }
+
+    // For development, you can optionally return the token
+    const responsePayload = process.env.NODE_ENV === 'development' ? {
+      resetToken: resetToken,
+      email: email,
+      // note: 'This is only returned in development mode for testing'
+    } : undefined;
 
     responseObject({
       res,
       statusCode: HttpStatusCode.OK,
-      message: getMessage('AUTH.SUCCESS.RESET_EMAIL_SENT')
+      message: getMessage('AUTH.SUCCESS.RESET_EMAIL_SENT'),
+      payload: responsePayload
     });
    
-  } catch (error) {
+  } catch (error: any) {
+    console.error('❌ Forgot password error details:', error);
     Logger.error('Forgot password error:', error);
+    
+    // Check if it's an email error and handle gracefully
+    if (error.message.includes('email') || error.message.includes('Email')) {
+      console.log('⚠️ Email error, but returning success to user');
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.OK,
+        message: getMessage('AUTH.SUCCESS.RESET_EMAIL_SENT')
+      });
+    }
+    
     responseObject({
       res,
       statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
@@ -315,6 +352,9 @@ export const forgotPassword = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+
 
 export const resetPassword = async (req: Request, res: Response) => {
   try {

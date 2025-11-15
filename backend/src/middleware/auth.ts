@@ -117,23 +117,17 @@ export const authorize = (allowedRoles: Role | Role[]): RequestHandler => {
   };
 };
 
-export function generateToken(userId: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const payload = { id: userId }; // Payload is an object
-    const secret = process.env.JWT_SECRET!; // Ensure this is a string
-    
-    jwt.sign(
-      payload, 
-      secret, 
-      { expiresIn: '24h' }, // Use a valid string timespan
-      (err, token) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(token!);
-        }
-      }
-    );
+
+export function generateToken(userId: string): string {
+  const payload = { id: userId };
+  const secret = process.env.JWT_SECRET;
+  
+  if (!secret) {
+    throw new Error('JWT_SECRET is not defined in environment variables');
+  }
+
+  return jwt.sign(payload, secret, { 
+    expiresIn: '24h'
   });
 }
 

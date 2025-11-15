@@ -44,6 +44,7 @@ export const createCohort: RequestHandler = async (req, res) => {
         description
       }
     });
+    console.log("cohots:", cohort)
 
     responseObject({  
       res,
@@ -125,7 +126,11 @@ export const getCohorts: RequestHandler = async (req, res) => {
 // User Creation with Email
 export const createStudentAccount: RequestHandler = async (req, res) => {
   try {
-    const { email, firstName, lastName, track, cohortId } = req.body;
+      console.log('🎯 CREATE STUDENT ENDPOINT HIT');
+    console.log('📦 Request body:', req.body);
+
+    const { email, firstName, lastName, track } = req.body;
+        console.log('❌ Missing required fields for student creation');
 
     if (!email || !firstName || !lastName || !track) {
       return responseObject({ 
@@ -171,7 +176,7 @@ export const createStudentAccount: RequestHandler = async (req, res) => {
         firstName,
         lastName,
         track,
-        cohortId
+     
       }
     });
 
@@ -224,7 +229,7 @@ export const createMentorAccount: RequestHandler = async (req, res) => {
   try {
     const { email, firstName, lastName, expertise, track, bio } = req.body;
 
-    if (!email || !firstName || !lastName) {
+    if (!email || !firstName || !lastName || !track) {
       return responseObject({ 
         res,
         statusCode: HttpStatusCode.BAD_REQUEST,
@@ -317,6 +322,95 @@ export const createMentorAccount: RequestHandler = async (req, res) => {
     });
   }
 };
+
+
+// Assign student to cohort
+export const assignStudentToCohort: RequestHandler = async (req, res) => {
+  try {
+    const { studentId, cohortId } = req.body;
+
+    if (!studentId || !cohortId) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: 'Student ID and Cohort ID are required'
+      });
+    }
+
+    // Check if student exists
+    const student = await prisma.studentProfile.findUnique({
+      where: { userId: studentId },
+      include: { user: true }
+    });
+
+    if (!student) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: 'Student not found'
+      });
+    }
+
+    // Check if cohort exists
+    const cohort = await prisma.cohort.findUnique({
+      where: { id: cohortId }
+    });
+
+    if (!cohort) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: 'Cohort not found'
+      });
+    }
+
+    // Check if track matches
+    if (student.track !== cohort.track) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: `Student track (${student.track}) does not match cohort track (${cohort.track})`
+      });
+    }
+
+    // Assign student to cohort
+    const updatedStudent = await prisma.studentProfile.update({
+      where: { userId: studentId },
+      data: {
+        cohortId,
+        updatedAt: new Date()
+      },
+      include: {
+        user: {
+          select: {
+            email: true,
+            firstName: true,
+            lastName: true
+          }
+        },
+        cohort: true
+      }
+    });
+
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      message: 'Student successfully assigned to cohort',
+      payload: {
+        student: updatedStudent
+      }
+    });
+    
+  } catch (error: any) {
+    Logger.error('Assign student to cohort error:', error);
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('ADMIN.ERRORS.INTERNAL_SERVER')
+    });
+  }
+};
+
 
 // Course Management
 export const createCourse: RequestHandler = async (req, res) => {
@@ -919,8 +1013,7 @@ export const evaluateAssessment: RequestHandler = async (req, res) => {
     // Update assessment with evaluation
     await prisma.assessment.update({
       where: { applicantId },
-      data: {
-       
+      data: {    
         reviewedAt: new Date(),
       }
     });
@@ -987,6 +1080,19 @@ export const createStudentFromApplicant: RequestHandler = async (req, res) => {
       });
     }
 
+      // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email: applicant.email }
+    });
+
+    if (existingUser) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('USERS.ERRORS.EMAIL_EXISTS')
+      });
+    }
+
     // Use your existing createUser function logic
     const randomPassword = generateRandomPassword();
     const hashedPassword = await bcrypt.hash(randomPassword, PASSWORD_CONSTANTS.SALT_ROUNDS);
@@ -1018,7 +1124,7 @@ export const createStudentFromApplicant: RequestHandler = async (req, res) => {
         firstName: applicant.firstname,
         lastName: applicant.lastname,
         track: applicant.track,
-        cohortId
+         cohortId: cohortId 
       }
     });
 
@@ -1028,6 +1134,14 @@ export const createStudentFromApplicant: RequestHandler = async (req, res) => {
       data: { applicationStatus: 'ACCEPTED' }
     });
 
+      // Send welcome email with credentials
+    const emailSent = await emailService.sendCredentialsEmail(
+      applicant.email,
+      applicant.firstname,
+      randomPassword,
+      'STUDENT'
+    );
+
     responseObject({
       res,
       statusCode: HttpStatusCode.CREATED,
@@ -1035,7 +1149,8 @@ export const createStudentFromApplicant: RequestHandler = async (req, res) => {
       payload: {
         user,
         student,
-        temporaryPassword: EnvironmentConfig.IS_DEVELOPMENT ? randomPassword : undefined
+        temporaryPassword: EnvironmentConfig.IS_DEVELOPMENT ? randomPassword : undefined,
+         emailSent
       }
     });
    

@@ -15,3 +15,4 @@ router.put(urls.auth.profile().path, authenticate, updateProfile);
 router.put(urls.auth.changePassword().path, authenticate, changePassword);
 
 export default router;
+

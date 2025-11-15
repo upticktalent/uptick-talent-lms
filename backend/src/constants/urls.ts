@@ -60,7 +60,7 @@ export const urls = {
     createStudentFromApplicant: () => routeCreator("admin/students/create-from-applicant"),
     bulkCreateStudents: () => routeCreator("admin/students/bulk-create"),
     dashboard: () => routeCreator("admin/dashboard"),
-    
+    assignCohort: () => routeCreator("/admin/students/assign-cohort")
   },
   applicant: {
 interview: () => routeCreator('/applicants/interview/evaluate'), 
@@ -98,7 +98,10 @@ export const ROUTES = {
     UPDATE_APPLICANT_STATUS: '/admin/applicants/status',
     CREATE_STUDENT_FROM_APPLICANT: '/admin/students/create-from-applicant',
     BULK_CREATE_STUDENTS: '/admin/students/bulk-create',
+    ASSIGN_COHORT:'/admin/students/assign-cohort',
     DASHBOARD: '/admin/dashboard',
+   
+    
    
 
   },

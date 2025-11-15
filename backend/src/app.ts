@@ -98,20 +98,18 @@ app.use(
   })
 );
 
-// Routes
-app.use(ENDPOINTS.APPLICANTS, router);
 
-// Register routes via loader
-loadServices(app);
 
-// 404 handler - Using global HttpStatusCode
-app.use((_req: Request, res: Response) => {
-  res.status(HttpStatusCode.NOT_FOUND).json({
-    success: false,
-    message: "Route not found",
-    path: _req.path
-  });
-});
+
+
+// // 404 handler - Using global HttpStatusCode
+// app.use((_req: Request, res: Response) => {
+//   res.status(HttpStatusCode.NOT_FOUND).json({
+//     success: false,
+//     message: "Route not found",
+//     path: _req.path
+//   });
+// });
 
 // Define proper TypeScript interfaces for error response
 interface BaseErrorResponse {

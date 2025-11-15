@@ -43,7 +43,9 @@ app.use('*', (req, res) => {
       method: req.method
     }
   });
+   console.log(`🔥 ALL REQUESTS: ${req.method} ${req.originalUrl}`);
 });
+
 
 // Error handling middleware - Using responseObject
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

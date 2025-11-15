@@ -225,10 +225,10 @@ model Course {
   title       String
   description String
   track       Track
-  cohortId    String
+  cohortId    String?
   mentorId    String?
   
-  cohort      Cohort       @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  cohort      Cohort?       @relation(fields: [cohortId], references: [id], onDelete: Cascade)
   mentor      MentorProfile? @relation(fields: [mentorId], references: [id], onDelete: SetNull)
   
   createdAt   DateTime @default(now())

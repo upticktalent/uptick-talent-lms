@@ -18,7 +18,8 @@ import {
   getAdminDashboard,
   updateApplicantStatus,
   evaluateInterview,
-  scheduleInterview
+  scheduleInterview,
+  assignStudentToCohort
 } from '../controllers/adminController';
 import { urls } from '../constants/urls';
 import { Role } from '@prisma/client';
@@ -48,11 +49,11 @@ router.post(urls.admin.createCohort().path, validateCreateCohort, createCohort);
 router.get(urls.admin.cohorts().path, getCohorts);
 
 // User creation routes with validation
-router.post(urls.admin.createStudent().path, validateCreateStudent, checkCohortExists, createStudentAccount);
+router.post(urls.admin.createStudent().path, validateCreateStudent, createStudentAccount);
 router.post(urls.admin.createMentor().path, validateCreateMentor, createMentorAccount);
 
 // Course routes with validation
-router.post(urls.admin.createCourse().path, validateCreateCourse, checkCohortExists, checkMentorExists, createCourse);
+router.post(urls.admin.createCourse().path, validateCreateCourse,  createCourse);
 router.get(urls.admin.courses().path, getCourses);
 
 // User management routes
@@ -65,6 +66,7 @@ router.post(urls.admin.sendAssessment().path, validateSendAssessment, sendAssess
 router.get(urls.admin.assessmentProgress().path, validatePagination, getAssessmentProgress);
 router.post(urls.admin.evaluateAssessment().path, validateEvaluateAssessment, evaluateAssessment);
 router.put(urls.admin.updateApplicantStatus().path, validateUpdateApplicantStatus, updateApplicantStatus);
+router.put(urls.admin.assignCohort().path, authenticate, authorize(Role.ADMIN), assignStudentToCohort)
 
 // Student creation from applicants with validation
 router.post(urls.admin.createStudentFromApplicant().path, validateCreateStudentFromApplicant, checkCohortExists, createStudentFromApplicant);
