@@ -1,17 +1,13 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendApplicationEmail = void 0;
 const resend_1 = require("resend");
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
-const resend = new resend_1.Resend(process.env.RESEND_API_KEY);
+const logger_1 = require("../config/logger");
+const dynamicEnv_1 = require("../config/dynamicEnv");
+const resend = new resend_1.Resend(dynamicEnv_1.env.RESEND_API_KEY);
 const sendApplicationEmail = async (to, name) => {
-    if (!process.env.RESEND_API_KEY) {
-        console.error("Missing RESEND_API_KEY");
-        return false;
+    if (!dynamicEnv_1.env.RESEND_API_KEY) {
+        throw new Error("RESEND_API_KEY is required");
     }
     const sendEmail = async () => {
         const { data, error } = await resend.emails.send({
@@ -30,10 +26,9 @@ const sendApplicationEmail = async (to, name) => {
       `,
         });
         if (error) {
-            console.error("Resend Error:", error);
+            logger_1.Logger.error("Resend Error:", error);
             throw error;
         }
-        console.log("Email sent:", data?.id);
         return true;
     };
     // Retry once on failure
@@ -41,12 +36,12 @@ const sendApplicationEmail = async (to, name) => {
         return await sendEmail();
     }
     catch (error) {
-        console.log("First attempt failed, retrying...");
+        logger_1.Logger.log("First attempt failed, retrying...");
         try {
             return await sendEmail();
         }
         catch (retryError) {
-            console.error("Retry failed:", retryError);
+            logger_1.Logger.error("Retry failed:", retryError);
             return false;
         }
     }

@@ -43,6 +43,7 @@ uploads/
 user_emails.csv
 docker-compose.yml
 
+/src/generated/prisma
 # Prisma
 prisma/dev.db
 prisma/*.db

@@ -1,35 +1,70 @@
+import dotenv from 'dotenv';
+import express from 'express';
+import { MainRouter } from './routes';
+import { setupSwagger } from './config/swagger';
+// Load env vars
+dotenv.config();
 import app from "./app";
-// import { connectDatabase } from "./models/db";
 import { getters } from "./config";
+import { Logger } from './config/logger';
+import { responseObject } from '@utils';
+import { HttpStatusCode } from '@config';
+import { getMessage } from './utils/i188n';
 
-const port = getters.getAppPort();
+const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
-    // Connect to database first
-    // await connectDatabase();
-    // console.log("✅ Database connected");
-
-    app.listen(port, () => {
-      console.log(`${getters.geti18ns().LOGS.RUNNING_APP} ${port}`);
-      console.log(`🚀 Server: http://localhost:${port}`);
+    app.listen(PORT, () => {
+      Logger.log(`${getters.geti18ns().LOGS.RUNNING_APP} ${PORT}`);
+      Logger.log(`🚀 Server: http://localhost:${PORT}`);
     });
   } catch (error) { 
-    console.error("❌ Failed to start server:", error);
+    Logger.error("❌ Failed to start server:", error);
     process.exit(1);
   }
 };
 
-// Handle unhandled rejections
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
-  process.exit(1);
+// Setup Swagger documentation
+setupSwagger(app);
+
+// Routes
+app.use('/api/v1', MainRouter);
+
+// 404 handler - Using responseObject
+app.use('*', (req, res) => {
+  responseObject({
+    res,
+    statusCode: HttpStatusCode.NOT_FOUND,
+    message: getMessage('LOGS.ROUTES.WILDCARD'),
+    status: false,
+    payload: {
+      path: req.path,
+      method: req.method
+    }
+  });
+   console.log(`🔥 ALL REQUESTS: ${req.method} ${req.originalUrl}`);
 });
 
-// Handle uncaught exceptions
-process.on("uncaughtException", (error) => {
-  console.error("Uncaught Exception:", error);
-  process.exit(1);
+
+// Error handling middleware - Using responseObject
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  Logger.error('Unhandled error:', err);
+  
+  const statusCode = err.status || HttpStatusCode.INTERNAL_SERVER_ERROR;
+  const message = err.message || getMessage('USERS.ERRORS.INTERNAL_SERVER');
+  
+  responseObject({
+    res,
+    statusCode,
+    message,
+    status: false,
+    payload: process.env.NODE_ENV === 'development' ? {
+      error: err.message,
+      stack: err.stack,
+      path: req.path
+    } : undefined
+  });
 });
 
 startServer();

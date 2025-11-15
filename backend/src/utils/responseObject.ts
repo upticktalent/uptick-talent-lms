@@ -1,4 +1,5 @@
-import type { ResponseObjectFn } from "@/types";
+import type { ResponseObjectFn } from "../types";
+
 
 export const responseObject: ResponseObjectFn = (props) => {
   const {
@@ -38,3 +39,4 @@ export const responseObject: ResponseObjectFn = (props) => {
 
   return res.status(statusCode).send(responseObject);
 };
+
