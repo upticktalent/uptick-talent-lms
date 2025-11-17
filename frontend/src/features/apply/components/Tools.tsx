@@ -1,7 +1,7 @@
 import React from 'react';
 import { useFormikContext } from 'formik';
 import { ApplicationFormData, Tracks } from '@/types/apply';
-import { FormCheckboxGroup, FormInput } from './FormInput';
+import { FormCheckboxGroup, FormInput , FormCombobox} from './FormInput';
 import Box from '@/components/ui/box';
 
 const toolOptions = {
@@ -9,24 +9,23 @@ const toolOptions = {
     { value: 'REACT', label: 'React' },
     { value: 'VUE', label: 'Vue' },
     { value: 'ANGULAR', label: 'Angular' },
-    { value: 'NEXT_JS', label: 'Next.js' },
-    { value: 'TAILWIND_CSS', label: 'Tailwind CSS' },
+    { value: 'SVELTE', label: 'Svelte' },
     { value: 'OTHER', label: 'Other' },
   ],
   backend: [
-    { value: 'NODE_JS', label: 'Node.js' },
-    { value: 'PYTHON', label: 'Python (Django/Flask)' },
-    { value: 'PHP', label: 'PHP (Laravel)' },
-    { value: 'JAVA', label: 'Java (Spring)' },
-    { value: 'GO', label: 'Go' },
+    { value: 'NODE', label: 'Node' },
+    { value: 'EXPRESS', label: 'Express' },
+    { value: 'DJANGO', label: 'Django' },
+    { value: 'FASTAPI', label: 'FastAPI' },
+    { value: 'LARAVEL', label: 'Laravel' },
     { value: 'OTHER', label: 'Other' },
   ],
   fullstack: [
     { value: 'REACT', label: 'React' },
-    { value: 'NODE_JS', label: 'Node.js' },
-    { value: 'NEXT_JS', label: 'Next.js' },
-    { value: 'LARAVEL', label: 'Laravel' },
+    { value: 'NODE', label: 'Node' },
+    { value: 'ANGULAR', label: 'Angular' },
     { value: 'DJANGO', label: 'Django' },
+    { value: 'LARAVEL', label: 'Laravel' },
     { value: 'OTHER', label: 'Other' },
   ],
   mobile: [
@@ -43,6 +42,8 @@ export const Tools = () => {
 
   return (
     <Box>
+
+      {/* --- 2. Track-Specific Tools/Proficiency --- */}
       {values.track === Tracks.FRONTEND && (
         <Box>
           <FormCheckboxGroup
