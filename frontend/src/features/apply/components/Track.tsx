@@ -11,6 +11,19 @@ const stackOptions = [
   { value: Tracks.BACKEND, label: 'Backend Engineering' },
   { value: Tracks.FULLSTACK, label: 'Fullstack Engineering' },
   { value: Tracks.MOBILE, label: 'Mobile Engineering' },
+  { value: Tracks.DATA_SCIENCE, label: 'Data Science' },
+  { value: Tracks.MACHINE_LEARNING, label: 'Machine Learning' },
+  { value: Tracks.DATA_ANALYSIS, label: 'Data Analysis' },
+  { value: Tracks.DATA_ENGINEERING, label: 'Data Engineering' },
+  { value: Tracks.UI_DESIGN, label: 'UI Design' },
+  { value: Tracks.UX_DESIGN, label: 'UX Design' },
+  { value: Tracks.GRAPHICS_DESIGN, label: 'Graphics Design' },
+  { value: Tracks.UX_RESEARCH, label: 'UX Research' },
+  { value: Tracks.PROJECT_PRODUCT_MANAGEMENT, label: 'Project/Product Management' },
+  { value: Tracks.PRODUCT_MARKETING_MANAGEMENT, label: 'Product Marketing Management' },
+  { value: Tracks.OPERATIONS, label: 'Operations' },
+  { value: Tracks.SALES, label: 'Sales' },
+  { value: Tracks.BUSINESS_DEVELOPMENT, label: 'Business Development' },
 ];
 
 export const Track = () => {
