@@ -1,23 +1,29 @@
 import React from 'react';
 import { useFormikContext } from 'formik';
-import { ApplicationFormData } from '@/types/apply';
-import { FormInput, FormSelect } from './FormInput';
+import { ApplicationFormData } from '@/types/apply'; 
+import { FormInput, FormCombobox } from './FormInput';
 import Box from '@/components/ui/box';
-import { SelectItem } from '@/components/ui/select';
+
+const referralOptions = [
+  { value: 'TWITTER', label: 'Twitter (X)' },
+  { value: 'LINKEDIN', label: 'LinkedIn' },
+  { value: 'INSTAGRAM', label: 'Instagram' },
+  { value: 'FACEBOOK', label: 'Facebook' },
+  { value: 'FRIEND', label: 'From a Friend' },
+  { value: 'OTHER', label: 'Other' },
+];
 
 export const Referral = () => {
   const { values } = useFormikContext<ApplicationFormData>();
 
   return (
     <Box>
-      <FormSelect name="referralSource" label="How did you hear about us?">
-        <SelectItem value="TWITTER">Twitter (X)</SelectItem>
-        <SelectItem value="LINKEDIN">LinkedIn</SelectItem>
-        <SelectItem value="INSTAGRAM">Instagram</SelectItem>
-        <SelectItem value="FACEBOOK">Facebook</SelectItem>
-        <SelectItem value="FRIEND">From a Friend</SelectItem>
-        <SelectItem value="OTHER">Other</SelectItem>
-      </FormSelect>
+      <FormCombobox
+        name="referralSource"
+        label="How did you hear about us?"
+        options={referralOptions}
+        placeholder="Select an option"
+      />
 
       {values.referralSource === 'OTHER' && (
         <FormInput
@@ -26,6 +32,7 @@ export const Referral = () => {
           placeholder="e.g., A blog post"
         />
       )}
+
     </Box>
   );
 };
