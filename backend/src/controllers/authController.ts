@@ -12,13 +12,99 @@ import { EnvironmentConfig } from '../constants/environment';
 
 const prisma = new PrismaClient();
 
+// export const login = async (req: Request, res: Response) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     console.log('🔐 Login Attempt:', req.body);
+    
+//     if (!email || !password) {
+//       return responseObject({
+//         res,
+//         statusCode: HttpStatusCode.BAD_REQUEST,
+//         message: getMessage('AUTH.ERRORS.EMAIL_PASSWORD_REQUIRED')
+//       });
+//     }
+
+//     const user = await prisma.user.findUnique({
+//       where: { email }
+//     });
+
+//     if (!user) {
+//       return responseObject({
+//         res,
+//         statusCode: HttpStatusCode.UNAUTHORIZED,
+//         message: getMessage('AUTH.ERRORS.INVALID_CREDENTIALS')
+//       });
+//     }
+
+//     const isPasswordValid = await bcrypt.compare(password, user.password);
+//     if (!isPasswordValid) {
+//       return responseObject({
+//         res,
+//         statusCode: HttpStatusCode.UNAUTHORIZED,
+//         message: getMessage('AUTH.ERRORS.INVALID_CREDENTIALS')
+//       });
+//     }
+
+//     const token = generateToken(user.id);
+
+//     const userWithoutPassword = {
+//       id: user.id,
+//       email: user.email,
+//       firstName: user.firstName,
+//       lastName: user.lastName,
+//       role: user.role,
+//       createdAt: user.createdAt
+//     };
+
+//     responseObject({
+//       res,
+//       statusCode: HttpStatusCode.OK,
+//       message: getMessage('AUTH.SUCCESS.LOGIN'),
+//       payload: {
+//         user: userWithoutPassword,
+//         token
+//       },
+//       status: true
+//     });
+   
+//   } catch (error) {
+//     Logger.error('Login error:', error);
+//     responseObject({
+//       res,
+//       statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+//       message: getMessage('AUTH.ERRORS.INTERNAL_LOGIN')
+//     });
+//   }
+// };
+
+
+
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    console.log('🔐 Login Attempt:', req.body);
-    
+    // 🔍 COMPREHENSIVE DEBUGGING
+    console.log('🔐 ========== LOGIN ATTEMPT ==========');
+    console.log('📦 Full Request Body:', JSON.stringify(req.body, null, 2));
+    console.log('📧 Email from req.body:', email);
+    console.log('🔑 Password from req.body:', password ? '***' : 'MISSING');
+    console.log('📨 Content-Type header:', req.headers['content-type']);
+    console.log('🔍 Request method:', req.method);
+    console.log('🔍 Request URL:', req.url);
+    console.log('🔍 Raw body received:', req.body);
+    console.log('🔍 Body type:', typeof req.body);
+    console.log('=====================================');
+
+    // Check if email and password are present
     if (!email || !password) {
+      console.log('❌ VALIDATION FAILED:');
+      console.log('   Email present:', !!email);
+      console.log('   Password present:', !!password);
+      console.log('   Email value:', email);
+      console.log('   Password value:', password);
+      
       return responseObject({
         res,
         statusCode: HttpStatusCode.BAD_REQUEST,
@@ -26,11 +112,17 @@ export const login = async (req: Request, res: Response) => {
       });
     }
 
+    console.log('✅ Email and password received, searching for user...');
+
+    // Find user in database
     const user = await prisma.user.findUnique({
       where: { email }
     });
 
+    console.log('👤 Database lookup result:', user ? 'User found' : 'User not found');
+    
     if (!user) {
+      console.log('❌ User not found for email:', email);
       return responseObject({
         res,
         statusCode: HttpStatusCode.UNAUTHORIZED,
@@ -38,8 +130,15 @@ export const login = async (req: Request, res: Response) => {
       });
     }
 
+    console.log('🔑 User found, comparing passwords...');
+    console.log('   Stored password hash:', user.password ? '***' : 'MISSING');
+
+    // Compare passwords
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('✅ Password comparison result:', isPasswordValid);
+
     if (!isPasswordValid) {
+      console.log('❌ Password invalid for user:', email);
       return responseObject({
         res,
         statusCode: HttpStatusCode.UNAUTHORIZED,
@@ -47,6 +146,9 @@ export const login = async (req: Request, res: Response) => {
       });
     }
 
+    console.log('🎉 Login successful, generating token...');
+
+    // Generate JWT token
     const token = generateToken(user.id);
 
     const userWithoutPassword = {
@@ -58,6 +160,8 @@ export const login = async (req: Request, res: Response) => {
       createdAt: user.createdAt
     };
 
+    console.log('✅ Login completed successfully for:', email);
+    
     responseObject({
       res,
       statusCode: HttpStatusCode.OK,
@@ -70,6 +174,7 @@ export const login = async (req: Request, res: Response) => {
     });
    
   } catch (error) {
+    console.error('💥 LOGIN ERROR:', error);
     Logger.error('Login error:', error);
     responseObject({
       res,
@@ -78,6 +183,10 @@ export const login = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+
+
 
 export const getMe: RequestHandler = async (req, res) => {
   try {

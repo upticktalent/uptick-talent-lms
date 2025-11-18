@@ -67,8 +67,12 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Body parsing middleware with limits
+// app.use(express.json({
+//   limit: '10mb' // prevent DOS attacks with large payloads
+// }));
 app.use(express.json({
-  limit: '10mb' // prevent DOS attacks with large payloads
+  limit: '10mb',
+  type: ['application/json', 'text/plain'] // Accept both JSON and text/plain
 }));
 app.use(express.urlencoded({ 
   extended: true,
@@ -76,10 +80,38 @@ app.use(express.urlencoded({
 }));
 
 // Request logging middleware (simple version)
-app.use((req: Request, _res: Response, next: NextFunction) => {
-  Logger.log(`${new Date().toISOString()} - ${req.method} ${req.path} - IP: ${req.ip}`);
+// app.use((req: Request, _res: Response, next: NextFunction) => {
+//   Logger.log(`${new Date().toISOString()} - ${req.method} ${req.path} - IP: ${req.ip}`);
+//   next();
+// });
+
+app.use((req, res, next) => {
+  if (req.is('text/plain')) {
+    console.log('🔄 Converting text/plain to JSON');
+    try {
+      req.body = JSON.parse(req.body);
+    } catch (error) {
+      console.log('❌ Failed to parse text/plain as JSON');
+    }
+  }
   next();
 });
+
+
+
+
+app.use((req, res, next) => {
+  console.log('📨 Incoming Request:', {
+    method: req.method,
+    url: req.url,
+    contentType: req.headers['content-type'],
+    body: req.body
+  });
+  next();
+});
+
+
+
 
 const allowedOrigins = env.ALLOWED_ORIGINS;
 

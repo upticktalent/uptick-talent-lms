@@ -9,6 +9,7 @@ import { getMessage } from '../utils/i188n';
 
 import { EnvironmentConfig } from '../constants/environment';
 import { PASSWORD_CONSTANTS } from '../constants/password';
+import { sendCredentialsEmail } from '../utils/EmailService';
 
 const prisma = new PrismaClient();
 
@@ -126,11 +127,10 @@ export const getCohorts: RequestHandler = async (req, res) => {
 // User Creation with Email
 export const createStudentAccount: RequestHandler = async (req, res) => {
   try {
-      console.log('🎯 CREATE STUDENT ENDPOINT HIT');
-    console.log('📦 Request body:', req.body);
+    
 
     const { email, firstName, lastName, track } = req.body;
-        console.log('❌ Missing required fields for student creation');
+       
 
     if (!email || !firstName || !lastName || !track) {
       return responseObject({ 
@@ -181,14 +181,13 @@ export const createStudentAccount: RequestHandler = async (req, res) => {
     });
 
     // Send credentials email
-    const emailSent = await emailService.sendCredentialsEmail(
+    const emailSent = await sendCredentialsEmail(
       email,
       firstName,
       temporaryPassword,
       'STUDENT'
     );
-
-    responseObject({
+ responseObject({
       res,
       statusCode: HttpStatusCode.CREATED,
       message: getMessage('ADMIN.SUCCESS.STUDENT_CREATED'),
@@ -205,6 +204,7 @@ export const createStudentAccount: RequestHandler = async (req, res) => {
         emailSent
       }
     });
+   
    
   } catch (error: any) {
     Logger.error('Create student error:', error);
@@ -415,7 +415,13 @@ export const assignStudentToCohort: RequestHandler = async (req, res) => {
 // Course Management
 export const createCourse: RequestHandler = async (req, res) => {
   try {
-    const { title, description, track, cohortId, mentorId } = req.body;
+    const { 
+      title, 
+      description, 
+      track, 
+      cohortId, 
+      mentorId 
+    } = req.body;
 
     if (!title || !description || !track || !cohortId) {
       return responseObject({
@@ -425,23 +431,57 @@ export const createCourse: RequestHandler = async (req, res) => {
       });
     }
 
+    // Verify cohort exists
+    const cohort = await prisma.cohort.findUnique({
+      where: { id: cohortId }
+    });
+
+    if (!cohort) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: getMessage('ADMIN.ERRORS.COHORT_NOT_FOUND')
+      });
+    }
+
+    // Verify mentor exists if provided
+    if (mentorId) {
+      const mentor = await prisma.mentorProfile.findUnique({
+        where: { userId: mentorId }
+      });
+
+      if (!mentor) {
+        return responseObject({
+          res,
+          statusCode: HttpStatusCode.NOT_FOUND,
+          message: getMessage('ADMIN.ERRORS.MENTOR_NOT_FOUND')
+        });
+      }
+    }
+
     const course = await prisma.course.create({
       data: {
         title,
         description,
-        track,
+        track: track as Track,
         cohortId,
-        mentorId
+        mentorId: mentorId || null
       },
       include: {
         cohort: true,
         mentor: {
-          select: {
-            firstName: true,
-            lastName: true,
-            email: true
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true
+              }
+            }
           }
-        }
+        },
+        materials: true,
+        assignments: true
       }
     });
 
@@ -464,22 +504,46 @@ export const createCourse: RequestHandler = async (req, res) => {
 
 export const getCourses: RequestHandler = async (req, res) => {
   try {
-    const { track, cohortId } = req.query;
+    const { track, cohortId, mentorId } = req.query;
 
     const where: any = {};
     if (track) where.track = track;
     if (cohortId) where.cohortId = cohortId;
+    if (mentorId) where.mentorId = mentorId;
 
     const courses = await prisma.course.findMany({
       where,
       include: {
         cohort: true,
         mentor: {
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true
+              }
+            }
+          }
+        },
+        students: {
           select: {
+            userId: true,
             firstName: true,
             lastName: true,
-            email: true,
-            expertise: true
+            email: true
+          }
+        },
+        materials: {
+          orderBy: { weekNumber: 'asc' }
+        },
+        assignments: {
+          include: {
+            _count: {
+              select: {
+                submissions: true
+              }
+            }
           }
         }
       },
@@ -914,76 +978,7 @@ export const getAssessmentProgress: RequestHandler = async (req, res) => {
   }
 };
 
-// Evaluate assessment and move to next stage
-// export const evaluateAssessment: RequestHandler = async (req, res) => {
-//   try {
-//     const { applicantId, score, feedback, passed, nextStage } = req.body;
 
-//     if (!applicantId || passed === undefined) {
-//       return responseObject({
-//         res,
-//         statusCode: HttpStatusCode.BAD_REQUEST,
-//         message: getMessage('ADMIN.ERRORS.EVALUATION_REQUIRED_FIELDS')
-//       });
-//     }
-
-//     const applicant = await prisma.applicant.findUnique({
-//       where: { id: applicantId },
-//       include: { assessment: true }
-//     });
-
-//     if (!applicant || !applicant.assessment) {
-//       return responseObject({
-//         res,
-//         statusCode: HttpStatusCode.NOT_FOUND,
-//         message: getMessage('ADMIN.ERRORS.APPLICANT_ASSESSMENT_NOT_FOUND')
-//       });
-//     }
-
-//     // Update assessment with evaluation
-//     await prisma.assessment.update({
-//       where: { applicantId },
-//       data: {
-//         reviewedAt: new Date(),
-//       }
-//     });
-
-//     // Determine next status
-//     let nextStatus: ApplicationStatus;
-//     if (passed) {
-//       nextStatus = nextStage === 'INTERVIEW' ? 'INTERVIEW_SCHEDULED' : 'ACCEPTED';
-//     } else {
-//       nextStatus = 'REJECTED';
-//     }
-
-//     // Update applicant status
-//     await prisma.applicant.update({
-//       where: { id: applicantId },
-//       data: { applicationStatus: nextStatus }
-//     });
-
-//     responseObject({
-//       res,
-//       statusCode: HttpStatusCode.OK,
-//       message: passed 
-//         ? getMessage('ADMIN.SUCCESS.ASSESSMENT_PASSED') 
-//         : getMessage('ADMIN.SUCCESS.ASSESSMENT_FAILED'),
-//       payload: {
-//         applicantId,
-//         status: nextStatus,
-//         passed
-//       }
-//     });
-  
-//   } catch (error) {
-//     Logger.error('Evaluate assessment error:', error);
-//     responseObject({
-//       res,
-//       statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
-//       message: getMessage('ADMIN.ERRORS.INTERNAL_SERVER')
-//     });
-//   }
-// };
 
 export const evaluateAssessment: RequestHandler = async (req, res) => {
   try {
@@ -1652,5 +1647,212 @@ const getTrackInstructions = (track: Track, generalInstructions?: string) => {
   return generalInstructions 
     ? `${generalInstructions}\n\n${specificInstructions}`
     : specificInstructions;
+};
+
+
+
+export const addCourseMaterial: RequestHandler = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { title, description, fileUrl, content, weekNumber } = req.body;
+
+    if (!title || !weekNumber) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('ADMIN.ERRORS.MATERIAL_REQUIRED_FIELDS')
+      });
+    }
+
+    // Verify course exists
+    const course = await prisma.course.findUnique({
+      where: { id: courseId }
+    });
+
+    if (!course) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: getMessage('ADMIN.ERRORS.COURSE_NOT_FOUND')
+      });
+    }
+
+    const material = await prisma.courseMaterial.create({
+      data: {
+        title,
+        description,
+        fileUrl,
+        content,
+        weekNumber: parseInt(weekNumber),
+        courseId
+      }
+    });
+
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.CREATED,
+      message: getMessage('ADMIN.SUCCESS.MATERIAL_ADDED'),
+      payload: { material }
+    });
+    
+  } catch (error) {
+    Logger.error('Add course material error:', error);
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('ADMIN.ERRORS.INTERNAL_SERVER')
+    });
+  }
+};
+
+
+export const createAssignment: RequestHandler = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { title, description, instructions, dueDate, maxScore } = req.body;
+
+    if (!title || !description || !instructions || !dueDate) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('ADMIN.ERRORS.ASSIGNMENT_REQUIRED_FIELDS')
+      });
+    }
+
+    // Verify course exists
+    const course = await prisma.course.findUnique({
+      where: { id: courseId }
+    });
+
+    if (!course) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: getMessage('ADMIN.ERRORS.COURSE_NOT_FOUND')
+      });
+    }
+
+    const assignment = await prisma.assignment.create({
+      data: {
+        title,
+        description,
+        instructions,
+        dueDate: new Date(dueDate),
+        maxScore: maxScore || 100,
+        courseId
+      }
+    });
+
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.CREATED,
+      message: getMessage('ADMIN.SUCCESS.ASSIGNMENT_CREATED'),
+      payload: { assignment }
+    });
+    
+  } catch (error) {
+    Logger.error('Create assignment error:', error);
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('ADMIN.ERRORS.INTERNAL_SERVER')
+    });
+  }
+};
+
+// Assign students to course
+export const assignStudentsToCourse: RequestHandler = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { studentIds } = req.body;
+
+    if (!studentIds || !Array.isArray(studentIds)) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('ADMIN.ERRORS.STUDENT_IDS_REQUIRED')
+      });
+    }
+
+    // Verify course exists and get track
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      select: { track: true, id: true }
+    });
+
+    if (!course) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: getMessage('ADMIN.ERRORS.COURSE_NOT_FOUND')
+      });
+    }
+
+    const results = [];
+    const failed = [];
+
+    for (const studentId of studentIds) {
+      try {
+        const student = await prisma.studentProfile.findUnique({
+          where: { userId: studentId },
+          include: { user: true }
+        });
+
+        if (!student) {
+          failed.push({ studentId, error: 'Student not found' });
+          continue;
+        }
+
+        // Check if student track matches course track
+        if (student.track !== course.track) {
+          failed.push({ 
+            studentId, 
+            error: `Student track (${student.track}) doesn't match course track (${course.track})` 
+          });
+          continue;
+        }
+
+        // Connect student to course using the many-to-many relation
+        await prisma.course.update({
+          where: { id: courseId },
+          data: {
+            students: {
+              connect: { userId: studentId }
+            }
+          }
+        });
+
+        results.push({
+          studentId,
+          name: `${student.firstName} ${student.lastName}`,
+          email: student.email,
+          track: student.track
+        });
+      } catch (error: any) {
+        failed.push({
+          studentId,
+          error: error.message
+        });
+      }
+    }
+
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      message: getMessage('ADMIN.SUCCESS.STUDENTS_ASSIGNED_TO_COURSE'),
+      payload: {
+        successful: results,
+        failed
+      }
+    });
+    
+  } catch (error) {
+    Logger.error('Assign students to course error:', error);
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('ADMIN.ERRORS.INTERNAL_SERVER')
+    });
+  }
 };
 

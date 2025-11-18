@@ -19,7 +19,10 @@ import {
   updateApplicantStatus,
   evaluateInterview,
   scheduleInterview,
-  assignStudentToCohort
+  assignStudentToCohort,
+   addCourseMaterial,
+  createAssignment,
+  assignStudentsToCourse
 } from '../controllers/adminController';
 import { urls } from '../constants/urls';
 import { Role } from '@prisma/client';
@@ -55,7 +58,9 @@ router.post(urls.admin.createMentor().path, validateCreateMentor, createMentorAc
 // Course routes with validation
 router.post(urls.admin.createCourse().path, validateCreateCourse,  createCourse);
 router.get(urls.admin.courses().path, getCourses);
-
+router.post(urls.admin.courseMaterials().path, addCourseMaterial);
+router.post(urls.admin.courseAssignments().path, createAssignment);
+router.post(urls.admin.assignStudentsToCourse().path, assignStudentsToCourse);
 // User management routes
 router.get(urls.user_management.getAll().path, getUsersByTrack);
 
