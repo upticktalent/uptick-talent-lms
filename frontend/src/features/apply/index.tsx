@@ -23,6 +23,7 @@ import { Track } from './components/Track';
 import { Tools } from './components/Tools';
 import { Referral } from './components/Referral';
 import { Review } from './components/Review';
+import { SuccessModal } from './components/SuccessModal';
 
 const i18n = getters.geti18ns().en.apply;
 
@@ -104,6 +105,8 @@ export const ApplicationForm = () => {
 
   const queryClient = useQueryClient();
 
+  const [showSuccessModal, setShowSuccessModal] = React.useState(false);
+
   // Load draft from local storage
   const [initialValues] = React.useState(
     getSavedDraft() || defaultInitialValues
@@ -155,9 +158,8 @@ export const ApplicationForm = () => {
       return client.post(urls.APPLY, payload);
     },
     onSuccess: () => {
-      toast.success(i18n.toast.success);
+      setShowSuccessModal(true);
       clearSavedDraft();
-      // TODO: Redirect to a thank you page
     },
     onError: error => {
       toast.error(getErrorMessage(error, i18n.toast.error));
@@ -189,7 +191,7 @@ export const ApplicationForm = () => {
       onSubmit={handleSubmit}
       validateOnMount={true}
     >
-      {({ isSubmitting, isValid }) => (
+      {({ isSubmitting, isValid, values }) => (
         <Form>
           <AutoSaveHandler />
           
@@ -209,6 +211,12 @@ export const ApplicationForm = () => {
             isLastStep={isLastStep}
             isSubmitting={isSubmitting}
             isValid={isValid}
+          />
+
+          <SuccessModal 
+            isOpen={showSuccessModal} 
+            onClose={() => setShowSuccessModal(false)}
+            email={values.email}
           />
         </Form>
       )}
