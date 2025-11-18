@@ -110,7 +110,7 @@ export function ApplicantStatsDashboard() {
       <div className="container mx-auto px-4 py-8 md:py-12 lg:py-16 max-w-7xl">
         <header className="mb-10 md:mb-14">
           <h1 className="font-bold text-3xl md:text-4xl lg:text-5xl text-foreground mb-3 tracking-tight">
-            Statistics Dashboard
+            Applicant Statistics 
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl font-normal">
             Overview of key applicant metrics and trends
