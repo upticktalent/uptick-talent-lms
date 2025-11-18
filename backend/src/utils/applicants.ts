@@ -51,7 +51,13 @@ const emptyToNull = (val: any) => (val === "" ? null : val);
 export const createApplicationSchema = z.object({
   firstName: z.string().min(3).trim(),
   lastName: z.string().min(3).trim(),
-  email: z.string().email(),
+  email: z.string()
+  .regex(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/, "Invalid email format")
+  .refine(
+    (val) => !/\.([a-zA-Z]{2,})\.\1$/.test(val),
+    "Invalid email: repeated domain extension"
+  ),
+
   phoneNumber: z
     .string()
     .min(7, "Phone number must be at least 7 digits")

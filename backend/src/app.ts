@@ -4,12 +4,12 @@ import helmet from "helmet";
 import compression from "compression";
 import rateLimit from "express-rate-limit";
 import { getters } from "@config";
-import { loadServices } from "./loader";
+// import { loadServices } from "./loader";
 import { Logger } from "./constants/logger";
 import { EnvironmentConfig } from "./constants/environment";
-import router from "./routes/applicants.routes";
+// import router from "./routes/applicants.routes";
 import errorHandlerMiddleWare from "./Middlware/ErrorHandlerMiddleware";
-import { ENDPOINTS } from "./constants/endpoints";
+// import { ENDPOINTS } from "./constants/endpoints";
 import { env } from "./config/dynamicEnv";
 import { responseObject } from '@utils';
 import { HttpStatusCode } from '@config';
@@ -83,20 +83,20 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 
 const allowedOrigins = env.ALLOWED_ORIGINS;
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true, 
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  })
-);
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+//       if (!origin) return callback(null, true);
+//       if (allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true, 
+//     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+//   })
+// );
 
 
 

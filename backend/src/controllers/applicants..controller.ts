@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { PrismaClient } from "@prisma/client";
+import { ApplicationStatus, PrismaClient } from "@prisma/client";
 import { createApplicationSchema } from "../utils/applicants";
-import { sendApplicationEmail } from "../utils/email";
+import { sendApplicationEmail } from "../utils/Emails/ApplicationEmail";
 import { responseObject } from "../utils";
 import { HttpStatusCode } from "../config";
 import { Logger } from "../config/logger";
@@ -49,7 +49,7 @@ export const createApplicant = async (
       status,
     } = parsed.data;
 
-    const newApplicant = await prisma.application.create({
+    const newApplicant = await prisma.applicant.create({
       data: {
         firstName,
         lastName,
@@ -68,9 +68,8 @@ export const createApplicant = async (
         mobileToolsOther,
         referralSource,
         referralSourceOther,
-        status,
       },
-      include: { assessments: true },
+      include: { assessment: true },
     });
 
     const emailSent = await sendApplicationEmail(
@@ -107,8 +106,8 @@ export const getAllApplicants = async (
   next: NextFunction,
 ) => {
   try {
-    const applicants = await prisma.application.findMany({
-      where: { status: "PENDING" },
+    const applicants = await prisma.applicant.findMany({
+      where: { applicationStatus: ApplicationStatus.PENDING },
       take: 50,
       skip: 0,
       orderBy: { createdAt: "asc" },

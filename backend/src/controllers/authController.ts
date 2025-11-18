@@ -1,7 +1,7 @@
 import { Request, Response, RequestHandler } from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import { AuthRequest, generateToken } from '../middleware/auth';
 import { sendPasswordResetEmail, sendPasswordChangedEmail } from '../utils/EmailService';
 import { Logger } from '../constants/logger';
@@ -16,7 +16,7 @@ export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    console.log('🔐 Login Attempt:', req.body);
+    console.log('Login Attempt:', req.body);
     
     if (!email || !password) {
       return responseObject({
@@ -54,7 +54,7 @@ export const login = async (req: Request, res: Response) => {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      role: user.role,
+      role: user.role as Role,
       createdAt: user.createdAt
     };
 
@@ -109,7 +109,10 @@ export const getMe: RequestHandler = async (req, res) => {
       statusCode: HttpStatusCode.OK,
       message: getMessage('AUTH.SUCCESS.PROFILE_RETRIEVED'),
       payload: {
-        user
+        user: {
+          ...user,
+          role: user.role as Role
+        }
       },
       status: true
     });
@@ -168,7 +171,10 @@ export const updateProfile: RequestHandler = async (req, res) => {
       statusCode: HttpStatusCode.OK,
       message: getMessage('AUTH.SUCCESS.PROFILE_UPDATED'),
       payload: {
-        user  
+        user: {
+          ...user,
+          role: user.role as Role
+        }
       },
       status: true
     });
@@ -252,13 +258,11 @@ export const changePassword: RequestHandler = async (req, res) => {
   }
 };
 
-
-
 export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
 
-    console.log('🔐 Forgot Password Request:', { email });
+    console.log('Forgot Password Request:', { email });
 
     if (!email) {
       return responseObject({
@@ -272,11 +276,10 @@ export const forgotPassword = async (req: Request, res: Response) => {
       where: { email }
     });
 
-    console.log('👤 User found:', !!user);
+    console.log('User found:', !!user);
 
-    // Always return success even if user doesn't exist (for security)
     if (!user) {
-      console.log('📧 User not found, but returning success for security');
+      console.log('User not found, but returning success for security');
       return responseObject({
         res,
         statusCode: HttpStatusCode.OK,
@@ -284,20 +287,17 @@ export const forgotPassword = async (req: Request, res: Response) => {
       });
     }
 
-    // Generate reset token
     const resetToken = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-    console.log('🔑 Generated reset token:', resetToken);
+    console.log('Generated reset token:', resetToken);
 
-    // Delete any existing reset tokens for this email
     await prisma.passwordResetToken.deleteMany({
       where: { email }
     });
 
-    console.log('🗑️ Deleted existing reset tokens');
+    console.log('Deleted existing reset tokens');
 
-    // Create new reset token
     await prisma.passwordResetToken.create({
       data: {
         email,
@@ -306,22 +306,19 @@ export const forgotPassword = async (req: Request, res: Response) => {
       }
     });
 
-    console.log('💾 Saved new reset token to database');
+    console.log('Saved new reset token to database');
 
-    // Send reset email
     if (!EnvironmentConfig.IS_TEST) {
-      console.log('📤 Attempting to send reset email via Resend');
+      console.log('Attempting to send reset email via Resend');
       await sendPasswordResetEmail(email, resetToken);
-      console.log('✅ Email process completed');
+      console.log('Email process completed');
     } else {
-      console.log('🧪 Test environment - skipping email send');
+      console.log('Test environment - skipping email send');
     }
 
-    // For development, you can optionally return the token
     const responsePayload = process.env.NODE_ENV === 'development' ? {
       resetToken: resetToken,
       email: email,
-      // note: 'This is only returned in development mode for testing'
     } : undefined;
 
     responseObject({
@@ -332,12 +329,11 @@ export const forgotPassword = async (req: Request, res: Response) => {
     });
    
   } catch (error: any) {
-    console.error('❌ Forgot password error details:', error);
+    console.error('Forgot password error details:', error);
     Logger.error('Forgot password error:', error);
     
-    // Check if it's an email error and handle gracefully
     if (error.message.includes('email') || error.message.includes('Email')) {
-      console.log('⚠️ Email error, but returning success to user');
+      console.log('Email error, but returning success to user');
       return responseObject({
         res,
         statusCode: HttpStatusCode.OK,
@@ -352,9 +348,6 @@ export const forgotPassword = async (req: Request, res: Response) => {
     });
   }
 };
-
-
-
 
 export const resetPassword = async (req: Request, res: Response) => {
   try {
@@ -376,12 +369,10 @@ export const resetPassword = async (req: Request, res: Response) => {
       });
     }
 
-    // Find valid reset token
     const resetToken = await prisma.passwordResetToken.findUnique({
       where: { token },
     });
 
-    // Check if token exists and is not expired
     if (!resetToken || resetToken.expiresAt < new Date()) {
       return responseObject({
         res,
@@ -390,7 +381,6 @@ export const resetPassword = async (req: Request, res: Response) => {
       });
     }
 
-    // Find user by email from the token
     const user = await prisma.user.findUnique({
       where: { email: resetToken.email }
     });
@@ -403,10 +393,8 @@ export const resetPassword = async (req: Request, res: Response) => {
       });
     }
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update user password
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -415,12 +403,10 @@ export const resetPassword = async (req: Request, res: Response) => {
       }
     });
 
-    // Delete used reset token
     await prisma.passwordResetToken.delete({
       where: { id: resetToken.id }
     });
 
-    // Send password changed notification
     if (!EnvironmentConfig.IS_TEST) {
       await sendPasswordChangedEmail(user.email);
     }

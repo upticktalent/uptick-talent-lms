@@ -42,38 +42,38 @@ import { validatePagination } from '../middleware/validation';
 const router = express.Router();
 
 // All routes require admin authentication
-router.use(authenticate, authorize(Role.ADMIN));
+// router.use(authenticate, authorize(Role.ADMIN));
 
 // Cohort routes with validation
-router.post(urls.admin.createCohort().path, validateCreateCohort, createCohort);
-router.get(urls.admin.cohorts().path, getCohorts);
+router.post(urls.admin.createCohort().path, authenticate, authorize(Role.ADMIN), validateCreateCohort, createCohort);
+router.get(urls.admin.cohorts().path, authenticate, authorize(Role.ADMIN), getCohorts);
 
 // User creation routes with validation
-router.post(urls.admin.createStudent().path, validateCreateStudent, createStudentAccount);
-router.post(urls.admin.createMentor().path, validateCreateMentor, createMentorAccount);
+router.post(urls.admin.createStudent().path,  authenticate, authorize(Role.ADMIN), validateCreateStudent, createStudentAccount);
+router.post(urls.admin.createMentor().path,  authenticate, authorize(Role.ADMIN), validateCreateMentor, createMentorAccount);
 
 // Course routes with validation
-router.post(urls.admin.createCourse().path, validateCreateCourse,  createCourse);
-router.get(urls.admin.courses().path, getCourses);
+router.post(urls.admin.createCourse().path,   authenticate, authorize(Role.ADMIN), validateCreateCourse,  createCourse);
+router.get(urls.admin.courses().path,   authenticate, authorize(Role.ADMIN), getCourses);
 
 // User management routes
-router.get(urls.user_management.getAll().path, getUsersByTrack);
+router.get(urls.user_management.getAll().path,authenticate, authorize(Role.ADMIN), getUsersByTrack);
 
 // Applicant management routes with validation
-router.get(urls.admin.applicants().path, validatePagination, getApplicants);
-router.post(urls.admin.emailApplicants().path, validateEmailApplicants, emailApplicants);
-router.post(urls.admin.sendAssessment().path, validateSendAssessment, sendAssessment);
-router.get(urls.admin.assessmentProgress().path, validatePagination, getAssessmentProgress);
-router.post(urls.admin.evaluateAssessment().path, validateEvaluateAssessment, evaluateAssessment);
-router.put(urls.admin.updateApplicantStatus().path, validateUpdateApplicantStatus, updateApplicantStatus);
+router.get(urls.admin.applicants().path,   authenticate, authorize(Role.ADMIN), validatePagination, getApplicants);
+router.post(urls.admin.emailApplicants().path,   authenticate, authorize(Role.ADMIN), validateEmailApplicants, emailApplicants);
+router.post(urls.admin.sendAssessment().path,   authenticate, authorize(Role.ADMIN), validateSendAssessment, sendAssessment);
+router.get(urls.admin.assessmentProgress().path,   authenticate, authorize(Role.ADMIN),validatePagination, getAssessmentProgress);
+router.post(urls.admin.evaluateAssessment().path,   authenticate, authorize(Role.ADMIN), validateEvaluateAssessment, evaluateAssessment);
+router.put(urls.admin.updateApplicantStatus().path,   authenticate, authorize(Role.ADMIN), validateUpdateApplicantStatus, updateApplicantStatus);
 router.put(urls.admin.assignCohort().path, authenticate, authorize(Role.ADMIN), assignStudentToCohort)
 
 // Student creation from applicants with validation
-router.post(urls.admin.createStudentFromApplicant().path, validateCreateStudentFromApplicant, checkCohortExists, createStudentFromApplicant);
-router.post(urls.admin.bulkCreateStudents().path, validateBulkCreateStudents, checkCohortExists, bulkCreateStudents);
+router.post(urls.admin.createStudentFromApplicant().path,  authenticate, authorize(Role.ADMIN), validateCreateStudentFromApplicant, checkCohortExists, createStudentFromApplicant);
+router.post(urls.admin.bulkCreateStudents().path,   authenticate, authorize(Role.ADMIN), validateBulkCreateStudents, checkCohortExists, bulkCreateStudents);
 
 // Dashboard
-router.get(urls.admin.dashboard().path, getAdminDashboard);
+router.get(urls.admin.dashboard().path,  authenticate, authorize(Role.ADMIN), getAdminDashboard);
 router.post(urls.applicant.interview().path, authenticate, authorize(Role.ADMIN), evaluateInterview);
 router.post(urls.applicant.schedule().path, authenticate, authorize(Role.ADMIN), scheduleInterview);
 

@@ -1,6 +1,6 @@
 import { Resend } from "resend";
-import { Logger } from "../config/logger";
-import { env } from "../config/dynamicEnv";
+import { Logger } from "../../config/logger";
+import { env } from "../../config/dynamicEnv";
 
 
 const resend = new Resend(env.RESEND_API_KEY);

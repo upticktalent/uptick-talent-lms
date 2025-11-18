@@ -1,5 +1,7 @@
-import { Response, RequestHandler } from 'express';
-import { PrismaClient, Role, Prisma } from '@prisma/client';
+// src/controllers/userController.ts (or users.controller.ts)
+
+import { RequestHandler } from 'express';
+import { PrismaClient, Role, Track, Prisma } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { AuthRequest } from '../middleware/auth';
 import { PASSWORD_CONSTANTS } from '../constants/password';
@@ -23,50 +25,69 @@ const generateRandomPassword = (length: number = PASSWORD_CONSTANTS.DEFAULT_LENG
 
 export const createUser: RequestHandler = async (req, res) => {
   try {
-    const { email, firstName, lastName, role = Role.STUDENT, track } = req.body;
+    const { email, firstName, lastName, role = Role.STUDENT, track } = req.body as {
+      email: string;
+      firstName: string;
+      lastName: string;
+      role?: Role;
+      track?: Track;
+    };
 
-    // Split guards with clear individual messages using i18n
+    // === VALIDATION ===
     if (!email) {
       return responseObject({
         res,
         statusCode: HttpStatusCode.BAD_REQUEST,
-        message: getMessage('USERS.ERRORS.EMAIL_REQUIRED')
+        message: getMessage('USERS.ERRORS.EMAIL_REQUIRED'),
       });
     }
-
     if (!firstName) {
       return responseObject({
         res,
         statusCode: HttpStatusCode.BAD_REQUEST,
-        message: getMessage('USERS.ERRORS.FIRST_NAME_REQUIRED')
+        message: getMessage('USERS.ERRORS.FIRST_NAME_REQUIRED'),
       });
     }
-
     if (!lastName) {
       return responseObject({
         res,
         statusCode: HttpStatusCode.BAD_REQUEST,
-        message: getMessage('USERS.ERRORS.LAST_NAME_REQUIRED')
+        message: getMessage('USERS.ERRORS.LAST_NAME_REQUIRED'),
       });
     }
-
-    if (![Role.STUDENT, Role.MENTOR].includes(role)) {
+    if (role !== Role.STUDENT && role !== Role.MENTOR) {
       return responseObject({
         res,
         statusCode: HttpStatusCode.BAD_REQUEST,
-        message: getMessage('USERS.ERRORS.ROLE_INVALID')
+        message: getMessage('USERS.ERRORS.ROLE_INVALID'),
       });
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    });
+    // === TRACK VALIDATION (required for STUDENT & MENTOR) ===
+    if ((role === Role.STUDENT || role === Role.MENTOR)) {
+      if (!track) {
+        return responseObject({
+          res,
+          statusCode: HttpStatusCode.BAD_REQUEST,
+          message: getMessage('USERS.ERRORS.TRACK_REQUIRED'),
+        });
+      }
+      if (!Object.values(Track).includes(track)) {
+        return responseObject({
+          res,
+          statusCode: HttpStatusCode.BAD_REQUEST,
+          message: getMessage('USERS.ERRORS.TRACK_INVALID'),
+        });
+      }
+    }
 
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return responseObject({
         res,
         statusCode: HttpStatusCode.BAD_REQUEST,
-        message: getMessage('USERS.ERRORS.EMAIL_EXISTS')
+        message: getMessage('USERS.ERRORS.EMAIL_EXISTS'),
       });
     }
 
@@ -81,8 +102,7 @@ export const createUser: RequestHandler = async (req, res) => {
       role,
     };
 
-    // Create the complete user data with conditional profile
-    let userData: Prisma.UserCreateInput;
+    let userData: Prisma.UserCreateInput = baseUserData;
 
     if (role === Role.STUDENT) {
       userData = {
@@ -91,10 +111,10 @@ export const createUser: RequestHandler = async (req, res) => {
           create: {
             email,
             firstName,
-            track: track || 'default-track',
-            lastName
-          }
-        }
+            lastName,
+            track: track as Track,
+          },
+        },
       };
     } else if (role === Role.MENTOR) {
       userData = {
@@ -103,13 +123,11 @@ export const createUser: RequestHandler = async (req, res) => {
           create: {
             email,
             firstName,
-            track: track || 'default-track',
-            lastName
-          }
-        }
+            lastName,
+            track: track as Track,
+          },
+        },
       };
-    } else {
-      userData = baseUserData;
     }
 
     const user = await prisma.user.create({
@@ -122,39 +140,42 @@ export const createUser: RequestHandler = async (req, res) => {
         role: true,
         createdAt: true,
         studentProfile: role === Role.STUDENT,
-        mentorProfile: role === Role.MENTOR
-      }
+        mentorProfile: role === Role.MENTOR,
+      },
     });
 
-    responseObject({
-      statusCode: HttpStatusCode.CREATED,
+    return responseObject({
       res,
+      statusCode: HttpStatusCode.CREATED,
       message: getMessage('USERS.SUCCESS.CREATED'),
       payload: {
         user,
-        temporaryPassword: EnvironmentConfig.IS_DEVELOPMENT ? randomPassword : undefined
-      }
+        temporaryPassword: EnvironmentConfig.IS_DEVELOPMENT ? randomPassword : undefined,
+      },
     });
-    
   } catch (error) {
     Logger.error('Create user error:', error);
-    responseObject({
-      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+    return responseObject({
       res,
-      message: getMessage('USERS.ERRORS.INTERNAL_CREATION')
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('USERS.ERRORS.INTERNAL_CREATION'),
     });
   }
 };
 
 export const getAllUsers: RequestHandler = async (req, res) => {
   try {
-    const { role, page = 1, limit = 10 } = req.query;
-    
+    const { role, page = 1, limit = 10 } = req.query as {
+      role?: string;
+      page?: string;
+      limit?: string;
+    };
+
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
     const where: Prisma.UserWhereInput = {};
-    if (role && [Role.ADMIN, Role.STUDENT, Role.MENTOR].includes(role as Role)) {
+    if (role && Object.values(Role).includes(role as Role)) {
       where.role = role as Role;
     }
 
@@ -171,20 +192,18 @@ export const getAllUsers: RequestHandler = async (req, res) => {
           updatedAt: true,
           adminProfile: true,
           mentorProfile: true,
-          studentProfile: true
+          studentProfile: true,
         },
-        orderBy: {
-          createdAt: 'desc'
-        },
+        orderBy: { createdAt: 'desc' },
         skip,
-        take
+        take,
       }),
-      prisma.user.count({ where })
+      prisma.user.count({ where }),
     ]);
 
-    responseObject({
-      statusCode: HttpStatusCode.OK,
+    return responseObject({
       res,
+      statusCode: HttpStatusCode.OK,
       message: getMessage('USERS.SUCCESS.LIST_RETRIEVED'),
       payload: {
         users,
@@ -192,16 +211,16 @@ export const getAllUsers: RequestHandler = async (req, res) => {
           page: Number(page),
           limit: Number(limit),
           total,
-          pages: Math.ceil(total / Number(limit))
-        }
-      }
+          pages: Math.ceil(total / Number(limit)),
+        },
+      },
     });
   } catch (error) {
     Logger.error('Get all users error:', error);
-    responseObject({
-      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+    return responseObject({
       res,
-      message: getMessage('USERS.ERRORS.INTERNAL_SERVER')
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('USERS.ERRORS.INTERNAL_SERVER'),
     });
   }
 };
@@ -222,32 +241,30 @@ export const getUserById: RequestHandler = async (req, res) => {
         updatedAt: true,
         adminProfile: true,
         mentorProfile: true,
-        studentProfile: true
-      }
+        studentProfile: true,
+      },
     });
 
     if (!user) {
       return responseObject({
         res,
         statusCode: HttpStatusCode.NOT_FOUND,
-        message: getMessage('USERS.ERRORS.NOT_FOUND')
+        message: getMessage('USERS.ERRORS.NOT_FOUND'),
       });
     }
 
-    responseObject({
-      statusCode: HttpStatusCode.OK,
+    return responseObject({
       res,
+      statusCode: HttpStatusCode.OK,
       message: getMessage('USERS.SUCCESS.RETRIEVED'),
-      payload: {
-        user
-      }
+      payload: { user },
     });
   } catch (error) {
     Logger.error('Get user by id error:', error);
-    responseObject({
-      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+    return responseObject({
       res,
-      message: getMessage('USERS.ERRORS.INTERNAL_SERVER')
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('USERS.ERRORS.INTERNAL_SERVER'),
     });
   }
 };
@@ -257,26 +274,20 @@ export const updateUser: RequestHandler = async (req, res) => {
     const { id } = req.params;
     const { firstName, lastName, role } = req.body;
 
-    const existingUser = await prisma.user.findUnique({
-      where: { id }
-    });
-
+    const existingUser = await prisma.user.findUnique({ where: { id } });
     if (!existingUser) {
       return responseObject({
         res,
         statusCode: HttpStatusCode.NOT_FOUND,
-        message: getMessage('USERS.ERRORS.NOT_FOUND')
+        message: getMessage('USERS.ERRORS.NOT_FOUND'),
       });
     }
 
-    const updateData: Prisma.UserUpdateInput = {
-      updatedAt: new Date()
-    };
-
+    const updateData: Prisma.UserUpdateInput = { updatedAt: new Date() };
     if (firstName) updateData.firstName = firstName;
     if (lastName) updateData.lastName = lastName;
-    if (role && [Role.ADMIN, Role.STUDENT, Role.MENTOR].includes(role)) {
-      updateData.role = role;
+    if (role && Object.values(Role).includes(role as Role)) {
+      updateData.role = role as Role;
     }
 
     const user = await prisma.user.update({
@@ -289,25 +300,22 @@ export const updateUser: RequestHandler = async (req, res) => {
         lastName: true,
         role: true,
         createdAt: true,
-        updatedAt: true
-      }
+        updatedAt: true,
+      },
     });
 
-    responseObject({
+    return responseObject({
       res,
       statusCode: HttpStatusCode.OK,
       message: getMessage('USERS.SUCCESS.UPDATED'),
-      payload: {
-        user
-      }
+      payload: { user },
     });
-    
   } catch (error) {
     Logger.error('Update user error:', error);
-    responseObject({
-      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+    return responseObject({
       res,
-      message: getMessage('USERS.ERRORS.INTERNAL_SERVER')
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('USERS.ERRORS.INTERNAL_SERVER'),
     });
   }
 };
@@ -316,15 +324,12 @@ export const resetUserPassword: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const user = await prisma.user.findUnique({
-      where: { id }
-    });
-
+    const user = await prisma.user.findUnique({ where: { id } });
     if (!user) {
       return responseObject({
         res,
         statusCode: HttpStatusCode.NOT_FOUND,
-        message: getMessage('USERS.ERRORS.NOT_FOUND')
+        message: getMessage('USERS.ERRORS.NOT_FOUND'),
       });
     }
 
@@ -333,27 +338,23 @@ export const resetUserPassword: RequestHandler = async (req, res) => {
 
     await prisma.user.update({
       where: { id },
-      data: {
-        password: hashedPassword,
-        updatedAt: new Date()
-      }
+      data: { password: hashedPassword, updatedAt: new Date() },
     });
 
-    responseObject({
-      statusCode: HttpStatusCode.OK,
+    return responseObject({
       res,
+      statusCode: HttpStatusCode.OK,
       message: getMessage('USERS.SUCCESS.PASSWORD_RESET'),
       payload: {
-        newPassword: EnvironmentConfig.IS_DEVELOPMENT ? newPassword : undefined
-      }
+        newPassword: EnvironmentConfig.IS_DEVELOPMENT ? newPassword : undefined,
+      },
     });
-   
   } catch (error) {
     Logger.error('Reset user password error:', error);
-    responseObject({
-      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+    return responseObject({
       res,
-      message: getMessage('USERS.ERRORS.INTERNAL_SERVER')
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('USERS.ERRORS.INTERNAL_SERVER'),
     });
   }
 };
@@ -361,44 +362,38 @@ export const resetUserPassword: RequestHandler = async (req, res) => {
 export const deleteUser: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
+    const authReq = req as AuthRequest;
 
-    const user = await prisma.user.findUnique({
-      where: { id }
-    });
-
+    const user = await prisma.user.findUnique({ where: { id } });
     if (!user) {
       return responseObject({
         res,
         statusCode: HttpStatusCode.NOT_FOUND,
-        message: getMessage('USERS.ERRORS.NOT_FOUND')
+        message: getMessage('USERS.ERRORS.NOT_FOUND'),
       });
     }
-
-    const authReq = req as AuthRequest;
 
     if (user.id === authReq.user.id) {
       return responseObject({
         res,
         statusCode: HttpStatusCode.BAD_REQUEST,
-        message: getMessage('USERS.ERRORS.SELF_DELETE')
+        message: getMessage('USERS.ERRORS.SELF_DELETE'),
       });
     }
 
-    await prisma.user.delete({
-      where: { id }
-    });
+    await prisma.user.delete({ where: { id } });
 
-    responseObject({
-      statusCode: HttpStatusCode.OK,
+    return responseObject({
       res,
-      message: getMessage('USERS.SUCCESS.DELETED')
+      statusCode: HttpStatusCode.OK,
+      message: getMessage('USERS.SUCCESS.DELETED'),
     });
   } catch (error) {
     Logger.error('Delete user error:', error);
-    responseObject({
-      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+    return responseObject({
       res,
-      message: getMessage('USERS.ERRORS.INTERNAL_SERVER')
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('USERS.ERRORS.INTERNAL_SERVER'),
     });
   }
 };
