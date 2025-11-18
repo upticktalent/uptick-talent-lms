@@ -296,3 +296,160 @@ export const sendWelcomeEmail = async (email: string, firstName: string): Promis
     console.error('❌ Welcome email failed:', error);
   }
 };
+
+
+export const sendCredentialsEmail = async (
+  email: string, 
+  firstName: string, 
+  password: string, 
+  role: 'STUDENT' | 'MENTOR'
+): Promise<boolean> => {
+  try {
+    console.log('📧 Preparing to send credentials email to:', email);
+    
+    // Check if Resend API key is configured
+    if (!process.env.RESEND_API_KEY) {
+      console.warn('⚠️ RESEND_API_KEY not configured - simulating email send');
+      console.log('🔑 Credentials for development:');
+      console.log('   Email:', email);
+      console.log('   Password:', password);
+      console.log('   Role:', role);
+      return false; // Return false but don't throw error
+    }
+
+    if (!process.env.RESEND_FROM_EMAIL) {
+      console.error('❌ RESEND_FROM_EMAIL not configured');
+      return false;
+    }
+
+    const roleDisplay = role === 'STUDENT' ? 'Student' : 'Mentor';
+    
+    const { data, error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL,
+      to: email,
+      subject: `Welcome to Uptick Talent LMS - Your ${roleDisplay} Account`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                body { 
+                    font-family: Arial, sans-serif; 
+                    line-height: 1.6; 
+                    color: #333; 
+                    max-width: 600px; 
+                    margin: 0 auto; 
+                    padding: 20px; 
+                }
+                .header { 
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                    color: white; 
+                    padding: 30px; 
+                    text-align: center; 
+                    border-radius: 10px 10px 0 0; 
+                }
+                .content { 
+                    background: #f9f9f9; 
+                    padding: 30px; 
+                    border-radius: 0 0 10px 10px; 
+                }
+                .credentials-box { 
+                    background: white; 
+                    border: 2px solid #667eea; 
+                    padding: 20px; 
+                    margin: 20px 0; 
+                    border-radius: 5px; 
+                }
+                .login-button { 
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                    color: white; 
+                    padding: 12px 30px; 
+                    text-decoration: none; 
+                    border-radius: 5px; 
+                    display: inline-block; 
+                    margin: 10px 0; 
+                }
+                .footer { 
+                    text-align: center; 
+                    margin-top: 20px; 
+                    padding-top: 20px; 
+                    border-top: 1px solid #ddd; 
+                    color: #666; 
+                    font-size: 14px; 
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Uptick Talent LMS</h1>
+                <p>Welcome ${firstName}!</p>
+            </div>
+            <div class="content">
+                <h2>Your ${roleDisplay} Account is Ready</h2>
+                <p>Hello ${firstName},</p>
+                <p>Your ${roleDisplay.toLowerCase()} account has been created successfully. Here are your login credentials:</p>
+                
+                <div class="credentials-box">
+                    <h3>Login Details</h3>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Temporary Password:</strong> <code style="font-size: 16px; background: #f5f5f5; padding: 5px 10px; border-radius: 3px;">${password}</code></p>
+                    <p><strong>Role:</strong> ${roleDisplay}</p>
+                </div>
+                
+                <p>To get started, please login and change your password immediately:</p>
+                <div style="text-align: center;">
+                    <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" class="login-button">Login to Your Account</a>
+                </div>
+                
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0;"><strong>Security Notice:</strong> For security reasons, please change your password after your first login.</p>
+                </div>
+                
+                <p>If you have any questions, please contact our support team.</p>
+            </div>
+            <div class="footer">
+                <p>&copy; ${new Date().getFullYear()} Uptick Talent LMS. All rights reserved.</p>
+            </div>
+        </body>
+        </html>
+      `,
+      text: `
+        Welcome to Uptick Talent LMS - Your ${roleDisplay} Account
+        
+        Hello ${firstName},
+        
+        Your ${roleDisplay.toLowerCase()} account has been created successfully.
+        
+        Login Details:
+        - Email: ${email}
+        - Temporary Password: ${password}
+        - Role: ${roleDisplay}
+        
+        Login URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}/login
+        
+        Security Notice: For security reasons, please change your password after your first login.
+        
+        If you have any questions, please contact our support team.
+      `
+    });
+
+    if (error) {
+      console.error('❌ Resend API error:', error);
+      return false;
+    }
+
+    console.log('✅ Credentials email sent successfully via Resend:', data?.id);
+    return true;
+    
+  } catch (error: any) {
+    console.error('❌ Credentials email sending failed:', error);
+    
+    // For development, log the credentials instead of failing completely
+    console.log('🔑 DEVELOPMENT - Credentials for', email, ':');
+    console.log('   Password:', password);
+    console.log('   Role:', role);
+    
+    return false;
+  }
+};

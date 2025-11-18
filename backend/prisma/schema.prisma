@@ -191,9 +191,12 @@ model StudentProfile {
   cohortId  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cohort Cohort? @relation(fields: [cohortId], references: [id])
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cohort    Cohort?  @relation(fields: [cohortId], references: [id])
+  courses   Course[]
+  assignmentSubmission   AssignmentSubmission[]
 }
 
 model MentorProfile {
@@ -247,12 +250,67 @@ model Course {
   track       Track
   cohortId    String?
   mentorId    String?
-
-  cohort Cohort?        @relation(fields: [cohortId], references: [id], onDelete: Cascade)
-  mentor MentorProfile? @relation(fields: [mentorId], references: [id], onDelete: SetNull)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  
+  cohort      Cohort?       @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  mentor      MentorProfile? @relation(fields: [mentorId], references: [id], onDelete: SetNull)
+   students    StudentProfile[] 
+  materials   CourseMaterial[]
+  assignments Assignment[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
   @@map("courses")
+}
+
+model CourseMaterial {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  fileUrl     String?
+  content     String?
+  weekNumber  Int
+  courseId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("course_materials")
+}
+
+
+model Assignment {
+  id           String   @id @default(uuid())
+  title        String
+  description  String
+  instructions String
+  dueDate      DateTime
+  maxScore     Int      @default(100)
+  courseId     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  course       Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  submissions  AssignmentSubmission[]
+
+  @@map("assignments")
+}
+
+
+model AssignmentSubmission {
+  id           String   @id @default(uuid())
+  assignmentId String
+  studentId    String
+  fileUrl      String?
+  content      String?
+  submittedAt  DateTime @default(now())
+  grade        Int?
+  feedback     String?
+  gradedAt     DateTime?
+
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student      StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+  @@map("assignment_submissions")
 }

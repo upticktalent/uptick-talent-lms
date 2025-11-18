@@ -19,7 +19,10 @@ import {
   updateApplicantStatus,
   evaluateInterview,
   scheduleInterview,
-  assignStudentToCohort
+  assignStudentToCohort,
+   addCourseMaterial,
+  createAssignment,
+  assignStudentsToCourse
 } from '../controllers/adminController';
 import { urls } from '../constants/urls';
 import { Role } from '@prisma/client';

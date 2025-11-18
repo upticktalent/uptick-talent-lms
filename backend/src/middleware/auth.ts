@@ -118,17 +118,43 @@ export const authorize = (allowedRoles: Role | Role[]): RequestHandler => {
 };
 
 
-export function generateToken(userId: string): string {
-  const payload = { id: userId };
-  const secret = process.env.JWT_SECRET;
+// export function generateToken(userId: string): string {
+//   const payload = { id: userId };
+//   const secret = process.env.JWT_SECRET;
   
-  if (!secret) {
-    throw new Error('JWT_SECRET is not defined in environment variables');
-  }
+//   if (!secret) {
+//     throw new Error('JWT_SECRET is not defined in environment variables');
+//   }
 
-  return jwt.sign(payload, secret, { 
-    expiresIn: '24h'
-  });
+//   return jwt.sign(payload, secret, { 
+//     expiresIn: '24h'
+//   });
+// }
+
+
+export function generateToken(userId: string): string {
+  try {
+    console.log('🔑 Generating token for user:', userId);
+    
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not defined in environment variables');
+    }
+
+    const payload = { 
+      id: userId,
+      iat: Math.floor(Date.now() / 1000), // issued at
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { 
+      expiresIn: '24h'
+    });
+
+    console.log('✅ Token generated successfully');
+    return token;
+  } catch (error) {
+    console.error('❌ Token generation failed:', error);
+    throw error;
+  }
 }
 
 export const verifyToken = (token: string): any => {

@@ -173,22 +173,39 @@ export const i18n = {
     // ... keep the generic one for backward compatibility if needed
     MENTOR_REQUIRED_FIELDS: 'All mentor fields are required',
   },
-   'INTERVIEW_INVITATION': {
-    'TITLE': 'Interview Invitation - Uptick Talent Program',
-    'GREETING': 'Congratulations {firstName}!',
-    'INVITATION_TEXT': 'After reviewing your application, we\'re excited to invite you to an interview for the Uptick Talent Program.',
-    'DETAILS_TITLE': 'Interview Details',
-    'DATE_TIME': 'Date & Time',
-    'INTERVIEWER': 'Interviewer',
-    'MEETING_LINK': 'Meeting Link',
-    'ADDITIONAL_NOTES': 'Additional Notes',
-    'PREPARATION_TITLE': 'Preparation Instructions',
-    'RESCHEDULE_TITLE': 'Need to Reschedule?',
-    'RESCHEDULE_TEXT': 'If you need to reschedule or have any questions, please reply to this email at least 24 hours before your scheduled interview.',
-    'LATE_CANCELLATION_WARNING': 'Late cancellations or no-shows may affect your application status.',
-    'LOOKING_FORWARD': 'We\'re looking forward to learning more about you and your potential fit for our program!',
-    'SUBJECT': 'Interview Invitation - Uptick Talent Program'
+   INTERVIEW_INVITATION: {
+    TITLE: 'Interview Invitation - Uptick Talent Program',
+    GREETING: 'Congratulations {firstName}!',
+    INVITATION_TEXT: 'After reviewing your application, we\'re excited to invite you to an interview for the Uptick Talent Program.',
+    DETAILS_TITLE: 'Interview Details',
+    DATE_TIME: 'Date & Time',
+    INTERVIEWER: 'Interviewer',
+    MEETING_LINK: 'Meeting Link',
+    ADDITIONAL_NOTES: 'Additional Notes',
+    PREPARATION_TITLE: 'Preparation Instructions',
+    RESCHEDULE_TITLE: 'Need to Reschedule?',
+    RESCHEDULE_TEXT: 'If you need to reschedule or have any questions, please reply to this email at least 24 hours before your scheduled interview.',
+    LATE_CANCELLATION_WARNING: 'Late cancellations or no-shows may affect your application status.',
+    LOOKING_FORWARD: 'We\'re looking forward to learning more about you and your potential fit for our program!',
+    SUBJECT: 'Interview Invitation - Uptick Talent Program'
   },
+
+
+  COURSE: {
+    ERRORS: {
+      MATERIAL_TITLE_WEEK_REQUIRED: 'Title and week number are required for course material',
+      INVALID_WEEK_NUMBER : 'Week number must be a valid number',
+      ASSIGNMENT_REQUIRED_FIELDS : 'Title, description, instructions, and due date are required for assignments',
+      INVALID_DUE_DATE: 'Due date must be in the future',
+      STUDENT_IDS_REQUIRED: 'Student IDs array is required and must not be empty'
+    },
+    SUCCESS: {
+      MATERIAL_ADDED: 'Course material added successfully',
+      ASSIGNMENT_CREATED: 'Assignment created successfully',
+      STUDENTS_ASSIGNED: 'Students assigned to course successfully'
+    }
+  },
+  
       
       BULK: {
         TITLE: "Uptick Talent Announcement",

@@ -15,6 +15,7 @@ export const MainRouter = express.Router();
 MainRouter.use('/', authRoutes);
 MainRouter.use('/users', userRoutes);
 MainRouter.use('/', adminRoutes);
+MainRouter.use('/', studentRoutes )
 MainRouter.use('/health', healthRoutes);
 MainRouter.use('/applicants', applicantsRoutes);
 MainRouter.use('/assessment', assessmentRoutes);
