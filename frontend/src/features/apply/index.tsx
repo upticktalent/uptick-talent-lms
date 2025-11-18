@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Formik, Form } from 'formik';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { ApplicationFormData } from '@/types/apply';
@@ -102,6 +102,8 @@ export const ApplicationForm = () => {
     isLastStep,
   } = useMultiStepForm(steps.length);
 
+  const queryClient = useQueryClient();
+
   // Load draft from local storage
   const [initialValues] = React.useState(
     getSavedDraft() || defaultInitialValues
@@ -110,8 +112,26 @@ export const ApplicationForm = () => {
   // TanStack Query mutation for form submission
   const { mutateAsync } = useMutation({
     mutationFn: (data: ApplicationFormData) => {
+      const countryOptions =
+        queryClient.getQueryData<any[]>(['countries'])?.map(c => ({
+          value: c.iso2,
+          label: c.name,
+        })) || [];
+      const stateOptions =
+        queryClient.getQueryData<any[]>(['states', data.country])?.map(s => ({
+          value: s.iso2,
+          label: s.name,
+        })) || [];
+
+      const countryLabel =
+        countryOptions.find(o => o.value === data.country)?.label || data.country;
+      const stateLabel =
+        stateOptions.find(o => o.value === data.state)?.label || data.state;
+
       const payload: any = {
         ...data,
+        country: countryLabel, 
+        state: stateLabel,
         frontendToolsOther: data.frontendToolsOther
           ? [data.frontendToolsOther]
           : [],
