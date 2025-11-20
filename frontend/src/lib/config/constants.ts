@@ -11,6 +11,9 @@ export const createRoute = (endpoint: string) => {
 export const urls = {
   LOGIN: createRoute('auth/login'),
   APPLY: createRoute('applicants/createApplicant'),
+  GET_APPLICANTS: createRoute('admin/applicants'),
 };
 
-export const queryKeys = {};
+export const queryKeys = {
+  APPLICANTS: 'applicants', 
+};
