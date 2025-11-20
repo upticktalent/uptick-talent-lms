@@ -7,6 +7,7 @@ import adminRoutes from './admin';
 import healthRoutes from './health.routes';
 import applicantsRoutes from './applicants.routes'
 import assessmentRoutes from './assessment.routes'
+import studentRoutes from  './student'
 
 // Main API router mounted under /api/v1
 export const MainRouter = express.Router();
