@@ -405,7 +405,7 @@ export const getStudentAssignments: RequestHandler = async (req, res) => {
       orderBy: { dueDate: 'asc' }
     });
 
-    // Filter by status if provided
+    // Filter by status if provided ....
     let filteredAssignments = assignments;
     if (status === 'submitted') {
       filteredAssignments = assignments.filter((a: any) => a.submissions.length > 0);
