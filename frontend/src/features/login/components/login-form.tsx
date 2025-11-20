@@ -2,22 +2,51 @@ import React from 'react';
 import Box from '@/components/ui/box';
 import { getters, LangKey } from '@/lib/config/i18n';
 import Link from 'next/link';
-import Input from '@/components/ui/input';
-import Button from '@/components/ui/button';
-import Checkbox from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAppSelector } from '@/redux';
+import { useMutation } from '@tanstack/react-query';
+import { loginUser } from '@/lib/api/auth';
+import { toast } from 'sonner';
 import type { LoginFormValues } from '@/types/auth';
 import { useFormHandler } from '@/hooks/useFormHandler';
 import { loginSchema } from '@/lib/utils';
-import { client } from '@/lib/api/client';
 import { useRouter } from 'next/navigation';
-import { urls } from '@/lib/config/constants';
+import { storeCookie, env } from '@/lib';
+import { getErrorMessage } from '@/utils';
 
 const LoginForm: React.FC = () => {
+  const router = useRouter();
   const lang = useAppSelector(state => state.settings.lang) as LangKey;
   const text = getters.geti18ns()[lang].login.form;
 
-  const router = useRouter();
+  // 1. Setup React Query Mutation
+  const { mutateAsync } = useMutation({
+    mutationFn: loginUser,
+    onSuccess: response => {
+      if (response.code === 200) {
+        toast.success(response.message || 'Login successful');
+
+        // Store the token
+        storeCookie({ key: env.AUTH_TOKEN, value: response.payload.token });
+
+        // Redirect based on role
+        const userRole = response.payload.user.role;
+        if (userRole === 'ADMIN') {
+          router.push('/dashboard');
+        } else if (userRole === 'STUDENT') {
+          router.push('/student/dashboard');
+        }
+      } else {
+        throw new Error(response.message);
+      }
+    },
+    onError: error => {
+      const message = getErrorMessage(error);
+      toast.error(message);
+    },
+  });
 
   const formik = useFormHandler<LoginFormValues>({
     initialValues: {
@@ -25,17 +54,8 @@ const LoginForm: React.FC = () => {
       password: '',
     },
     validationSchema: loginSchema,
-    onSubmit: async (values, { setSubmitting, resetForm }) => {
-      try {
-        const response = await client.post(urls.LOGIN, values);
-        console.log('Login successful:', response.data);
-        resetForm();
-        setTimeout(() => router.push('/dashboard'), 1000);
-      } catch (error) {
-        console.error('Login failed:', error);
-      } finally {
-        setSubmitting(false);
-      }
+    onSubmit: async values => {
+      await mutateAsync(values);
     },
   });
 
@@ -52,11 +72,12 @@ const LoginForm: React.FC = () => {
         name="email"
         type="email"
         label={text.email}
+        placeholder="you@example.com"
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
         value={formik.values.email}
-        placeholder="you@example.com"
         error={formik.touched.email && formik.errors.email ? formik.errors.email : undefined}
+        disabled={isSubmitting}
       />
 
       <Box className="mt-4" />
@@ -66,19 +87,20 @@ const LoginForm: React.FC = () => {
         name="password"
         type="password"
         label={text.password}
+        placeholder="••••••••"
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
         value={formik.values.password}
-        placeholder="••••••••"
         error={
           formik.touched.password && formik.errors.password ? formik.errors.password : undefined
         }
+        disabled={isSubmitting}
       />
 
       <Checkbox id="remember" label={text.remember} wrapperClassName="mt-3" />
 
       <Box className="mt-6 flex flex-col gap-3 items-center">
-        <Button type="submit" fullWidth>
+        <Button type="submit" fullWidth disabled={isSubmitting}>
           {isSubmitting ? 'Processing...' : text.login}
         </Button>
 
@@ -93,4 +115,5 @@ const LoginForm: React.FC = () => {
     </Box>
   );
 };
+
 export { LoginForm };
