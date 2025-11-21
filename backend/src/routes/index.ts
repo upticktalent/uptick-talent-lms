@@ -14,12 +14,12 @@ export const MainRouter = express.Router();
 
 // Mount sub-routers
 MainRouter.use('/applicants', applicantsRoutes);
+MainRouter.use('/assessment', assessmentRoutes);
+MainRouter.use('/health', healthRoutes);
 MainRouter.use('/', authRoutes);
 MainRouter.use('/users', userRoutes);
 MainRouter.use('/', adminRoutes);
 MainRouter.use('/', studentRoutes )
-MainRouter.use('/health', healthRoutes);
-MainRouter.use('/assessment', assessmentRoutes);
 // Keep default export for backward compatibility if imported elsewhere
 export default MainRouter;
 
