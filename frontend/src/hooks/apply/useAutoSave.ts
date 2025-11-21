@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useFormikContext } from 'formik';
 import { setLocalItem, getLocalItem, removeLocalItem } from '@/lib/config';
-import { ApplicationFormData } from '@/features/apply/types';
+import { ApplicationFormData } from '@/types/apply';
 import { useDebounce } from 'use-debounce'; 
 
 const STORAGE_KEY = 'uptick_application_draft';

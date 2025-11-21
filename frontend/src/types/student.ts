@@ -20,8 +20,8 @@ export interface StudentDashboardResponse {
   payload: {
     student: Student;
     courses: Course[];
-    upcomingAssignments: any[]; 
-    recentMaterials: any[]; 
+upcomingAssignments: Assessment[]; 
+    recentMaterials: CourseMaterial[];
     stats: StudentStats;
     mentor?: Mentor; 
   };

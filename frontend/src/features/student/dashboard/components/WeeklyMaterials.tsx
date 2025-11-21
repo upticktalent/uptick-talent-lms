@@ -2,14 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Video,
-  FileText,
-  Link as LinkIcon,
-  ClipboardList,
-  ChevronRight,
-  Loader2,
-} from 'lucide-react';
+import { Video, FileText, Link as LinkIcon, ClipboardList } from 'lucide-react';
 import Box from '@/components/ui/box';
 import { Button } from '@/components/ui/button';
 import { AssessmentSubmission } from './AssessmentSubmission';
@@ -54,8 +47,8 @@ export const WeeklyMaterials: React.FC<WeeklyMaterialsProps> = ({ courseId }) =>
     for (let i = 1; i <= totalWeeks; i++) {
       organizedWeeks.push({
         weekNumber: i,
-        title: `Week ${i}`, // You might want a map of week titles if available
-        startDate: '', // Backend doesn't provide this in current endpoint list
+        title: `Week ${i}`,
+        startDate: '',
         endDate: '',
         materials: materials.filter(m => m.weekNumber === i),
         assessments: assignments.filter(a => a.weekNumber === i),

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import Image from 'next/image';
 import { Github, Linkedin, Globe, Camera } from 'lucide-react';
 import Box from '@/components/ui/box';
 import { StudentProfile as StudentProfileType } from '@/types/lms';
@@ -118,10 +119,13 @@ export const StudentProfile: React.FC = () => {
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {formData.profilePicture ? (
-                    <img
+                    <Image
                       src={formData.profilePicture}
                       alt="Profile"
+                      width={96}
+                      height={96}
                       className="w-full h-full object-cover"
+                      unoptimized
                     />
                   ) : (
                     <span className="text-3xl font-bold text-primary">
@@ -144,9 +148,11 @@ export const StudentProfile: React.FC = () => {
             ) : (
               <Box className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                 {profile.student.profilePicture ? (
-                  <img
+                  <Image
                     src={profile.student.profilePicture}
                     alt="Profile"
+                    width={96}
+                    height={96}
                     className="w-full h-full object-cover"
                   />
                 ) : (

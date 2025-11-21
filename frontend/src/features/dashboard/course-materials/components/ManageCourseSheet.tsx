@@ -105,7 +105,11 @@ export const ManageCourseSheet: React.FC<ManageCourseSheetProps> = ({ course, on
             </Box>
             <Button
               onClick={() =>
-                submitMaterial({ ...material, courseId: course.id, type: material.type as any })
+                submitMaterial({
+                  ...material,
+                  courseId: course.id,
+                  type: material.type as 'VIDEO' | 'DOCUMENT' | 'LINK',
+                })
               }
               disabled={isMatPending}
               className="w-full"
