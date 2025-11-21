@@ -20,7 +20,7 @@ import {
 import { cn } from '@/lib/utils';
 import Box from '@/components/ui/box';
 import { Button } from '@/components/ui/button';
-import { deleteStorageCookie, removeLocalItem, getLocalItem, env } from '@/lib';
+import { deleteStorageCookie, removeLocalItem, env } from '@/lib';
 
 interface SidebarProps {
   isMobileMenuOpen: boolean;

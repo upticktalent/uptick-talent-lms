@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Applicant, ApplicationStatus } from '@/types/dashboard';
+import { Applicant } from '@/types/dashboard';
 
 interface ApplicantRowActionsProps {
   applicant: Applicant;

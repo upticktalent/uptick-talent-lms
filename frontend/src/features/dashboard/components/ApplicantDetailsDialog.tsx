@@ -12,7 +12,6 @@ import {
 import { Button } from '@/components/ui/button';
 import Box from '@/components/ui/box';
 import { Applicant } from '@/types/dashboard';
-import { formatDate } from '@/components/common/DatePicker';
 
 interface ApplicantDetailsDialogProps {
   applicant: Applicant | null;

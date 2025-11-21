@@ -75,7 +75,10 @@ const CountrySelect = ({
       modal
       onOpenChange={open => {
         setIsOpen(open);
-        open && setSearchValue('');
+        // FIX: Changed expression to if statement
+        if (open) {
+          setSearchValue('');
+        }
       }}
     >
       <PopoverTrigger asChild>
