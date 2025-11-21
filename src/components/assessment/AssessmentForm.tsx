@@ -1,17 +1,17 @@
 "use client";
 import React, { JSX, useState } from "react";
 import AssessmentButton from "../button/AssessmentButton";
+import Image from "next/image";
 
 
 /**
  * AssessmentForm
  *
- * - Fields: email, githubLink, liveDemoLink (all required)
+ * - Fields: email, githubLink, liveDemoLink, comments (all required)
  * - Client-side validation with inline errors
  * - Disabled submit while submitting
  * - POSTs to /api/assessment-submissions (see src/app/api/assessment-submissions/route.ts)
  *
- * N
  * Notes for backend integration:
  * - Keep posting to /api/assessment-submissions and the route will forward to the real backend once configured.
  */
@@ -20,18 +20,20 @@ type Errors = {
   email?: string;
   githubLink?: string;
   liveDemoLink?: string;
+  comments?: string;
   form?: string;
 };
 
-export default function AssessmentForm(): JSX.Element {
+export default function AssessmentForm({ assessmentId }: { assessmentId: string }): JSX.Element {
   const [email, setEmail] = useState("");
   const [githubLink, setGithubLink] = useState("");
   const [liveDemoLink, setLiveDemoLink] = useState("");
+  const [comments, setComments] = useState("");
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const primaryBlue = "#477BFF";
+  // const primaryBlue = "#477BFF";
   const darkNavy = "#000523";
 
   const isValidEmail = (v: string) => /^\S+@\S+\.\S+$/.test(v.trim());
@@ -56,6 +58,8 @@ export default function AssessmentForm(): JSX.Element {
     if (!liveDemoLink.trim()) next.liveDemoLink = "Live demo link is required.";
     else if (!isValidUrl(liveDemoLink)) next.liveDemoLink = "Enter a valid URL for the live demo.";
 
+    if (!comments.trim()) next.comments = "Comments are required.";
+
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -73,7 +77,13 @@ export default function AssessmentForm(): JSX.Element {
       const res = await fetch("/api/assessment-submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), githubLink: githubLink.trim(), liveDemoLink: liveDemoLink.trim() }),
+        body: JSON.stringify({
+          id: assessmentId,
+          email: email.trim(),
+          githubUrl: githubLink.trim(),
+          liveDemoUrl: liveDemoLink.trim(),
+          comments: comments.trim()
+        }),
       });
 
       if (!res.ok) {
@@ -89,6 +99,7 @@ export default function AssessmentForm(): JSX.Element {
       setEmail("");
       setGithubLink("");
       setLiveDemoLink("");
+      setComments("");
     } catch (err) {
       // Log the error to use the variable and aid debugging
       console.error(err);
@@ -99,26 +110,32 @@ export default function AssessmentForm(): JSX.Element {
   };
 
   return (
+    <div className="">
+      <div className="flex items-left ml-20 ">
+     
+      </div>
     <div className="px-4">
+      
       <div className="bg-white dark:bg-[#0b1220] rounded-xl shadow-lg overflow-hidden">
         {/* Header / Logo area */}
         
         <div className="flex items-center gap-4 p-6 border-b border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-3">
             {/* Use public URL for images placed in frontend/public */}
-            {/* <Image src="public/uptick-logo.svg" alt="Uptick logo" width={48} height={48} /> */}
-            {/* <Logo /> */}
+            {/* <Image src="/uptick-logo.svg" alt="Uptick logo" width={48} height={48} /> */}
+            {/* <Image src="/uptick-logo.svg" alt="Uptick logo" width={48} height={48} /> */}
             <div
-              className="w-14 h-14 flex items-center justify-center rounded-lg"
-              style={{ backgroundColor: "rgba(71,123,255,0.08)" }}
+              className=" flex items-center justify-center rounded-lg"
+              
               aria-hidden
             >
-              <div
+                 <Image src="/uptick-logo.svg" alt="Uptick logo" width={200} height={200} />
+              {/* <div
                 className="w-10 h-10 rounded-md flex items-center justify-center text-white font-semibold"
                 style={{ backgroundColor: primaryBlue }}
               >
-                UPT
-              </div>
+                
+              </div> */}
             </div>
           </div>
 
@@ -127,7 +144,7 @@ export default function AssessmentForm(): JSX.Element {
               Take-Home Assessment Submission Form
             </h1>
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-              Submit your completed assessment so the Uptick team can review. Provide your email, GitHub repo and a live demo URL.
+              Submit your completed assessment so the Uptick team can review. Provide your email, GitHub repo, live demo URL, and any comments.
             </p>
           </div>
         </div>
@@ -202,6 +219,28 @@ export default function AssessmentForm(): JSX.Element {
               )}
             </div>
 
+            <div>
+              <label htmlFor="comments" className="text-sm font-medium block">
+                Comments
+              </label>
+              <textarea
+                id="comments"
+                name="comments"
+                value={comments}
+                onChange={(e) => setComments(e.target.value)}
+                className="mt-2 block w-full px-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#477BFF] text-base"
+                placeholder="Any additional comments or notes..."
+                rows={4}
+                aria-invalid={!!errors.comments}
+                aria-describedby={errors.comments ? "comments-error" : undefined}
+              />
+              {errors.comments && (
+                <p id="comments-error" className="mt-1 text-xs text-red-600">
+                  {errors.comments}
+                </p>
+              )}
+            </div>
+
             {errors.form && (
               <div role="alert" className="text-sm text-red-600">
                 {errors.form}
@@ -238,6 +277,7 @@ export default function AssessmentForm(): JSX.Element {
       <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
         Tip: (3.): Ensure your live demo is accessible without authentication for smooth review Or provide the link to view and access your given task/project.
       </p>
+    </div>
     </div>
   );
 }

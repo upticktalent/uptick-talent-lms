@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 /**
  * POST /api/assessment-submissions
  *
- * - Accepts { email, githubLink, liveDemoLink }
+ * - Accepts { email, githubUrl, liveDemoUrl, comments }
  * - Performs basic server-side validation
  * - If BACKEND_API_URL (see env notes below) is set, forwards the request to the real backend.
  * - Otherwise returns a mocked 201 response so frontend can work while backend is not ready.
@@ -34,17 +34,20 @@ const isValidUrl = (v?: unknown) => {
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { email, githubLink, liveDemoLink } = body ?? {};
+    const { id, email, githubUrl, liveDemoUrl, comments } = body ?? {};
 
     // Basic validation
     if (!isValidEmail(email)) {
       return NextResponse.json({ message: "Invalid or missing email" }, { status: 400 });
     }
-    if (!isValidUrl(githubLink)) {
+    if (!isValidUrl(githubUrl)) {
       return NextResponse.json({ message: "Invalid or missing GitHub repository URL" }, { status: 400 });
     }
-    if (!isValidUrl(liveDemoLink)) {
+    if (!isValidUrl(liveDemoUrl)) {
       return NextResponse.json({ message: "Invalid or missing live demo URL" }, { status: 400 });
+    }
+    if (!comments || typeof comments !== 'string' || comments.trim().length === 0) {
+      return NextResponse.json({ message: "Comments are required" }, { status: 400 });
     }
 
     // If a backend URL is configured, forward the submission there.
@@ -52,37 +55,30 @@ export async function POST(req: Request) {
       process.env.NEXT_PUBLIC_BACKEND_API_URL ?? process.env.BACKEND_API_URL ?? null;
 
     if (backendUrl) {
-      // TODO: backend's endpoint when available.
-      const forwardTo = `${backendUrl.replace(/\/$/, "")}/api/assessment-submissions`;
+      // Forward to the backend endpoint: api/v1/assessment/submit/:id
+      const forwardTo = `${backendUrl.replace(/\/$/, "")}/api/v1/assessment/submit/${id}`;
 
       // Example headers: For Authorization if backend requires it.
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
       };
       //  to include a server-side secret token, add it from env:
-      // headers['Authorization'] = `Bearer ${process.env.BACKEND_API_TOKEN}`;
+      if (process.env.BACKEND_API_TOKEN) {
+        headers['Authorization'] = `Bearer ${process.env.BACKEND_API_TOKEN}`;
+      }
 
       const resp = await fetch(forwardTo, {
         method: "POST",
         headers,
-        body: JSON.stringify({ email, githubLink, liveDemoLink }),
+        body: JSON.stringify({ email, githubUrl, liveDemoUrl, comments }),
       });
 
       const respBody = await resp.json().catch(() => ({}));
       return NextResponse.json(respBody, { status: resp.status });
     }
 
-    // No backend configured — return a mocked success so frontend can proceed during development.
-    // Replace this with forwarding (above) once backend is available.
-    console.log("Mock save assessment submission:", { email, githubLink, liveDemoLink });
-
-    // simulated delay (optional)
-    await new Promise((r) => setTimeout(r, 300));
-
-    return NextResponse.json(
-      { message: "Submission received (mock)", data: { email, githubLink, liveDemoLink } },
-      { status: 201 }
-    );
+    // Backend not configured
+    return NextResponse.json({ message: "Backend API not configured" }, { status: 500 });
   } catch (err) {
     console.error("API route error: /api/assessment-submissions", err);
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });
