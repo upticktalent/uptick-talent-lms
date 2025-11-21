@@ -1,25 +1,31 @@
-import { Student, Mentor, CourseMaterial, Assessment, AttendanceRecord } from './lms';
+import { Student, Mentor, CourseMaterial, Assessment } from './lms';
+
+export interface Course {
+  id: string;
+  title: string;
+  description?: string;
+  
+}
+
+export interface StudentStats {
+  totalCourses: number;
+  totalAssignments: number;
+  submittedAssignments: number;
+  pendingAssignments: number;
+}
 
 export interface StudentDashboardResponse {
   code: number;
   message: string;
   payload: {
     student: Student;
-    mentor: Mentor;
-    activeCourseId: string; 
-    progress: {
-      completedWeeks: number;
-      totalWeeks: number;
-      averageScore: number;
-      totalAssessments: number;
-      completedAssessments: number;
-    };
-    upcomingClasses: {
-      id: string;
-      title: string;
-      scheduledAt: string;
-    }[];
+    courses: Course[];
+    upcomingAssignments: any[]; 
+    recentMaterials: any[]; 
+    stats: StudentStats;
+    mentor?: Mentor; 
   };
+  status: boolean;
 }
 
 export interface CourseMaterialsResponse {
