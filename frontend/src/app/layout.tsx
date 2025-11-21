@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Mentor Hub',
-  description: 'A web-based mentorship platform for reasearch students',
+  description: 'A web-based mentorship platform',
 };
 
 export default function RootLayout({
@@ -37,11 +37,14 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AppProvider>
-            <Box className="fixed top-4 right-4 z-50">
+            {/* Global Toggle - visible on all routes */}
+            <Box className="fixed bottom-4 right-4 z-50">
               <ModeToggle />
             </Box>
+
             {children}
-            <Toaster />
+
+            <Toaster position="top-right" />
           </AppProvider>
         </ThemeProvider>
       </Box>
