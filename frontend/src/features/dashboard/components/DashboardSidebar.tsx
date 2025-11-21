@@ -10,24 +10,24 @@ import { Button } from '@/components/ui/button';
 
 interface NavItem {
   name: string;
-  href: string;
+  path: string; // Changed from href to path (relative)
   icon: React.ReactNode;
 }
 
 const navItems: NavItem[] = [
   {
     name: 'Dashboard',
-    href: '/dashboard',
+    path: '/dashboard',
     icon: <Home className="w-5 h-5" />,
   },
   {
     name: 'Live Classes',
-    href: '/dashboard/live-classes',
+    path: '/live-classes',
     icon: <Video className="w-5 h-5" />,
   },
   {
     name: 'Profile',
-    href: '/dashboard/profile',
+    path: '/profile',
     icon: <User2 className="w-5 h-5" />,
   },
 ];
@@ -35,9 +35,14 @@ const navItems: NavItem[] = [
 interface DashboardSidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
+  basePath?: string;
 }
 
-export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen = false, onClose }) => {
+export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
+  isOpen = false,
+  onClose,
+  basePath = '/student', // Default to student base path if not provided
+}) => {
   const pathname = usePathname();
 
   return (
@@ -50,11 +55,8 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen = fal
         as="aside"
         className={cn(
           'fixed left-0 top-16 z-40 w-64 min-h-[calc(100vh-4rem)] border-r border-sidebar-border p-6 transition-transform duration-300 ease-in-out',
-
           'bg-sidebar text-sidebar-foreground',
-
           isOpen ? 'translate-x-0' : '-translate-x-full',
-
           'md:translate-x-0',
         )}
       >
@@ -72,12 +74,15 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen = fal
 
         <nav className="space-y-2">
           {navItems.map(item => {
-            const isActive = pathname === item.href;
+            const fullHref = `${basePath}${item.path}`;
+
+            const isActive = pathname === fullHref;
+
             return (
               <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => onClose?.()} // Close on navigate (mobile)
+                key={fullHref}
+                href={fullHref}
+                onClick={() => onClose?.()}
                 className={cn(
                   'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
                   isActive
