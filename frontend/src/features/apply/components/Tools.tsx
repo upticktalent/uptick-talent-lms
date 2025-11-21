@@ -1,7 +1,7 @@
 import React from 'react';
 import { useFormikContext } from 'formik';
 import { ApplicationFormData, Tracks } from '@/types/apply';
-import { FormCheckboxGroup, FormInput , FormCombobox} from './FormInput';
+import { FormCheckboxGroup, FormInput } from './FormInput';
 import Box from '@/components/ui/box';
 
 const toolOptions = {
@@ -42,14 +42,10 @@ export const Tools = () => {
 
   return (
     <Box>
-
       {/* --- 2. Track-Specific Tools/Proficiency --- */}
       {values.track === Tracks.FRONTEND && (
         <Box>
-          <FormCheckboxGroup
-            name="frontendTools"
-            options={toolOptions.frontend}
-          />
+          <FormCheckboxGroup name="frontendTools" options={toolOptions.frontend} />
           <FormInput name="frontendToolsOther" label="Other (please specify)" />
         </Box>
       )}
@@ -61,10 +57,7 @@ export const Tools = () => {
       )}
       {values.track === Tracks.FULLSTACK && (
         <Box>
-          <FormCheckboxGroup
-            name="fullstackTools"
-            options={toolOptions.fullstack}
-          />
+          <FormCheckboxGroup name="fullstackTools" options={toolOptions.fullstack} />
           <FormInput name="fullstackToolsOther" label="Other (please specify)" />
         </Box>
       )}
