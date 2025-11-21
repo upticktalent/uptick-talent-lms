@@ -11,6 +11,9 @@ export const createRoute = (endpoint: string) => {
 export const urls = {
   LOGIN: createRoute('auth/login'),
   APPLY: createRoute('applicants/createApplicant'),
+  
+  // Admin
+  GET_APPLICANTS: createRoute('admin/applicants'),
 
   // Student
   STUDENT_DASHBOARD: createRoute('student/dashboard'),
@@ -19,6 +22,7 @@ export const urls = {
 };
 
 export const queryKeys = {
+  APPLICANTS: 'applicants', 
   STUDENT_DASHBOARD: 'student_dashboard',
   STUDENT_COURSE: 'student_course',
   STUDENT_MATERIALS: 'student_materials',
