@@ -118,7 +118,7 @@ const LoginForm: React.FC = () => {
       </div>
 
       <Box className="mt-6 flex flex-col gap-3 items-center">
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
+        <Button type="submit" className="w-full text-white" disabled={isSubmitting}>
           {isSubmitting ? 'Processing...' : text.login}
         </Button>
 
