@@ -4,12 +4,11 @@ import React from 'react';
 import Box from '@/components/ui/box';
 import { Student, Mentor } from '@/types/lms';
 import { StudentStats } from '@/types/student';
-// import { ProgressTracking } from './ProgressTracking'; // Commented out until we have week-by-week data
 
 interface DashboardOverviewProps {
   student: Student;
-  mentor?: Mentor; // Made optional
-  stats: StudentStats; // Changed from 'progress' to 'stats'
+  mentor?: Mentor;
+  stats: StudentStats;
 }
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ student, mentor, stats }) => {
@@ -17,7 +16,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ student, m
     <Box className="space-y-6">
       <Box>
         <h1 className="text-3xl font-bold">Welcome back, {student.firstName}! 👋</h1>
-        <p className="text-muted-foreground mt-2">Here's your learning overview</p>
+        <p className="text-muted-foreground mt-2">Here&apos;s your learning overview</p>
       </Box>
 
       {/* Stats Grid */}

@@ -3,12 +3,7 @@ import { Field, ErrorMessage, FieldProps } from 'formik';
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Select,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,11 +14,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
 interface FormInputProps {
@@ -35,12 +26,7 @@ interface FormInputProps {
 }
 
 // Basic reusable Input Field
-export const FormInput: React.FC<FormInputProps> = ({
-  name,
-  label,
-  type = 'text',
-  ...rest
-}) => {
+export const FormInput: React.FC<FormInputProps> = ({ name, label, type = 'text', ...rest }) => {
   return (
     <Box className="mb-4">
       <Label htmlFor={name} className="block text-sm font-medium mb-1">
@@ -53,23 +39,31 @@ export const FormInput: React.FC<FormInputProps> = ({
         className={cn(
           'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
           'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-          'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive'
+          'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
         )}
         {...rest}
       />
-      <ErrorMessage
-        name={name}
-        component="div"
-        className="text-red-600 text-sm mt-1"
-      />
+      <ErrorMessage name={name} component="div" className="text-red-600 text-sm mt-1" />
     </Box>
   );
 };
 
 // Basic reusable Select Field
-export const FormSelect: React.FC<
-  FormInputProps & { children: React.ReactNode; placeholder?: string; disabled?: boolean; }
-> = ({ name, label, children, placeholder, type, disabled, ...rest }) => {
+
+type FormSelectProps = Omit<FormInputProps, 'type'> & {
+  children: React.ReactNode;
+  placeholder?: string;
+  disabled?: boolean;
+};
+
+export const FormSelect: React.FC<FormSelectProps> = ({
+  name,
+  label,
+  children,
+  placeholder,
+  disabled,
+  ...rest
+}) => {
   return (
     <Box className="mb-4">
       <Label htmlFor={name} className="block text-sm font-medium mb-1">
@@ -92,11 +86,7 @@ export const FormSelect: React.FC<
           </Select>
         )}
       </Field>
-      <ErrorMessage
-        name={name}
-        component="div"
-        className="text-red-600 text-sm mt-1"
-      />
+      <ErrorMessage name={name} component="div" className="text-red-600 text-sm mt-1" />
     </Box>
   );
 };
@@ -107,7 +97,7 @@ export const FormCombobox: React.FC<{
   placeholder?: string;
   disabled?: boolean;
   options: { value: string; label: string }[];
-  onValueChange?: (value: string) => void; // For cascading resets
+  onValueChange?: (value: string) => void;
 }> = ({ name, label, options, placeholder, disabled, onValueChange }) => {
   const [open, setOpen] = React.useState(false);
 
@@ -118,9 +108,7 @@ export const FormCombobox: React.FC<{
       </Label>
       <Field name={name}>
         {({ field, form }: FieldProps) => {
-          const selectedLabel = options.find(
-            opt => opt.value === field.value
-          )?.label;
+          const selectedLabel = options.find(opt => opt.value === field.value)?.label;
 
           return (
             <Popover open={open} onOpenChange={setOpen}>
@@ -139,10 +127,7 @@ export const FormCombobox: React.FC<{
               </PopoverTrigger>
               <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                 <Command>
-                  <CommandInput
-                    placeholder={placeholder || 'Search...'}
-                    className="h-9"
-                  />
+                  <CommandInput placeholder={placeholder || 'Search...'} className="h-9" />
                   <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
                     <CommandGroup>
@@ -151,8 +136,7 @@ export const FormCombobox: React.FC<{
                           key={option.value}
                           value={option.label} // Search by label
                           onSelect={() => {
-                            const newValue =
-                              option.value === field.value ? '' : option.value;
+                            const newValue = option.value === field.value ? '' : option.value;
                             form.setFieldValue(name, newValue);
                             if (onValueChange) {
                               onValueChange(newValue);
@@ -164,9 +148,7 @@ export const FormCombobox: React.FC<{
                           <Check
                             className={cn(
                               'ml-auto h-4 w-4',
-                              field.value === option.value
-                                ? 'opacity-100'
-                                : 'opacity-0'
+                              field.value === option.value ? 'opacity-100' : 'opacity-0',
                             )}
                           />
                         </CommandItem>
@@ -179,20 +161,16 @@ export const FormCombobox: React.FC<{
           );
         }}
       </Field>
-      <ErrorMessage
-        name={name}
-        component="div"
-        className="text-red-600 text-sm mt-1"
-      />
+      <ErrorMessage name={name} component="div" className="text-red-600 text-sm mt-1" />
     </Box>
   );
 };
 
 // Basic reusable Checkbox Group
-export const FormCheckboxGroup: React.FC<{ name: string; options: { value: string; label: string }[]; }> = ({
-  name,
-  options,
-}) => {
+export const FormCheckboxGroup: React.FC<{
+  name: string;
+  options: { value: string; label: string }[];
+}> = ({ name, options }) => {
   return (
     <Box role="group" aria-labelledby={`${name}-group-label`} className="mb-4">
       <Field name={name}>
@@ -212,19 +190,14 @@ export const FormCheckboxGroup: React.FC<{ name: string; options: { value: strin
                   }}
                   className="rounded"
                 />
-                
+
                 <Box as="span">{option.label}</Box>
-                
               </Label>
             ))}
           </Box>
         )}
       </Field>
-      <ErrorMessage
-        name={name}
-        component="div"
-        className="text-red-600 text-sm mt-1"
-      />
+      <ErrorMessage name={name} component="div" className="text-red-600 text-sm mt-1" />
     </Box>
   );
 };

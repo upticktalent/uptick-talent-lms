@@ -10,8 +10,8 @@ import { validationSchemas } from '@/schema/apply';
 import { useAutoSave, getSavedDraft, clearSavedDraft } from '@/hooks/apply/useAutoSave';
 import { useMultiStepForm } from '@/hooks/apply/useMultiStepForm';
 
-import { client } from '@/lib/api'; 
-import { getErrorMessage } from '@/utils/errors'; 
+import { client } from '@/lib/api';
+import { getErrorMessage } from '@/utils/errors';
 import { urls } from '@/lib';
 import { getters } from '@/lib/config/i18n';
 import Box from '@/components/ui/box';
@@ -92,64 +92,51 @@ const AutoSaveHandler = () => {
   return null;
 };
 
+interface LocationData {
+  iso2: string;
+  name: string;
+}
+
 // --- Main Application Form Component ---
 export const ApplicationForm = () => {
-  const {
-    currentStep,
-    nextStep,
-    prevStep,
-    goToStep,
-    isFirstStep,
-    isLastStep,
-  } = useMultiStepForm(steps.length);
+  const { currentStep, nextStep, prevStep, goToStep, isFirstStep, isLastStep } = useMultiStepForm(
+    steps.length,
+  );
 
   const queryClient = useQueryClient();
 
   const [showSuccessModal, setShowSuccessModal] = React.useState(false);
 
   // Load draft from local storage
-  const [initialValues] = React.useState(
-    getSavedDraft() || defaultInitialValues
-  );
+  const [initialValues] = React.useState(getSavedDraft() || defaultInitialValues);
 
   // TanStack Query mutation for form submission
   const { mutateAsync } = useMutation({
     mutationFn: (data: ApplicationFormData) => {
       const countryOptions =
-        queryClient.getQueryData<any[]>(['countries'])?.map(c => ({
+        queryClient.getQueryData<LocationData[]>(['countries'])?.map(c => ({
           value: c.iso2,
           label: c.name,
         })) || [];
       const stateOptions =
-        queryClient.getQueryData<any[]>(['states', data.country])?.map(s => ({
+        queryClient.getQueryData<LocationData[]>(['states', data.country])?.map(s => ({
           value: s.iso2,
           label: s.name,
         })) || [];
 
       const countryLabel =
         countryOptions.find(o => o.value === data.country)?.label || data.country;
-      const stateLabel =
-        stateOptions.find(o => o.value === data.state)?.label || data.state;
+      const stateLabel = stateOptions.find(o => o.value === data.state)?.label || data.state;
 
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         ...data,
-        country: countryLabel, 
+        country: countryLabel,
         state: stateLabel,
-        frontendToolsOther: data.frontendToolsOther
-          ? [data.frontendToolsOther]
-          : [],
-        backendToolsOther: data.backendToolsOther
-          ? [data.backendToolsOther]
-          : [],
-        fullstackToolsOther: data.fullstackToolsOther
-          ? [data.fullstackToolsOther]
-          : [],
-        mobileToolsOther: data.mobileToolsOther
-          ? [data.mobileToolsOther]
-          : [],
-        referralSourceOther: data.referralSourceOther
-          ? [data.referralSourceOther]
-          : [],
+        frontendToolsOther: data.frontendToolsOther ? [data.frontendToolsOther] : [],
+        backendToolsOther: data.backendToolsOther ? [data.backendToolsOther] : [],
+        fullstackToolsOther: data.fullstackToolsOther ? [data.fullstackToolsOther] : [],
+        mobileToolsOther: data.mobileToolsOther ? [data.mobileToolsOther] : [],
+        referralSourceOther: data.referralSourceOther ? [data.referralSourceOther] : [],
       };
 
       delete payload.fullstackTools;
@@ -168,7 +155,7 @@ export const ApplicationForm = () => {
 
   const handleSubmit = async (
     values: ApplicationFormData,
-    actions: { setSubmitting: (isSubmitting: boolean) => void }
+    actions: { setSubmitting: (isSubmitting: boolean) => void },
   ) => {
     if (!isLastStep) {
       nextStep();
@@ -179,6 +166,7 @@ export const ApplicationForm = () => {
     try {
       await mutateAsync(values);
     } catch (error) {
+      console.error(error);
     }
   };
 
@@ -194,12 +182,8 @@ export const ApplicationForm = () => {
       {({ isSubmitting, isValid, values }) => (
         <Form>
           <AutoSaveHandler />
-          
-          <StepIndicator
-            currentStep={currentStep}
-            steps={steps}
-            goToStep={goToStep}
-          />
+
+          <StepIndicator currentStep={currentStep} steps={steps} goToStep={goToStep} />
 
           <Box className="p-6 md:p-8 border rounded-lg shadow-sm bg-card">
             {steps[currentStep - 1].component}
@@ -213,8 +197,8 @@ export const ApplicationForm = () => {
             isValid={isValid}
           />
 
-          <SuccessModal 
-            isOpen={showSuccessModal} 
+          <SuccessModal
+            isOpen={showSuccessModal}
             onClose={() => setShowSuccessModal(false)}
             email={values.email}
           />

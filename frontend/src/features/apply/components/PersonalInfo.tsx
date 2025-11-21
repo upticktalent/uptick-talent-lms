@@ -4,7 +4,6 @@ import Box from '@/components/ui/box';
 import { useCountryStateCity } from '@/hooks/apply/useCountryStateCity';
 import { useFormikContext } from 'formik';
 import { ApplicationFormData } from '@/types/apply';
-import { SelectItem } from '@/components/ui/select';
 import { DatePicker, PhoneNumberInput } from '@/components/common';
 
 export const PersonalInfo = () => {
@@ -18,7 +17,7 @@ export const PersonalInfo = () => {
     loadingStates,
     loadingCities,
   } = useCountryStateCity(values.country, values.state);
-  
+
   return (
     <Box>
       <FormInput name="firstName" label="First Name" placeholder="Jane" />

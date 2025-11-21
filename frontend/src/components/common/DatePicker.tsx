@@ -36,24 +36,21 @@ interface FormDatePickerProps {
   toYear?: number;
 }
 
-export const DatePicker: React.FC<FormDatePickerProps> = ({
-  name,
-  label,
-  fromYear = 1950,
-  toYear = new Date().getFullYear() - 10,
-}) => {
-  const { values, setFieldValue } = useFormikContext<any>();
+export const DatePicker: React.FC<FormDatePickerProps> = ({ name, label }) => {
+  const { values, setFieldValue } = useFormikContext<Record<string, unknown>>();
 
-  const date = values[name] ? new Date(values[name]) : undefined;
+  const fieldValue = values[name] as string | number | Date | undefined;
+
+  const date = fieldValue ? new Date(fieldValue) : undefined;
 
   const [open, setOpen] = React.useState(false);
   const [month, setMonth] = React.useState<Date | undefined>(date);
   const [inputValue, setInputValue] = React.useState(formatDate(date));
 
   React.useEffect(() => {
-    const formikDate = values[name] ? new Date(values[name]) : undefined;
+    const formikDate = fieldValue ? new Date(fieldValue) : undefined;
     setInputValue(formatDate(formikDate));
-  }, [values[name]]);
+  }, [fieldValue]);
 
   return (
     <Box className="mb-4">
@@ -65,7 +62,7 @@ export const DatePicker: React.FC<FormDatePickerProps> = ({
           id={name}
           value={inputValue}
           placeholder="Select date"
-          className='pr-10'
+          className="pr-10"
           onChange={e => {
             const newStringValue = e.target.value;
             setInputValue(newStringValue);
@@ -93,7 +90,9 @@ export const DatePicker: React.FC<FormDatePickerProps> = ({
               className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
             >
               <CalendarIcon className="size-3.5" />
-              <Box as='span' className="sr-only">Select date</Box>
+              <Box as="span" className="sr-only">
+                Select date
+              </Box>
             </Button>
           </PopoverTrigger>
           <PopoverContent

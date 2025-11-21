@@ -11,7 +11,8 @@ interface FormPhoneNumberInputProps {
 }
 
 export const PhoneNumberInput: React.FC<FormPhoneNumberInputProps> = ({ name, label }) => {
-  const { setFieldValue, values, setFieldTouched } = useFormikContext<any>();
+  const { setFieldValue, values, setFieldTouched } = useFormikContext<Record<string, unknown>>();
+  const value = values[name] as string | undefined;
 
   return (
     <Box className="mb-4">
@@ -21,7 +22,7 @@ export const PhoneNumberInput: React.FC<FormPhoneNumberInputProps> = ({ name, la
       <PhoneInput
         id={name}
         name={name}
-        value={values[name]}
+        value={value}
         onChange={value => {
           setFieldValue(name, value);
         }}

@@ -1,5 +1,3 @@
-import { date } from "yup";
-
 const i18nData = {
   en: {
     welcome: 'Welcome',

@@ -67,7 +67,7 @@ export const ReferralSchema = Yup.object({
     .required(i18n.referralRequired),
   referralSourceOther: Yup.string().when('referralSource', {
     is: 'OTHER',
-    then: schema => Yup.string().required(i18n.referralOtherRequired),
+    then: () => Yup.string().required(i18n.referralOtherRequired),
     otherwise: schema => schema.notRequired(),
   }),
 });

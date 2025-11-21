@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/common/logo';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Home,
   FileText,
@@ -15,21 +15,52 @@ import {
   Settings,
   LogOut,
   Users,
+  BookOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Box from '@/components/ui/box';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { deleteStorageCookie, removeLocalItem, env } from '@/lib';
 
 interface SidebarProps {
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (open: boolean) => void;
+  variant: 'admin' | 'student';
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  isMobileMenuOpen,
+  setIsMobileMenuOpen,
+  variant = 'admin',
+}) => {
   const pathname = usePathname();
+  const router = useRouter();
 
-  const menuItems = [
+  // const handleLogout = () => {
+  //   const user = getLocalItem<{ role: string }>({ key: 'user' });
+  //   const role = user?.role;
+
+  //   deleteStorageCookie({ key: env.AUTH_TOKEN });
+  //   removeLocalItem({ key: 'user' });
+
+  //   if (role === 'ADMIN') {
+  //     router.push('/login?role=admin');
+  //   } else if (role === 'MENTOR') {
+  //     router.push('/login?role=mentor');
+  //   } else {
+  //     router.push('/login');
+  //   }
+  // };
+
+  const handleLogout = () => {
+    deleteStorageCookie({ key: env.AUTH_TOKEN });
+    deleteStorageCookie({ key: 'user_role' }); // Clear role cookie
+    removeLocalItem({ key: 'user' });
+    router.push('/login');
+  };
+
+  // Define menus for different roles
+  const adminMenu = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
     { href: '/dashboard/applicants', label: 'Applicants', icon: Users },
     { href: '/dashboard/course-materials', label: 'Course Materials', icon: FileText },
@@ -40,7 +71,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, setIsMobileM
     { href: '/dashboard/progress', label: 'Progress', icon: TrendingUp },
   ];
 
-  const bottomMenuItems = [{ href: '/dashboard/settings', label: 'Settings', icon: Settings }];
+  const studentMenu = [
+    { href: '/student/dashboard', label: 'My Learning', icon: Home },
+    { href: '/student/courses', label: 'My Courses', icon: BookOpen },
+    { href: '/student/assignments', label: 'Assignments', icon: ClipboardList },
+    { href: '/student/schedule', label: 'Schedule', icon: CalendarCheck },
+    { href: '/student/discussion', label: 'Discussion', icon: MessageSquare },
+  ];
+
+  // Select menu based on variant
+  const menuItems = variant === 'admin' ? adminMenu : studentMenu;
+  const settingsLink = variant === 'admin' ? '/dashboard/settings' : '/student/settings';
 
   return (
     <>
@@ -71,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, setIsMobileM
 
         {/* Menu Label */}
         <Box className="px-4 py-3 text-xs font-semibold text-white/40 uppercase tracking-wider">
-          Menu
+          {variant === 'admin' ? 'Admin Menu' : 'Student Menu'}
         </Box>
 
         {/* Navigation */}
@@ -104,67 +145,35 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, setIsMobileM
             })}
           </Box>
 
-          <Box className="mt-auto pt-4">
+          <Box className="mt-auto pt-4 pb-6">
             <Box className="border-t border-white/10 mb-4 mx-3" />
             <Box as="ul" className="space-y-1 px-3">
-              {bottomMenuItems.map(item => {
-                const isActive = pathname === item.href;
-                const Icon = item.icon;
-
-                return (
-                  <Box as="li" key={item.href}>
-                    <Link
-                      href={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={cn(
-                        'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
-                        'hover:bg-white/5',
-                        isActive
-                          ? 'bg-[#477BFF] text-white font-medium'
-                          : 'text-white/70 hover:text-white',
-                      )}
-                    >
-                      <Icon className="h-5 w-5 flex-shrink-0" />
-                      <Box as="span" className="text-sm">
-                        {item.label}
-                      </Box>
-                    </Link>
+              <Box as="li">
+                <Link
+                  href={settingsLink}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 hover:bg-white/5 text-white/70 hover:text-white"
+                >
+                  <Settings className="h-5 w-5 flex-shrink-0" />
+                  <Box as="span" className="text-sm">
+                    Settings
                   </Box>
-                );
-              })}
+                </Link>
+              </Box>
 
               <Box as="li">
                 <Button
                   variant="ghost"
                   className={cn(
-                    'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
+                    'w-full flex justify-start items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
                     'hover:bg-red-500/10 text-red-400 hover:text-red-300 cursor-pointer',
                   )}
-                  onClick={() => console.log('Logout clicked')}
+                  onClick={handleLogout}
                 >
                   <LogOut className="h-5 w-5 flex-shrink-0" />
                   <Box as="span" className="text-sm">
                     Log out
                   </Box>
                 </Button>
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-
-        {/* User Profile at Bottom */}
-        <Box className="p-4 border-t border-white/10 mt-auto">
-          <Box className="flex items-center gap-3">
-            <Avatar>
-              <AvatarImage src="/placeholder-user.jpg" alt="User" />
-              <AvatarFallback className="bg-gray-300 text-[#000523]">FU</AvatarFallback>
-            </Avatar>
-            <Box className="flex-1 min-w-0">
-              <Box as="p" className="text-sm font-medium text-white truncate">
-                Faith Udoh
-              </Box>
-              <Box as="p" className="text-xs text-white/60 truncate">
-                faithudoh@utf.com
               </Box>
             </Box>
           </Box>
