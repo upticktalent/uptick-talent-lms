@@ -4,7 +4,7 @@ import React from 'react';
 
 const ApplicationPage = () => {
   return (
-    <Box className="container mx-auto max-w-4xl p-4 md:p-8">
+    <Box className="container mx-auto max-w-4xl p-4 pt-24 md:p-8 md:pt-32">
       <ApplicationForm />
     </Box>
   );
