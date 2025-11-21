@@ -1,13 +1,17 @@
-import Link from 'next/link';
-import Box from '../ui/box';
-import Image from 'next/image';
-import clsx from 'clsx';
+'use client';
 
-interface LogoProps {
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import Box from '@/components/ui/box';
+import { cn } from '@/lib/utils';
+
+export interface LogoProps {
   linkTo?: string;
   className?: string;
   width?: number;
   clickable?: boolean;
+  variant?: 'light' | 'dark'; // Explicitly defined here
 }
 
 const Logo: React.FC<LogoProps> = ({
@@ -15,6 +19,7 @@ const Logo: React.FC<LogoProps> = ({
   className = '',
   width = 120,
   clickable = true,
+  variant = 'light',
 }) => {
   const logoElement = (
     <Image
@@ -22,10 +27,14 @@ const Logo: React.FC<LogoProps> = ({
       alt="UPTICK TALENT Logo"
       width={width}
       height={29}
-      className={clsx('bg-white p-2', className)}
+      className={cn(
+        variant === 'light' ? 'bg-white p-2 rounded-sm' : 'brightness-0 invert',
+        className,
+      )}
       priority
     />
   );
+
   return clickable ? <Link href={linkTo}>{logoElement}</Link> : <Box>{logoElement}</Box>;
 };
 
