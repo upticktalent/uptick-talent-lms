@@ -38,7 +38,16 @@ export const createApplicant = async (
       country,
       dateOfBirth,
       track,
+      careerGoals,
+
+      githubUrl,
+      portfolio,
+      yearsOfExperience,
+
+      timeCommitment,
+      timeCommitmentReason,
       frontendTools,
+
       backendTools,
       mobileTools,
       frontendToolsOther,
@@ -60,6 +69,14 @@ export const createApplicant = async (
         state,
         country,
         dateOfBirth,
+        careerGoals,
+        githubUrl,
+        portfolio,
+        yearsOfExperience,
+
+        timeCommitment,
+        timeCommitmentReason,
+
         frontendTools,
         backendTools,
         obileTools,

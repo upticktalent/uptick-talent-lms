@@ -1019,6 +1019,80 @@ export const sendAssessment: RequestHandler = async (req, res) => {
   }
 };
 
+// fetch applicnats submitted assessment
+export const getSubmittedAssessments: RequestHandler = async (req, res) => {
+  try {
+    const { track, page = 1, limit = 10 } = req.query as {
+      track?: string;
+      page?: string;
+      limit?: string;
+    };
+
+    const skip = (Number(page) - 1) * Number(limit);
+    const take = Number(limit);
+
+    const where: any = {
+      submittedAt: { not: null },
+      submissionLink: { not: null },
+    };
+
+    if (track) where.applicant = { track: track as Track };
+
+    const [assessments, total] = await Promise.all([
+      prisma.assessment.findMany({
+        where,
+        include: {
+          applicant: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              track: true,
+              phoneNumber: true,
+            },
+          },
+        },
+        orderBy: { submittedAt: 'desc' },
+        skip,
+        take,
+      }),
+      prisma.assessment.count({ where }),
+    ]);
+
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      message: 'Submitted assessments retrieved successfully',
+      payload: {
+        assessments: assessments.map(a => ({
+          applicantId: a.applicant.id,
+          name: `${a.applicant.firstName} ${a.applicant.lastName}`,
+          email: a.applicant.email,
+          track: a.applicant.track,
+          phoneNumber: a.applicant.phoneNumber,
+          githubUrl: a.submissionLink,
+          liveDemoUrl: a.fileUrl,
+          submittedAt: a.submittedAt,
+        })),
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total,
+          pages: Math.ceil(total / Number(limit)),
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Get submitted assessments error:', error);
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('ADMIN.ERRORS.INTERNAL_SERVER'),
+    });
+  }
+};
+
 // Track assessment progress
 export const getAssessmentProgress: RequestHandler = async (req, res) => {
   try {
@@ -1721,20 +1795,16 @@ export const evaluateInterview: RequestHandler = async (req, res) => {
   }
 };
 
+// schedule canditate interview 
 export const scheduleInterview: RequestHandler = async (req, res) => {
   try {
-    const { applicantId, interviewDate, notes, googleMeet } = req.body as {
-      applicantId: string;
-      interviewDate: string;
-      notes?: string;
-      googleMeet: string;
-    };
+    const { applicantId } = req.body as { applicantId: string };
 
-    if (!applicantId || !interviewDate || !googleMeet) {
+    if (!applicantId) {
       return responseObject({
         res,
         statusCode: HttpStatusCode.BAD_REQUEST,
-        message: "Applicant ID and interview date and google meet link are required",
+        message: "Applicant ID is required",
       });
     }
 
@@ -1746,7 +1816,7 @@ export const scheduleInterview: RequestHandler = async (req, res) => {
       return responseObject({
         res,
         statusCode: HttpStatusCode.NOT_FOUND,
-        message: getMessage("ADMIN.ERRORS.APPLICANT_NOT_FOUND"),
+        message: "Applicant not found",
       });
     }
 
@@ -1754,22 +1824,20 @@ export const scheduleInterview: RequestHandler = async (req, res) => {
       return responseObject({
         res,
         statusCode: HttpStatusCode.BAD_REQUEST,
-        message: "Only shortlisted applicants can have interviews scheduled",
+        message: "Only shortlisted applicants can be invited to interview",
       });
     }
 
-    const interview = await prisma.interview.upsert({
+    await prisma.interview.upsert({
       where: { applicantId },
       update: {
-        interviewDate: new Date(interviewDate),
-        notes,
         status: ApplicationStatus.INTERVIEW_SCHEDULED,
+        notes: "Interview scheduled via Calendly",
       },
       create: {
         applicantId,
-        interviewDate: new Date(interviewDate),
-        notes,
         status: ApplicationStatus.INTERVIEW_SCHEDULED,
+        notes: "Interview scheduled via Calendly",
       },
     });
 
@@ -1778,32 +1846,33 @@ export const scheduleInterview: RequestHandler = async (req, res) => {
       data: { applicationStatus: ApplicationStatus.INTERVIEW_SCHEDULED },
     });
 
+    // Send Calendly email
     const emailSent = await sendInterviewInvitationEmail({
       to: applicant.email,
       name: `${applicant.firstName} ${applicant.lastName}`,
-      date: interviewDate,
-      notes: notes,
-      googleMeet:googleMeet,
     });
 
     return responseObject({
       res,
       statusCode: HttpStatusCode.OK,
-      message: "Interview scheduled successfully",
+      message: "Interview invitation sent successfully!",
       payload: {
-        interview,
+        applicantId,
         emailSent,
+        calendlyLink: "https://calendly.com/peacedejiweb/30min",
       },
     });
   } catch (error: any) {
-    Logger.error("Schedule interview error:", error);
+    console.error("Schedule interview error:", error);
     return responseObject({
       res,
       statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
-      message: getMessage("ADMIN.ERRORS.INTERNAL_SERVER"),
+      message: "Failed to send interview invitation",
     });
   }
 };
+
+
 
 // Helper functions
 const getTrackInstructions = (track: Track, generalInstructions?: string) => {

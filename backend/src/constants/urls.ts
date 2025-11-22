@@ -59,6 +59,7 @@ export const urls = {
     applicants: () => routeCreator("admin/applicants"),
     emailApplicants: () => routeCreator("admin/applicants/email"),
     sendAssessment: () => routeCreator("admin/applicants/send-assessment"),
+    getAssessment: () => routeCreator("admin/applicants/assessments/submitted"),
     assessmentProgress: () => routeCreator("admin/applicants/assessment-progress"),
     evaluateAssessment: () => routeCreator("admin/applicants/evaluate-assessment"),
     updateApplicantStatus: () => routeCreator("admin/applicants/status"),

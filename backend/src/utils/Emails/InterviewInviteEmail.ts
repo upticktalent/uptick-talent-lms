@@ -3,91 +3,94 @@ import { env } from '../../config/dynamicEnv';
 
 const resend = new Resend(env.RESEND_API_KEY);
 
-interface SendInterviewInvitationParams {
-  to: string;
-  name: string;
-  date: Date | string;
-  notes?: string;
-  googleMeet: string;
-}
-
 export const sendInterviewInvitationEmail = async ({
   to,
   name,
-  date,
-  notes,
-  googleMeet
-}: SendInterviewInvitationParams): Promise<boolean> => {
+}: {
+  to: string;
+  name: string;
+}) => {
   if (!env.RESEND_API_KEY) {
-    console.log('DEV MODE: Interview invitation →', to, new Date(date).toLocaleString());
+    console.log('DEV MODE: Interview invitation →', to);
     return true;
   }
 
-  const interviewDate = new Date(date);
-  const formattedDate = interviewDate.toLocaleString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZoneName: 'short',
-  });
+  const firstName = name.split(' ')[0];
 
   const { error } = await resend.emails.send({
-    from:"Uptick Talent <no-reply@upticktalent.africa>",
+    from: "Uptick Talent <no-reply@upticktalent.africa>",
     to,
-    subject: 'Your Uptick Talent Interview is Scheduled! 🎉',
+    subject: "You're In! Schedule Your Uptick Talent Interview 🎉",
     html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
         <style>
-          body { font-family: 'Segoe UI', Arial, sans-serif; background: #f9f9fb; margin: 0; padding: 20px; }
-          .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; }
-          .content { padding: 40px 30px; color: #333; line-height: 1.7; }
-          .date-box { background: #e8f5e8; padding: 25px; border-radius: 12px; text-align: center; font-size: 20px; font-weight: bold; color: #2e7d32; margin: 30px 0; }
-          .notes { background: #fff8e1; padding: 25px; border-radius: 10px; border-left: 5px solid #ff8f00; margin: 30px 0; white-space: pre-wrap; }
-          .footer { background: #f8f9fa; padding: 30px; text-align: center; color: #666; font-size: 14px; }
+          body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8f9fb; margin: 0; padding: 20px; color: #1a1a1a; }
+          .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+          .header { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 60px 30px; text-align: center; color: white; }
+          .header h1 { margin: 0; font-size: 36px; font-weight: 700; }
+          .header p { margin: 12px 0 0; font-size: 20px; opacity: 0.95; }
+          .content { padding: 50px 40px; line-height: 1.8; text-align: center; }
+          .greeting { font-size: 26px; font-weight: 600; margin-bottom: 24px; color: #1e293b; }
+          .highlight { background: #f0f4ff; padding: 30px; border-radius: 16px; margin: 32px 0; font-size: 17px; color: #1e40af; }
+          .calendly-button { 
+            display: inline-block; 
+            background: #6366f1; 
+            color: white; 
+            padding: 20px 40px; 
+            font-size: 20px; 
+            font-weight: bold; 
+            border-radius: 16px; 
+            text-decoration: none; 
+            margin: 32px 0; 
+            box-shadow: 0 12px 30px rgba(99,102,241,0.4);
+            transition: all 0.3s;
+          }
+          .calendly-button:hover { 
+            background: #4f46e5; 
+            transform: translateY(-4px); 
+            box-shadow: 0 16px 40px rgba(99,102,241,0.5);
+          }
+          .footer { background: #f8f9fa; padding: 40px 30px; text-align: center; color: #64748b; font-size: 14px; }
+          .footer a { color: #6366f1; text-decoration: none; font-weight: 500; }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
             <h1>Uptick Talent</h1>
-            <p style="font-size: 20px; margin: 10px 0 0;">Interview Invitation</p>
+            <p>Congratulations — You're Moving Forward!</p>
           </div>
 
           <div class="content">
-            <h2>Hi ${name.split(' ')[0]},</h2>
-            <p><strong>Congratulations!</strong> You’ve been selected for an interview.</p>
-            <p>We were really impressed with your assessment and want to meet you!</p>
-
-            <div class="date-box">
-              Your Interview<br/>
-              ${formattedDate}
-            </div>
+            <div class="greeting">Hey ${firstName}!</div>
             
-            <div style="margin: 20px 0; padding: 20px; background: #e3f2fd; border-radius: 10px;">
-              <strong>Google Meet Link:</strong><br/>
-              <a href="${googleMeet}" style="color: #1a73e8;">${googleMeet}</a>
+            <p>We loved your assessment submission and we would love to meet you!</p>
+
+            <div class="highlight">
+              <strong>You're officially invited to interview for the Uptick Talent program.</strong>
             </div>
 
-            ${notes ? `
-              <div class="notes">
-                <strong>Important Notes:</strong><br/><br/>
-                ${notes.replace(/\n/g, '<br>')}
-              </div>
-            ` : ''}
+            <p>Pick a time that works best for you ${firstName}.</p>
 
-            <p>We’re excited to speak with you!</p>
-            <p>If you need to reschedule, just reply to this email.</p>
+            <a href="https://calendly.com/peacedejiweb/30min" 
+               class="calendly-button" 
+               target="_blank">
+               Schedule My Interview
+            </a>
+
+            <p style="color:#64748b; margin-top: 32px;">
+              Takes 30 minutes • No prep needed • Just be yourself
+            </p>
+
+            <p>Can't wait to speak with you!<br><strong>— The Uptick Talent Team</strong></p>
           </div>
 
           <div class="footer">
-            <p>— The Uptick Talent Team</p>
+            <p>Need to reschedule? Just reply to this email.</p>
+            <p><a href="mailto:hello@upticktalent.africa">hello@upticktalent.africa</a> • <a href="https://upticktalent.africa">upticktalent.africa</a></p>
           </div>
         </div>
       </body>
@@ -96,7 +99,7 @@ export const sendInterviewInvitationEmail = async ({
   });
 
   if (error) {
-    console.error('Failed to send interview email:', error);
+    console.error('Failed to send interview invitation:', error);
     return false;
   }
 

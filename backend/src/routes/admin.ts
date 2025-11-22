@@ -21,6 +21,7 @@ import {
   scheduleInterview,
   assignStudentToCohort,
   getAcceptedAndRejectedApplicantsData,
+  getSubmittedAssessments,
    addCourseMaterial,
   createAssignment,
   assignStudentsToCourse
@@ -70,6 +71,7 @@ router.get(urls.user_management.getAll().path,authenticate, authorize(Role.ADMIN
 router.get(urls.admin.applicants().path,   authenticate, authorize(Role.ADMIN), validatePagination, getApplicants);
 router.post(urls.admin.emailApplicants().path,   authenticate, authorize(Role.ADMIN), validateEmailApplicants, emailApplicants);
 router.post(urls.admin.sendAssessment().path,   authenticate, authorize(Role.ADMIN), validateSendAssessment, sendAssessment);
+router.get(urls.admin.getAssessment().path, authenticate, authorize(Role.ADMIN), getSubmittedAssessments);
 router.get(urls.admin.assessmentProgress().path,   authenticate, authorize(Role.ADMIN),validatePagination, getAssessmentProgress);
 router.post(urls.admin.evaluateAssessment().path,   authenticate, authorize(Role.ADMIN), validateEvaluateAssessment, evaluateAssessment);
 router.put(urls.admin.updateApplicantStatus().path,   authenticate, authorize(Role.ADMIN), validateUpdateApplicantStatus, updateApplicantStatus);
