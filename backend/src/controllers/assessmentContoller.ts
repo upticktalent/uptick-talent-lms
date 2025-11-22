@@ -1,12 +1,63 @@
 import { RequestHandler } from "express";
 import { responseObject } from "@utils";
 import { HttpStatusCode } from "@config";
-import { PrismaClient, ApplicationStatus} from "@prisma/client";
+import { PrismaClient, ApplicationStatus, Track } from "@prisma/client";
 import { Logger } from "../constants/logger";
 import { sendAssessmentReceivedEmail } from "../utils/Emails/AssessmentReceivedEmail";
-import { log } from "console";
+import { AuthRequest } from "src/middleware/auth";
 
 const prisma = new PrismaClient();
+
+// POST /api/v1/admin/track-assessments
+// Body: { track: "FRONTEND", title, instructions, submissionLink?, dueDate? }
+export const saveTrackAssessment: RequestHandler = async (req, res) => {
+  try {
+    const { track, title, instructions, submissionLink, dueDate } = req.body;
+    const authReq = req as AuthRequest;
+    const adminId = authReq.user.id;
+
+    if (!track || !title || !instructions) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: "Track, title, and instructions are required",
+      });
+    }
+
+    const assessment = await prisma.trackAssessment.upsert({
+      where: { track },
+      update: {
+        title,
+        instructions,
+        submissionLink: submissionLink || null,
+        dueDate: dueDate ? new Date(dueDate) : null,
+        updatedAt: new Date(),
+      },
+      create: {
+        track,
+        title,
+        instructions,
+        submissionLink: submissionLink || null,
+        dueDate: dueDate ? new Date(dueDate) : null,
+        createdById: adminId,
+      },
+    });
+
+    return responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      message: `Assessment for ${track} saved successfully`,
+      payload: { assessment },
+    });
+  } catch (error: any) {
+    Logger.error("Save track assessment error:", error);
+    return responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: "Failed to save track assessment",
+    });
+  }
+};
 
 export const submitAssessment: RequestHandler = async (req, res) => {
   try {
@@ -27,11 +78,14 @@ export const submitAssessment: RequestHandler = async (req, res) => {
     }
 
     const applicant = await prisma.applicant.findUnique({
-      where: {id:applicantId},
+      where: { id: applicantId },
       include: { assessment: true },
-    });    
+    });
 
-    if (applicant && applicant.email.trim().toLowerCase() !== email.trim().toLowerCase()){
+    if (
+      applicant &&
+      applicant.email.trim().toLowerCase() !== email.trim().toLowerCase()
+    ) {
       return responseObject({
         res,
         statusCode: HttpStatusCode.FORBIDDEN,
@@ -105,6 +159,51 @@ export const submitAssessment: RequestHandler = async (req, res) => {
       res,
       statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
       message: "Failed to submit assessment",
+    });
+  }
+};
+
+export const getTrackAssessment: RequestHandler = async (req, res) => {
+  try {
+    const { track } = req.params;
+
+    if (!track || !Object.values(Track).includes(track as Track)) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: "Invalid or unsupported track",
+      });
+    }
+
+    const assessment = await prisma.trackAssessment.findUnique({
+      where: { track: track as Track },
+      include: {
+        createdBy: {
+          select: { firstName: true, lastName: true, email: true },
+        },
+      },
+    });
+
+    if (!assessment || !assessment.isActive) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: "No active assessment found for this track",
+      });
+    }
+
+    return responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      payload: { assessment },
+      message: "Assessment successfuly fetched",
+    });
+  } catch (error) {
+    console.error("Get track assessment error:", error);
+    return responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: "Failed to fetch assessment",
     });
   }
 };

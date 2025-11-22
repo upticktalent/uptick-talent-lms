@@ -163,6 +163,23 @@ model Assessment {
   @@index([reviewedAt])
 }
 
+model TrackAssessment {
+  id           String   @id @default(uuid())
+  track        Track    @unique
+  title        String
+  instructions String
+  submissionLink     String?  
+  dueDate      DateTime?
+  isActive     Boolean  @default(true)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdById  String  @unique
+  createdBy    User     @relation("TrackAssessmentCreatedBy", fields: [createdById], references: [id])
+
+  @@map("track_assessments")
+}
+
 model Interview {
   id            String            @id @default(uuid())
   applicantId   String            @unique
@@ -188,8 +205,10 @@ model User {
   adminProfile   AdminProfile?
   mentorProfile  MentorProfile?
   studentProfile StudentProfile?
+  trackAssessmentCreatedBy  TrackAssessment? @relation("TrackAssessmentCreatedBy")
 
   reviewedAssessments Assessment[] @relation("AssessmentReviewedBy")
+  
 }
 
 model AdminProfile {
