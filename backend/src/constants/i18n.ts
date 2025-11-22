@@ -205,6 +205,36 @@ export const i18n = {
       STUDENTS_ASSIGNED: 'Students assigned to course successfully'
     }
   },
+
+  MENTOR: {
+    SUCCESS: {
+      DASHBOARD_RETRIEVED: 'Mentor dashboard retrieved successfully',
+      COURSES_RETRIEVED: 'Courses retrieved successfully',
+      COURSE_CREATED: 'Course created successfully',
+      STUDENTS_RETRIEVED: 'Students retrieved successfully',
+      MATERIAL_ADDED: 'Course material added successfully',
+      ASSIGNMENT_CREATED: 'Assignment created successfully',
+      ASSIGNMENT_GRADED: 'Assignment graded successfully',
+      SUBMISSIONS_RETRIEVED: 'Submissions retrieved successfully',
+      PROFILE_UPDATED: 'Profile updated successfully',
+      ANALYTICS_RETRIEVED: 'Course analytics retrieved successfully',
+    },
+    ERRORS: {
+      PROFILE_NOT_FOUND: 'Mentor profile not found',
+      TRACK_NOT_SET: 'Mentor track is not set',
+      COURSE_NOT_FOUND: 'Course not found',
+      COURSE_REQUIRED_FIELDS: 'Title and description are required',
+      COURSE_EXISTS: 'Course with this title already exists',
+      COHORT_NOT_FOUND: 'Cohort not found',
+      COHORT_TRACK_MISMATCH: 'Cohort track does not match mentor track',
+      MATERIAL_REQUIRED_FIELDS: 'Title and week number are required',
+      ASSIGNMENT_REQUIRED_FIELDS: 'Title, description, instructions, and due date are required',
+      GRADE_REQUIRED: 'Grade is required',
+      INVALID_GRADE_RANGE: 'Grade must be between 0 and maximum score',
+      SUBMISSION_NOT_FOUND: 'Submission not found',
+      INTERNAL_SERVER: 'Internal server error',
+    },
+  },
   
       
       BULK: {
