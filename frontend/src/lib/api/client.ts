@@ -7,13 +7,26 @@ const defaultConfig = {
 };
 
 const parseToken = (config: InternalAxiosRequestConfig) => {
-  // Match root, /login, or /register
-  const regex = /^\/(login)?$/;
-  if (!regex.test(config.url as string)) {
-    if (config.headers) {
-      config.headers.Authorization = `Bearer ${getAuthToken()}`;
+  const publicEndpoints = [
+    '/auth/login',
+    '/login',
+    '/applicants/createApplicant',
+    '/apply',
+  ];
+
+
+  const isPublic = publicEndpoints.some(endpoint => 
+    config.url?.includes(endpoint)
+  );
+
+  if (!isPublic) {
+    const token = getAuthToken();
+    // Only add the header if we actually have a token
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
   }
+  
   return config;
 };
 
@@ -23,7 +36,12 @@ export const client = axios.create({
 });
 
 // Set up response interceptor
-client.interceptors.response.use(response => Promise.resolve(response));
+client.interceptors.response.use(
+  response => Promise.resolve(response),
+  error => {
+    return Promise.reject(error);
+  }
+);
 
 // Set up request interceptor
 client.interceptors.request.use(parseToken);
