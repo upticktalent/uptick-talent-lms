@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url  =  env("DATABASE_URL") 
 }
 
 enum Role {
@@ -54,6 +54,20 @@ enum ApplicationStatus {
   ACCEPTED
 }
 
+enum YearsOfExperience {
+  ZERO
+  ONE
+  TWO
+  THREE
+  MORE
+}
+
+enum TimeCommitment {
+  YES_40_HRS
+  NO
+
+}
+
 enum FrontendTool {
   REACT
   VUE
@@ -90,6 +104,14 @@ model Applicant {
   country     String?   @default("Nigeria")
   dateOfBirth DateTime?
   track       Track
+  careerGoals String ? 
+
+  githubUrl  String?
+  portfolio   String ?
+
+  yearsOfExperience  YearsOfExperience @default(ONE)
+  timeCommitment   TimeCommitment   @default(YES_40_HRS)
+  timeCommitmentReason String ?
 
   referralSource ReferralSource
   frontendTools  FrontendTool[] @default([])
@@ -146,7 +168,7 @@ model Interview {
   applicantId   String            @unique
   applicant     Applicant         @relation(fields: [applicantId], references: [id], onDelete: Cascade)
   status        ApplicationStatus @default(SHORTLISTED)
-  interviewDate DateTime
+  interviewDate DateTime?
   notes         String?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt

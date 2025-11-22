@@ -41,6 +41,19 @@ export const ApplicationStatusEnum = z.enum([
   "ACCEPTED",
 ]);
 
+export const YearsOfExperienceEnum = z.enum([
+  "ZERO",
+  "ONE",
+  "TWO",
+  "THREE",
+  "MORE",
+]);
+
+export const TimeCommitmentEnum = z.enum([
+  "YES_40_HRS",
+  "NO",
+]);
+
 export const FrontendToolEnum = z.enum(["REACT", "VUE", "ANGULAR", "SVELTE", "OTHER"]);
 export const BackendToolEnum = z.enum(["NODE", "EXPRESS", "DJANGO", "FASTAPI", "LARAVEL", "OTHER"]);
 export const MobileToolEnum = z.enum(["FLUTTER", "REACT_NATIVE", "KOTLIN", "SWIFT", "OTHER"]);
@@ -69,6 +82,22 @@ export const createApplicationSchema = z.object({
   dateOfBirth: z.coerce.date(),
   track: TrackEnum,
 
+  careerGoals: z.string().optional(),
+  githubUrl: z.string().url().optional().or(z.literal("")),
+  portfolio: z.string().url().optional().or(z.literal("")),
+
+
+  yearsOfExperience: YearsOfExperienceEnum,
+
+  timeCommitment: TimeCommitmentEnum,
+
+  timeCommitmentReason: z
+    .string()
+    .trim()
+    .min(20, "Please explain in at least 20 characters why you cannot commit 40 hrs/week")
+    .optional()
+    .nullable(),
+
   // Tool arrays — default to empty
   frontendTools: z.array(FrontendToolEnum).default([]),
   backendTools: z.array(BackendToolEnum).default([]),
@@ -85,5 +114,16 @@ export const createApplicationSchema = z.object({
 
   // Status is set by backend
   status: ApplicationStatusEnum.default("PENDING"),
-});
+})
+.refine(
+  (data) =>
+    data.timeCommitment === "YES_40_HRS" ||
+    (data.timeCommitment === "NO" &&
+      data.timeCommitmentReason &&
+      data.timeCommitmentReason.trim().length >= 20),
+  {
+    message: "please let us know why you cannot commit 40 hours per week",
+    path: ["timeCommitmentReason"], // shows error on the reason field
+  }
+);
 
