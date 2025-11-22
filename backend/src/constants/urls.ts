@@ -1,5 +1,4 @@
 
-// constants/urls.ts
 import { routeCreator } from "../utils";
 
 export const urls = {
@@ -80,6 +79,20 @@ export const urls = {
     assignments: () => routeCreator("student/assignments"),
     submitAssignment: (assignmentId?: string) => routeCreator(`student/assignments/${assignmentId || ':assignmentId'}/submit`)
   },
+   // Mentor routes
+  mentor: {
+    base: () => routeCreator("mentor"),
+    dashboard: () => routeCreator("mentor/dashboard"),
+    courses: () => routeCreator("mentor/courses"),
+    createCourse: () => routeCreator("mentor/courses"),
+    students: () => routeCreator("mentor/students"),
+    courseMaterials: (courseId?: string) => routeCreator(`mentor/courses/${courseId || ':courseId'}/materials`),
+    createAssignment: (courseId?: string) => routeCreator(`mentor/courses/${courseId || ':courseId'}/assignments`),
+    assignmentSubmissions: (assignmentId?: string) => routeCreator(`mentor/assignments/${assignmentId || ':assignmentId'}/submissions`),
+    gradeSubmission: (submissionId?: string) => routeCreator(`mentor/submissions/${submissionId || ':submissionId'}/grade`),
+    courseAnalytics: (courseId?: string) => routeCreator(`mentor/courses/${courseId || ':courseId'}/analytics`),
+    profile: () => routeCreator("mentor/profile"),
+  },
   
 
   
@@ -136,6 +149,18 @@ export const ROUTES = {
   APPLICANT: {
     INTERVIEW: '/applicants/interview/evaluate',
     SCHEDULE: '/applicants/interview/schedule'
+  },
+ MENTOR: {
+    DASHBOARD: '/mentor/dashboard',
+    COURSES: '/mentor/courses',
+    CREATE_COURSE: '/mentor/courses',
+    STUDENTS: '/mentor/students',
+    COURSE_MATERIALS: '/mentor/courses/:courseId/materials',
+    CREATE_ASSIGNMENT: '/mentor/courses/:courseId/assignments',
+    ASSIGNMENT_SUBMISSIONS: '/mentor/assignments/:assignmentId/submissions',
+    GRADE_SUBMISSION: '/mentor/submissions/:submissionId/grade',
+    COURSE_ANALYTICS: '/mentor/courses/:courseId/analytics',
+    PROFILE: '/mentor/profile',
   },
   HEALTH: '/health',
   USER_MANAGEMENT: '/users/track'

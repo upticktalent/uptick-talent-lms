@@ -21,6 +21,7 @@ import { sendAssessmentEmail } from "../utils/Emails/AssesstmentSentEmail";
 import { sendAssessmentFailedEmail } from "../utils/Emails/AssessmentFailedEmail";
 import { sendAssessmentPassedEmail } from "../utils/Emails/AssessmentPassedEmail";
 import { sendInterviewInvitationEmail } from "../utils/Emails/InterviewInviteEmail";
+import { sendCredentialsEmail } from "../utils/EmailService";
 
 const prisma = new PrismaClient();
 

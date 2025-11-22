@@ -8,6 +8,7 @@ import healthRoutes from './health.routes';
 import applicantsRoutes from './applicants.routes'
 import assessmentRoutes from './assessment.routes'
 import studentRoutes from  './student'
+import mentorRoutes from './mentor'
 
 // Main API router mounted under /api/v1
 export const MainRouter = express.Router();
@@ -20,6 +21,8 @@ MainRouter.use('/health', healthRoutes);
 MainRouter.use('/users', userRoutes);
 MainRouter.use('/', adminRoutes);
 MainRouter.use('/', studentRoutes )
+MainRouter.use('/', mentorRoutes )
+
 // Keep default export for backward compatibility if imported elsewhere
 export default MainRouter;
 

@@ -1,4 +1,4 @@
-// src/routes/assessment.routes.ts
+
 import { Router } from "express";
 import { submitAssessment } from "../controllers/assessmentContoller";
 
