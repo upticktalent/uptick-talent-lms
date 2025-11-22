@@ -67,7 +67,9 @@ export const urls = {
     bulkCreateStudents: () => routeCreator("admin/students/bulk-create"),
     dashboard: () => routeCreator("admin/dashboard"),
     assignCohort: () => routeCreator("admin/students/assign-cohort"),
-    applicantsData: () => routeCreator("admin/applicants/applicantsData")
+    applicantsData: () => routeCreator("admin/applicants/applicantsData"),
+    saveTrackAssessment: () => routeCreator("admin/track-assessments"),
+    getTrackAssessment: () => routeCreator("admin/getTrackAssessment/:track")
   },
   
   // Student routes

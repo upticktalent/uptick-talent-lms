@@ -79,7 +79,7 @@ export const createApplicant = async (
 
         frontendTools,
         backendTools,
-        obileTools,
+        mobileTools,
         frontendToolsOther,
         backendToolsOther,
         mobileToolsOther,
@@ -130,8 +130,8 @@ export const getAllApplicants = async (
       orderBy: { createdAt: "asc" },
       select: {
         id: true,
-        firstname: true,
-        lastname: true,
+        firstName: true,
+        lastName: true,
         email: true,
         track: true,
         phoneNumber: true,

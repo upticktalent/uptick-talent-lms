@@ -26,6 +26,7 @@ import {
   createAssignment,
   assignStudentsToCourse
 } from '../controllers/adminController';
+import { saveTrackAssessment, getTrackAssessment } from '@controllers/assessmentContoller';
 import { urls } from '../constants/urls';
 import { Role } from '@prisma/client';
 import {
@@ -76,7 +77,9 @@ router.get(urls.admin.assessmentProgress().path,   authenticate, authorize(Role.
 router.post(urls.admin.evaluateAssessment().path,   authenticate, authorize(Role.ADMIN), validateEvaluateAssessment, evaluateAssessment);
 router.put(urls.admin.updateApplicantStatus().path,   authenticate, authorize(Role.ADMIN), validateUpdateApplicantStatus, updateApplicantStatus);
 router.put(urls.admin.assignCohort().path, authenticate, authorize(Role.ADMIN), assignStudentToCohort);
-router.get(urls.admin.applicantsData().path, authenticate, authorize(Role.ADMIN), getAcceptedAndRejectedApplicantsData)
+router.get(urls.admin.applicantsData().path, authenticate, authorize(Role.ADMIN), getAcceptedAndRejectedApplicantsData);
+router.post(urls.admin.saveTrackAssessment().path, authenticate, authorize(Role.ADMIN), saveTrackAssessment);
+router.get(urls.admin.getTrackAssessment().path, authenticate, authorize(Role.ADMIN), getTrackAssessment);
 
 // Student creation from applicants with validation
 router.post(urls.admin.createStudentFromApplicant().path,  authenticate, authorize(Role.ADMIN), validateCreateStudentFromApplicant, checkCohortExists, createStudentFromApplicant);
