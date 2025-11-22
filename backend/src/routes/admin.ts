@@ -24,7 +24,8 @@ import {
   getSubmittedAssessments,
    addCourseMaterial,
   createAssignment,
-  assignStudentsToCourse
+  assignStudentsToCourse,
+  addSingleCourseMaterial
 } from '../controllers/adminController';
 import { saveTrackAssessment, getTrackAssessment } from '@controllers/assessmentContoller';
 import { urls } from '../constants/urls';
@@ -41,7 +42,8 @@ import {
   validateCreateStudentFromApplicant,
   validateBulkCreateStudents,
   checkCohortExists,
-  checkMentorExists
+  checkMentorExists,
+  validateMaterialData, validateBulkMaterials
 } from '../middleware/adminValidation';
 import { validatePagination } from '../middleware/validation';
 
@@ -64,10 +66,10 @@ router.post(urls.admin.createMentor().path,  authenticate, authorize(Role.ADMIN)
 // Course routes with validation
 router.post(urls.admin.createCourse().path,   authenticate, authorize(Role.ADMIN), validateCreateCourse,  createCourse);
 router.get(urls.admin.courses().path,   authenticate, authorize(Role.ADMIN), getCourses);
-router.post(urls.admin.courseMaterials().path, authenticate, authorize(Role.ADMIN),addCourseMaterial);
+router.post(urls.admin.courseMaterials().path, authenticate, authorize(Role.ADMIN), validateBulkMaterials, addCourseMaterial);
 router.post(urls.admin.courseAssignments().path, authenticate, authorize(Role.ADMIN),createAssignment);
 router.post(urls.admin.assignStudentsToCourse().path, authenticate, authorize(Role.ADMIN), assignStudentsToCourse);
-
+router.post(urls.admin.courseMaterials().path, authenticate, authorize(Role.ADMIN), validateMaterialData, addSingleCourseMaterial);
 // User management routes
 router.get(urls.user_management.getAll().path,authenticate, authorize(Role.ADMIN), getUsersByTrack);
 

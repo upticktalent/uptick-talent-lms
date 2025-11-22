@@ -4,6 +4,7 @@ import { responseObject } from '@utils';
 import { HttpStatusCode } from '@config';
 import { getMessage } from '../utils/i188n';
 import { Track } from '@prisma/client';
+import { MaterialTypeEnum } from '../controllers/adminController';
 
 const isValidUuid = (value?: string): boolean => {
   if (!value) return false;
@@ -178,3 +179,75 @@ export const checkMentorExists = async (req: Request, res: Response, next: NextF
   next();
 };
 
+export const validateMaterialData = (req: Request, res: Response, next: NextFunction) => {
+  const { title, weekNumber, type, link, fileUrl, content } = req.body;
+
+  if (!title || !weekNumber) {
+    return responseObject({
+      res,
+      statusCode: HttpStatusCode.BAD_REQUEST,
+      message: getMessage('ADMIN.ERRORS.MATERIAL_REQUIRED_FIELDS')
+    });
+  }
+
+  if (type && !Object.values(MaterialTypeEnum).includes(type)) {
+    return responseObject({
+      res,
+      statusCode: HttpStatusCode.BAD_REQUEST,
+      message: getMessage('ADMIN.ERRORS.INVALID_MATERIAL_TYPE')
+    });
+  }
+
+  if (!link && !fileUrl && !content) {
+    return responseObject({
+      res,
+      statusCode: HttpStatusCode.BAD_REQUEST,
+      message: getMessage('ADMIN.ERRORS.MATERIAL_CONTENT_REQUIRED')
+    });
+  }
+
+  next();
+};
+
+export const validateBulkMaterials = (req: Request, res: Response, next: NextFunction) => {
+  const { materials } = req.body;
+
+  if (!materials || !Array.isArray(materials) || materials.length === 0) {
+    return responseObject({
+      res,
+      statusCode: HttpStatusCode.BAD_REQUEST,
+      message: getMessage('ADMIN.ERRORS.MATERIALS_ARRAY_REQUIRED')
+    });
+  }
+
+  // Validate each material in the array
+  for (let i = 0; i < materials.length; i++) {
+    const material = materials[i];
+    
+    if (!material.title || !material.weekNumber) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: `Material at index ${i} is missing required fields`
+      });
+    }
+
+    if (material.type && !Object.values(MaterialTypeEnum).includes(material.type)) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: `Invalid material type at index ${i}`
+      });
+    }
+
+    if (!material.link && !material.fileUrl && !material.content) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: `Material at index ${i} must have either link, fileUrl, or content`
+      });
+    }
+  }
+
+  next();
+};

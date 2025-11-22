@@ -55,6 +55,7 @@ export const urls = {
     courses: () => routeCreator("admin/courses"),
     createCourse: () => routeCreator("admin/courses"),
     courseMaterials: (courseId?: string) => routeCreator(`admin/courses/${courseId || ':courseId'}/materials`),
+      courseMaterialsBulk: (courseId?: string) => routeCreator(`admin/courses/${courseId || ':courseId'}/materials/bulk`),
     courseAssignments: (courseId?: string) => routeCreator(`admin/courses/${courseId || ':courseId'}/assignments`),
     assignStudentsToCourse: (courseId?: string) => routeCreator(`admin/courses/${courseId || ':courseId'}/assign-students`),
     applicants: () => routeCreator("admin/applicants"),
@@ -71,6 +72,10 @@ export const urls = {
     applicantsData: () => routeCreator("admin/applicants/applicantsData"),
     saveTrackAssessment: () => routeCreator("admin/track-assessments"),
     getTrackAssessment: () => routeCreator("admin/getTrackAssessment/:track"),
+     getCourse: (id?: string) => routeCreator(`admin/courses/${id || ':id'}`),
+    updateCourse: (id?: string) => routeCreator(`admin/courses/${id || ':id'}`),
+    deleteCourseMaterial: (courseId?: string, materialId?: string) => routeCreator(`admin/courses/${courseId || ':courseId'}/materials/${materialId || ':materialId'}`),
+    deleteAssignment: (courseId?: string, assignmentId?: string) => routeCreator(`admin/courses/${courseId || ':courseId'}/assignments/${assignmentId || ':assignmentId'}`),
   },
   // Student routes
   student: {
@@ -139,6 +144,11 @@ export const ROUTES = {
     BULK_CREATE_STUDENTS: '/admin/students/bulk-create',
     ASSIGN_COHORT: '/admin/students/assign-cohort',
     DASHBOARD: '/admin/dashboard',
+    COURSE_MATERIALS_BULK: '/admin/courses/:courseId/materials/bulk',
+    GET_COURSE: '/admin/courses/:id',
+    UPDATE_COURSE: '/admin/courses/:id',
+    DELETE_COURSE_MATERIAL: '/admin/courses/:courseId/materials/:materialId',
+    DELETE_ASSIGNMENT: '/admin/courses/:courseId/assignments/:assignmentId',
   },
   STUDENT: {
     DASHBOARD: '/student/dashboard',
