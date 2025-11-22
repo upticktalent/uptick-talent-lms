@@ -19,6 +19,8 @@ MainRouter.use('/', authRoutes);
 MainRouter.use('/users', userRoutes);
 MainRouter.use('/', adminRoutes);
 MainRouter.use('/', studentRoutes )
+MainRouter.use('/', mentorRoutes )
+
 // Keep default export for backward compatibility if imported elsewhere
 export default MainRouter;
 
