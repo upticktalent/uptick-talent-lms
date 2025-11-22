@@ -14,17 +14,17 @@ import { Role } from '@prisma/client';
 const router = express.Router();
 
 // All routes require student authentication
-router.use(authenticate, authorize([Role.STUDENT]));
+// router.use(authenticate, authorize([Role.STUDENT]));
 
 // Student dashboard
-router.get(urls.student.dashboard().path, getStudentDashboard);
+router.get(urls.student.dashboard().path, authenticate, authorize(Role.STUDENT), getStudentDashboard);
 
 // Course routes
-router.get(urls.student.courses().path, getStudentCourse);
-router.get(urls.student.courseMaterials().path, getCourseMaterials);
+router.get(urls.student.courses().path, authenticate, authorize(Role.STUDENT), getStudentCourse);
+router.get(urls.student.courseMaterials().path, authenticate, authorize(Role.STUDENT), getCourseMaterials);
 
 // Assignment routes
-router.get(urls.student.assignments().path, getStudentAssignments);
-router.post(urls.student.submitAssignment().path, submitAssignment);
+router.get(urls.student.assignments().path, authenticate, authorize(Role.STUDENT), getStudentAssignments);
+router.post(urls.student.submitAssignment().path, authenticate, authorize(Role.STUDENT), submitAssignment);
 
 export default router;

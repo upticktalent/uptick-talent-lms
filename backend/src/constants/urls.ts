@@ -1,4 +1,5 @@
 
+import { addCourseMaterial } from "@controllers/adminController";
 import { routeCreator } from "../utils";
 
 export const urls = {
@@ -69,9 +70,8 @@ export const urls = {
     assignCohort: () => routeCreator("admin/students/assign-cohort"),
     applicantsData: () => routeCreator("admin/applicants/applicantsData"),
     saveTrackAssessment: () => routeCreator("admin/track-assessments"),
-    getTrackAssessment: () => routeCreator("admin/getTrackAssessment/:track")
+    getTrackAssessment: () => routeCreator("admin/getTrackAssessment/:track"),
   },
-  
   // Student routes
   student: {
     base: () => routeCreator("student"),

@@ -53,7 +53,7 @@ const corsOptions = {
     }
 
     // Production: strict check
-    const allowedOrigins = getters.getAllowedOrigins();
+    const allowedOrigins = getters.getAllowedOrigins().map(o => o.trim());
     if (allowedOrigins.includes(origin)) {
       return callback(null, origin);
     }
