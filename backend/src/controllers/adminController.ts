@@ -772,7 +772,7 @@ export const emailApplicants: RequestHandler = async (req, res) => {
       for (const applicant of applicants) {
         await emailService.sendApplicationStatusEmail(
           applicant.email,
-          applicant.firstname,
+          applicant.firstName,
           status as ApplicationStatus,
           notes,
         );
@@ -976,7 +976,7 @@ export const sendAssessment: RequestHandler = async (req, res) => {
 
         const emailSent = await sendAssessmentEmail({
           to: applicant.email,
-          name: `${applicant.firstname} ${applicant.lastname}`,
+          name: `${applicant.firstName} ${applicant.lastName}`,
           track: applicant.track,
           assessmentLink,
           dueDate,
@@ -985,7 +985,7 @@ export const sendAssessment: RequestHandler = async (req, res) => {
 
         results.push({
           applicantId: applicant.id,
-          name: `${applicant.firstname} ${applicant.lastname}`,
+          name: `${applicant.firstName} ${applicant.lastName}`,
           email: applicant.email,
           status: emailSent ? "success" : "failed",
           ...(emailSent ? {} : { error: "Failed to send email" }),
@@ -993,7 +993,7 @@ export const sendAssessment: RequestHandler = async (req, res) => {
       } catch (error: any) {
         results.push({
           applicantId: applicant.id,
-          name: `${applicant.firstname} ${applicant.lastname}`,
+          name: `${applicant.firstName} ${applicant.lastName}`,
           email: applicant.email,
           status: "failed",
           error: error?.message || "Internal processing error!",
@@ -1154,12 +1154,12 @@ export const evaluateAssessment: RequestHandler = async (req, res) => {
     let nextStatus: ApplicationStatus;
     if (passed) {
       nextStatus = ApplicationStatus.SHORTLISTED;
-      await sendAssessmentPassedEmail(applicant.email, applicant.firstname);
+      await sendAssessmentPassedEmail(applicant.email, applicant.firstName);
     } else {
       nextStatus = ApplicationStatus.REJECTED;
       await sendAssessmentFailedEmail(
         applicant.email,
-        applicant.firstname,
+        applicant.firstName,
         feedback,
       );
     }
@@ -1244,8 +1244,8 @@ export const createStudentFromApplicant: RequestHandler = async (req, res) => {
       data: {
         email: applicant.email,
         password: hashedPassword,
-        firstName: applicant.firstname,
-        lastName: applicant.lastname,
+        firstName: applicant.firstName,
+        lastName: applicant.lastName,
         role: Role.STUDENT,
       },
       select: {
@@ -1262,8 +1262,8 @@ export const createStudentFromApplicant: RequestHandler = async (req, res) => {
       data: {
         userId: user.id,
         email: applicant.email,
-        firstName: applicant.firstname,
-        lastName: applicant.lastname,
+        firstName: applicant.firstName,
+        lastName: applicant.lastName,
         track: applicant.track as Track,
         cohortId: cohortId,
       },
@@ -1276,7 +1276,7 @@ export const createStudentFromApplicant: RequestHandler = async (req, res) => {
 
     const emailSent = await emailService.sendCredentialsEmail(
       applicant.email,
-      applicant.firstname,
+      applicant.firstName,
       randomPassword,
       "STUDENT",
     );
@@ -1368,8 +1368,8 @@ export const bulkCreateStudents: RequestHandler = async (req, res) => {
           data: {
             email: applicant.email,
             password: hashedPassword,
-            firstName: applicant.firstname,
-            lastName: applicant.lastname,
+            firstName: applicant.firstName,
+            lastName: applicant.lastName,
             role: Role.STUDENT,
           },
         });
@@ -1378,8 +1378,8 @@ export const bulkCreateStudents: RequestHandler = async (req, res) => {
           data: {
             userId: user.id,
             email: applicant.email,
-            firstName: applicant.firstname,
-            lastName: applicant.lastname,
+            firstName: applicant.firstName,
+            lastName: applicant.lastName,
             track: applicant.track as Track,
             cohortId,
           },
@@ -1394,7 +1394,7 @@ export const bulkCreateStudents: RequestHandler = async (req, res) => {
           applicantId,
           userId: user.id,
           email: applicant.email,
-          name: `${applicant.firstname} ${applicant.lastname}`,
+          name: `${applicant.firstName} ${applicant.lastName}`,
           track: applicant.track,
         });
       } catch (error: any) {
@@ -1619,8 +1619,8 @@ export const evaluateInterview: RequestHandler = async (req, res) => {
         data: {
           email: applicant.email,
           password: hashedPassword,
-          firstName: applicant.firstname,
-          lastName: applicant.lastname,
+          firstName: applicant.firstName,
+          lastName: applicant.lastName,
           role: Role.STUDENT,
         },
       });
@@ -1629,8 +1629,8 @@ export const evaluateInterview: RequestHandler = async (req, res) => {
         data: {
           userId: user.id,
           email: applicant.email,
-          firstName: applicant.firstname,
-          lastName: applicant.lastname,
+          firstName: applicant.firstName,
+          lastName: applicant.lastName,
           track: applicant.track as Track,
           cohortId: cohortId || null,
         },
@@ -1654,7 +1654,7 @@ export const evaluateInterview: RequestHandler = async (req, res) => {
 
       const emailSent = await emailService.sendCredentialsEmail(
         applicant.email,
-        applicant.firstname,
+        applicant.firstName,
         temporaryPassword,
         "STUDENT",
       );
@@ -1780,7 +1780,7 @@ export const scheduleInterview: RequestHandler = async (req, res) => {
 
     const emailSent = await sendInterviewInvitationEmail({
       to: applicant.email,
-      name: `${applicant.firstname} ${applicant.lastname}`,
+      name: `${applicant.firstName} ${applicant.lastName}`,
       date: interviewDate,
       notes: notes,
       googleMeet:googleMeet,
