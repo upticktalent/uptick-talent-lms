@@ -1,4 +1,5 @@
-import { RequestHandler } from "express";
+import {RequestHandler } from "express";
+import {type Request,  type Response } from "express";
 import {
   PrismaClient,
   Role,
@@ -15,6 +16,7 @@ import { getMessage } from "../utils/i188n";
 
 import { EnvironmentConfig } from "../constants/environment";
 import { PASSWORD_CONSTANTS } from "../constants/password";
+import { EmailService } from "../services/email.service";
 import { sendAssessmentEmail } from "../utils/Emails/AssesstmentSentEmail";
 import { sendAssessmentFailedEmail } from "../utils/Emails/AssessmentFailedEmail";
 import { sendAssessmentPassedEmail } from "../utils/Emails/AssessmentPassedEmail";
@@ -196,7 +198,7 @@ export const createStudentAccount: RequestHandler = async (req, res) => {
     });
 
     // Send credentials email
-    const emailSent = await sendCredentialsEmail(
+    const emailSent = await emailService.sendCredentialsEmail(
       email,
       firstName,
       temporaryPassword,
@@ -649,6 +651,75 @@ export const getUsersByTrack: RequestHandler = async (req, res) => {
     });
   }
 };
+
+// getApplicants data
+export const getAcceptedAndRejectedApplicantsData = async(req:Request, res:Response) => {
+  try {
+    const [acceptedApplicants, rejectedApplicants, totalApplicants] = await Promise.all([
+      prisma.applicant.findMany({
+        where: {
+          applicationStatus: ApplicationStatus.ACCEPTED
+        }, 
+        select: {
+          id:true,
+          email:true,
+          firstName:true,
+          lastName: true,
+          applicationStatus:true
+        }, orderBy:{
+          createdAt:'desc'
+        }
+      }),
+
+      prisma.applicant.findMany({
+        where: {
+          applicationStatus:ApplicationStatus.REJECTED
+        }, 
+          select: {
+          id:true,
+          email:true,
+          firstName:true,
+          lastName: true,
+          applicationStatus:true
+        }, orderBy: {
+          createdAt:'desc'
+        }
+
+      }),
+      prisma.applicant.findMany({
+        where:({
+          applicationStatus:ApplicationStatus.PENDING
+        }),
+        select: { id: true, firstName: true, lastName: true, email: true, applicationStatus: true },
+      })
+    ])
+    const stats = {
+      acceptedApplicants: acceptedApplicants.length,
+      rejectedApplicants:rejectedApplicants.length,
+      totalApplicants:  totalApplicants.length
+    }
+
+    return responseObject({
+      res,
+      statusCode: HttpStatusCode.OK,
+      message: getMessage('ADMIN.SUCCESS.APPLICANTS_DATA_RETRIEVED'),
+      payload: {
+        stats,
+        accepted: acceptedApplicants,
+        rejected: rejectedApplicants,
+        totalApplicants: totalApplicants
+      },
+    });
+
+} catch (error:any) {
+  console.error('Error fetching applicants data:', error);
+    return responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('ADMIN.ERRORS.INTERNAL_SERVER'),
+    });
+}
+}
 
 // Email Applicants
 export const emailApplicants: RequestHandler = async (req, res) => {

@@ -20,6 +20,7 @@ import {
   evaluateInterview,
   scheduleInterview,
   assignStudentToCohort,
+  getAcceptedAndRejectedApplicantsData,
    addCourseMaterial,
   createAssignment,
   assignStudentsToCourse
@@ -47,6 +48,9 @@ const router = express.Router();
 // All routes require admin authentication
 // router.use(authenticate, authorize(Role.ADMIN));
 
+// get Applicants data (accepted and failed applicants)
+
+
 // Cohort routes with validation
 router.post(urls.admin.createCohort().path, authenticate, authorize(Role.ADMIN), validateCreateCohort, createCohort);
 router.get(urls.admin.cohorts().path, authenticate, authorize(Role.ADMIN), getCohorts);
@@ -69,7 +73,8 @@ router.post(urls.admin.sendAssessment().path,   authenticate, authorize(Role.ADM
 router.get(urls.admin.assessmentProgress().path,   authenticate, authorize(Role.ADMIN),validatePagination, getAssessmentProgress);
 router.post(urls.admin.evaluateAssessment().path,   authenticate, authorize(Role.ADMIN), validateEvaluateAssessment, evaluateAssessment);
 router.put(urls.admin.updateApplicantStatus().path,   authenticate, authorize(Role.ADMIN), validateUpdateApplicantStatus, updateApplicantStatus);
-router.put(urls.admin.assignCohort().path, authenticate, authorize(Role.ADMIN), assignStudentToCohort)
+router.put(urls.admin.assignCohort().path, authenticate, authorize(Role.ADMIN), assignStudentToCohort);
+router.get(urls.admin.applicantsData().path, authenticate, authorize(Role.ADMIN), getAcceptedAndRejectedApplicantsData)
 
 // Student creation from applicants with validation
 router.post(urls.admin.createStudentFromApplicant().path,  authenticate, authorize(Role.ADMIN), validateCreateStudentFromApplicant, checkCohortExists, createStudentFromApplicant);

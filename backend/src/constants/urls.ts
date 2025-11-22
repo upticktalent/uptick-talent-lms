@@ -186,7 +186,8 @@ export const urls = {
     createStudentFromApplicant: () => routeCreator("admin/students/create-from-applicant"),
     bulkCreateStudents: () => routeCreator("admin/students/bulk-create"),
     dashboard: () => routeCreator("admin/dashboard"),
-    assignCohort: () => routeCreator("admin/students/assign-cohort")
+    assignCohort: () => routeCreator("admin/students/assign-cohort"),
+    applicantsData: () => routeCreator("admin/applicants/applicantsData")
   },
   
   // Student routes
