@@ -24,6 +24,46 @@ import { sendInterviewInvitationEmail } from "../utils/Emails/InterviewInviteEma
 import { sendCredentialsEmail } from "../utils/EmailService";
 
 const prisma = new PrismaClient();
+export interface MaterialType {
+  id?: string;
+  title: string;
+  description?: string;
+  fileUrl?: string;
+  link?: string;
+  content?: string;
+  weekNumber: number;
+  type: MaterialTypeEnum;
+  order?: number;
+  courseId?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export enum MaterialTypeEnum {
+  LINK = 'LINK',
+  VIDEO = 'VIDEO',
+  DOCUMENT = 'DOCUMENT',
+  PDF = 'PDF',
+  IMAGE = 'IMAGE',
+  TEXT = 'TEXT',
+  OTHER = 'OTHER'
+}
+
+export interface CreateMaterialRequest {
+  title: string;
+  description?: string;
+  fileUrl?: string;
+  link?: string;
+  content?: string;
+  weekNumber: number;
+  type: MaterialTypeEnum;
+  order?: number;
+}
+
+export interface BulkMaterialsRequest {
+  materials: MaterialType[];
+}
+
 
 const generateRandomPassword = (
   length: number = PASSWORD_CONSTANTS.DEFAULT_LENGTH,
@@ -1900,16 +1940,294 @@ const getTrackInstructions = (track: Track, generalInstructions?: string) => {
     : specificInstructions;
 };
 
+// export const addCourseMaterial: RequestHandler = async (req, res) => {
+//   try {
+//     const { courseId } = req.params;
+//     const { materials } = req.body as {
+//       materials: Array<{
+//         title: string;
+//         description?: string;
+//         fileUrl?: string;
+//         link?: string;
+//         content?: string;
+//         weekNumber: number;
+//         type?: MaterialType;
+//         order?: number;
+//       }>;
+//     };
+
+//     if (!materials || !Array.isArray(materials) || materials.length === 0) {
+//       return responseObject({
+//         res,
+//         statusCode: HttpStatusCode.BAD_REQUEST,
+//         message: getMessage('ADMIN.ERRORS.MATERIALS_ARRAY_REQUIRED')
+//       });
+//     }
+
+//     // Validate each material
+//     for (const material of materials) {
+//       if (!material.title || !material.weekNumber) {
+//         return responseObject({
+//           res,
+//           statusCode: HttpStatusCode.BAD_REQUEST,
+//           message: getMessage('ADMIN.ERRORS.MATERIAL_TITLE_WEEK_REQUIRED')
+//         });
+//       }
+
+//       // Validate that either link or fileUrl is provided
+//       if (!material.link && !material.fileUrl && !material.content) {
+//         return responseObject({
+//           res,
+//           statusCode: HttpStatusCode.BAD_REQUEST,
+//           message: getMessage('ADMIN.ERRORS.MATERIAL_CONTENT_REQUIRED')
+//         });
+//       }
+//     }
+
+//     // Verify course exists
+//     const course = await prisma.course.findUnique({
+//       where: { id: courseId }
+//     });
+
+//     if (!course) {
+//       return responseObject({
+//         res,
+//         statusCode: HttpStatusCode.NOT_FOUND,
+//         message: getMessage('ADMIN.ERRORS.COURSE_NOT_FOUND')
+//       });
+//     }
+
+//     // Create multiple materials
+//     const createdMaterials = await prisma.$transaction(
+//       materials.map((material, index) => 
+//         prisma.courseMaterial.create({
+//           data: {
+//             title: material.title,
+//             description: material.description,
+//             fileUrl: material.fileUrl,
+//             link: material.link,
+//             content: material.content,
+//             weekNumber: parseInt(material.weekNumber.toString()),
+//             type: material.type || 'LINK',
+//             order: material.order || index,
+//             courseId
+//           }
+//         })
+//       )
+//     );
+
+//     responseObject({
+//       res,
+//       statusCode: HttpStatusCode.CREATED,
+//       message: getMessage('ADMIN.SUCCESS.MATERIALS_ADDED'),
+//       payload: { 
+//         materials: createdMaterials,
+//         count: createdMaterials.length
+//       }
+//     });
+    
+//   } catch (error) {
+//     Logger.error('Add course materials error:', error);
+//     responseObject({
+//       res,
+//       statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+//       message: getMessage('ADMIN.ERRORS.INTERNAL_SERVER')
+//     });
+//   }
+// };
+
+// // New controller for single material (backward compatibility)
+// export const addSingleCourseMaterial: RequestHandler = async (req, res) => {
+//   try {
+//     const { courseId } = req.params;
+//     const { title, description, fileUrl, link, content, weekNumber, type, order } = req.body;
+
+//     if (!title || !weekNumber) {
+//       return responseObject({
+//         res,
+//         statusCode: HttpStatusCode.BAD_REQUEST,
+//         message: getMessage('ADMIN.ERRORS.MATERIAL_REQUIRED_FIELDS')
+//       });
+//     }
+
+//     // Validate that either link or fileUrl or content is provided
+//     if (!link && !fileUrl && !content) {
+//       return responseObject({
+//         res,
+//         statusCode: HttpStatusCode.BAD_REQUEST,
+//         message: getMessage('ADMIN.ERRORS.MATERIAL_CONTENT_REQUIRED')
+//       });
+//     }
+
+//     // Verify course exists
+//     const course = await prisma.course.findUnique({
+//       where: { id: courseId }
+//     });
+
+//     if (!course) {
+//       return responseObject({
+//         res,
+//         statusCode: HttpStatusCode.NOT_FOUND,
+//         message: getMessage('ADMIN.ERRORS.COURSE_NOT_FOUND')
+//       });
+//     }
+
+//     const material = await prisma.courseMaterial.create({
+//       data: {
+//         title,
+//         description,
+//         fileUrl,
+//         link,
+//         content,
+//         weekNumber: parseInt(weekNumber.toString()),
+//         type: type || 'LINK',
+//         order: order || 0,
+//         courseId
+//       }
+//     });
+
+//     responseObject({
+//       res,
+//       statusCode: HttpStatusCode.CREATED,
+//       message: getMessage('ADMIN.SUCCESS.MATERIAL_ADDED'),
+//       payload: { material }
+//     });
+    
+//   } catch (error) {
+//     Logger.error('Add single course material error:', error);
+//     responseObject({
+//       res,
+//       statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+//       message: getMessage('ADMIN.ERRORS.INTERNAL_SERVER')
+//     });
+//   }
+// };
+
+
+
+
 export const addCourseMaterial: RequestHandler = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const { title, description, fileUrl, content, weekNumber } = req.body;
+    const { materials } = req.body as BulkMaterialsRequest;
 
-    if (!title || !weekNumber) {
+    if (!materials || !Array.isArray(materials) || materials.length === 0) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('ADMIN.ERRORS.MATERIALS_ARRAY_REQUIRED')
+      });
+    }
+
+    // Validate each material using the interface
+    for (const material of materials) {
+      if (!material.title || !material.weekNumber) {
+        return responseObject({
+          res,
+          statusCode: HttpStatusCode.BAD_REQUEST,
+          message: getMessage('ADMIN.ERRORS.MATERIAL_TITLE_WEEK_REQUIRED')
+        });
+      }
+
+      // Validate material type
+      if (!Object.values(MaterialTypeEnum).includes(material.type)) {
+        return responseObject({
+          res,
+          statusCode: HttpStatusCode.BAD_REQUEST,
+          message: getMessage('ADMIN.ERRORS.INVALID_MATERIAL_TYPE')
+        });
+      }
+
+      // Validate that either link or fileUrl or content is provided
+      if (!material.link && !material.fileUrl && !material.content) {
+        return responseObject({
+          res,
+          statusCode: HttpStatusCode.BAD_REQUEST,
+          message: getMessage('ADMIN.ERRORS.MATERIAL_CONTENT_REQUIRED')
+        });
+      }
+    }
+
+    // Verify course exists
+    const course = await prisma.course.findUnique({
+      where: { id: courseId }
+    });
+
+    if (!course) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.NOT_FOUND,
+        message: getMessage('ADMIN.ERRORS.COURSE_NOT_FOUND')
+      });
+    }
+
+    // Create multiple materials with proper typing
+    const createdMaterials = await prisma.$transaction(
+      materials.map((material: MaterialType, index: number) => 
+        prisma.courseMaterial.create({
+          data: {
+            title: material.title,
+            description: material.description,
+            fileUrl: material.fileUrl,
+            link: material.link,
+            content: material.content,
+            weekNumber: parseInt(material.weekNumber.toString()),
+            type: material.type,
+            order: material.order || index,
+            courseId
+          }
+        })
+      )
+    );
+
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.CREATED,
+      message: getMessage('ADMIN.SUCCESS.MATERIALS_ADDED'),
+      payload: { 
+        materials: createdMaterials,
+        count: createdMaterials.length
+      }
+    });
+    
+  } catch (error) {
+    Logger.error('Add course materials error:', error);
+    responseObject({
+      res,
+      statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: getMessage('ADMIN.ERRORS.INTERNAL_SERVER')
+    });
+  }
+};
+
+export const addSingleCourseMaterial: RequestHandler = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const materialData = req.body as CreateMaterialRequest;
+
+    if (!materialData.title || !materialData.weekNumber) {
       return responseObject({
         res,
         statusCode: HttpStatusCode.BAD_REQUEST,
         message: getMessage('ADMIN.ERRORS.MATERIAL_REQUIRED_FIELDS')
+      });
+    }
+
+    // Validate material type
+    if (!Object.values(MaterialTypeEnum).includes(materialData.type)) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('ADMIN.ERRORS.INVALID_MATERIAL_TYPE')
+      });
+    }
+
+    // Validate that either link or fileUrl or content is provided
+    if (!materialData.link && !materialData.fileUrl && !materialData.content) {
+      return responseObject({
+        res,
+        statusCode: HttpStatusCode.BAD_REQUEST,
+        message: getMessage('ADMIN.ERRORS.MATERIAL_CONTENT_REQUIRED')
       });
     }
 
@@ -1928,11 +2246,14 @@ export const addCourseMaterial: RequestHandler = async (req, res) => {
 
     const material = await prisma.courseMaterial.create({
       data: {
-        title,
-        description,
-        fileUrl,
-        content,
-        weekNumber: parseInt(weekNumber),
+        title: materialData.title,
+        description: materialData.description,
+        fileUrl: materialData.fileUrl,
+        link: materialData.link,
+        content: materialData.content,
+        weekNumber: parseInt(materialData.weekNumber.toString()),
+        type: materialData.type,
+        order: materialData.order || 0,
         courseId
       }
     });
@@ -1945,7 +2266,7 @@ export const addCourseMaterial: RequestHandler = async (req, res) => {
     });
     
   } catch (error) {
-    Logger.error('Add course material error:', error);
+    Logger.error('Add single course material error:', error);
     responseObject({
       res,
       statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
@@ -1953,7 +2274,6 @@ export const addCourseMaterial: RequestHandler = async (req, res) => {
     });
   }
 };
-
 
 export const createAssignment: RequestHandler = async (req, res) => {
   try {

@@ -308,15 +308,28 @@ model CourseMaterial {
   title       String
   description String?
   fileUrl     String?
+  link        String? 
   content     String?
   weekNumber  Int
   courseId    String
+  type        MaterialType @default(LINK) 
+  order       Int?   @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@map("course_materials")
+}
+
+enum MaterialType {
+  LINK
+  VIDEO
+  DOCUMENT
+  PDF
+  IMAGE
+  TEXT
+  OTHER
 }
 
 
