@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
 import { useRouter } from 'next/navigation';
 import { Menu } from 'lucide-react';
+import { deleteStorageCookie, removeLocalItem, env } from '@/lib';
 
 interface DashboardHeaderProps {
   onMenuClick?: () => void;
@@ -16,10 +17,11 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuClick })
   const router = useRouter();
 
   const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('______Up@TickLMS____TOKEN___');
-    }
+    deleteStorageCookie({ key: env.AUTH_TOKEN });
+    deleteStorageCookie({ key: 'user_role' });
+    removeLocalItem({ key: 'user' });
     router.push('/login');
+    router.refresh();
   };
 
   return (

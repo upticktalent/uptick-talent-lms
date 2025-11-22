@@ -14,7 +14,7 @@ import type { LoginFormValues } from '@/types/auth';
 import { useFormHandler } from '@/hooks/useFormHandler';
 import { loginSchema } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
-import { storeCookie, env } from '@/lib';
+import { storeCookie, env, setLocalItem } from '@/lib';
 import { getErrorMessage } from '@/utils';
 
 const LoginForm: React.FC = () => {
@@ -31,6 +31,10 @@ const LoginForm: React.FC = () => {
 
         // Store the token
         storeCookie({ key: env.AUTH_TOKEN, value: response.payload.token });
+
+        setLocalItem({ key: 'user', value: response.payload.user });
+
+        storeCookie({ key: 'user_role', value: response.payload.user.role });
 
         // Redirect based on role
         const userRole = response.payload.user.role;

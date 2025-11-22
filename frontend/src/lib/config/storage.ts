@@ -44,10 +44,7 @@ export const deleteStorageCookie = ({ key }: StorageProps) => deleteCookie(key);
 
 export const setLocalItem = ({ key, value }: StorageProps) => {
   if (typeof window !== 'undefined')
-    return window.localStorage.setItem(
-      key,
-      DomPurify.sanitize(JSON.stringify(value))
-    );
+    return window.localStorage.setItem(key, JSON.stringify(value));
 };
 
 export const getLocalItem = <T>({ key }: StorageProps): T | null => {
@@ -55,7 +52,7 @@ export const getLocalItem = <T>({ key }: StorageProps): T | null => {
     const item = window.localStorage.getItem(key);
     if (item !== null) {
       try {
-        return JSON.parse(DomPurify.sanitize(item));
+        return JSON.parse(item) as T;
       } catch (err) {
         console.error(`Error parsing local storage item: `, err);
       }
