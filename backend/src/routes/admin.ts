@@ -64,6 +64,9 @@ router.post(urls.admin.createMentor().path,  authenticate, authorize(Role.ADMIN)
 // Course routes with validation
 router.post(urls.admin.createCourse().path,   authenticate, authorize(Role.ADMIN), validateCreateCourse,  createCourse);
 router.get(urls.admin.courses().path,   authenticate, authorize(Role.ADMIN), getCourses);
+router.post(urls.admin.courseMaterials().path, authenticate, authorize(Role.ADMIN),addCourseMaterial);
+router.post(urls.admin.courseAssignments().path, authenticate, authorize(Role.ADMIN),createAssignment);
+router.post(urls.admin.assignStudentsToCourse().path, authenticate, authorize(Role.ADMIN), assignStudentsToCourse);
 
 // User management routes
 router.get(urls.user_management.getAll().path,authenticate, authorize(Role.ADMIN), getUsersByTrack);

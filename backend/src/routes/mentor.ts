@@ -18,28 +18,28 @@ import { Role } from '@prisma/client';
 const router = express.Router();
 
 // All routes require mentor authentication
-router.use(authenticate, authorize(Role.MENTOR));
+// router.use(authenticate, authorize(Role.MENTOR));
 
 // Dashboard
-router.get(urls.mentor.dashboard().path, getMentorDashboard);
+router.get(urls.mentor.dashboard().path, authenticate, authorize(Role.MENTOR), getMentorDashboard);
 
 // Course management
-router.get(urls.mentor.courses().path, getMentorCourses);
-router.post(urls.mentor.createCourse().path, createMentorCourse);
-router.post(urls.mentor.courseMaterials().path, addMentorCourseMaterial);
-router.post(urls.mentor.createAssignment().path, createMentorAssignment);
+router.get(urls.mentor.courses().path, authenticate, authorize(Role.MENTOR), getMentorCourses);
+router.post(urls.mentor.createCourse().path, authenticate, authorize(Role.MENTOR), createMentorCourse);
+router.post(urls.mentor.courseMaterials().path, authenticate, authorize(Role.MENTOR), addMentorCourseMaterial);
+router.post(urls.mentor.createAssignment().path, authenticate, authorize(Role.MENTOR), createMentorAssignment);
 
 // Student management
-router.get(urls.mentor.students().path, getMentorStudents);
+router.get(urls.mentor.students().path, authenticate, authorize(Role.MENTOR), getMentorStudents);
 
 // Assignment grading
-router.get(urls.mentor.assignmentSubmissions().path, getAssignmentSubmissions);
-router.put(urls.mentor.gradeSubmission().path, gradeAssignment);
+router.get(urls.mentor.assignmentSubmissions().path, authenticate, authorize(Role.MENTOR), getAssignmentSubmissions);
+router.put(urls.mentor.gradeSubmission().path, authenticate, authorize(Role.MENTOR), gradeAssignment);
 
 // Analytics
-router.get(urls.mentor.courseAnalytics().path, getCourseAnalytics);
+router.get(urls.mentor.courseAnalytics().path, authenticate, authorize(Role.MENTOR), getCourseAnalytics);
 
 // Profile
-router.put(urls.mentor.profile().path, updateMentorProfile);
+router.put(urls.mentor.profile().path, authenticate, authorize(Role.MENTOR), updateMentorProfile);
 
 export default router;
