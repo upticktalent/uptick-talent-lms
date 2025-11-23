@@ -12,6 +12,12 @@ The Uptick Talent LMS Frontend is a comprehensive learning management platform t
 - Content management and delivery
 - Real-time notifications and updates
 
+## Demo Links
+1. [Live site url](https://uptick-talent-lms-three.vercel.app/)
+2. [Video recording of live project showing the features of the admin dashboard](https://www.loom.com/share/a29dd5a483594f7b98c6e3f0c6d62b2c)
+3. [Video recording showing the assessment submission process](https://www.loom.com/share/cb76e70c08a348c592a9da1f3ba5881d)
+4. [Video recording of the mentor's dashboard](https://www.loom.com/share/327c2e7f85904d719675469084ae4301)
+
 ## 🛠️ Tech Stack
 
 - **Framework**: Next.js 15 (with Turbopack)
